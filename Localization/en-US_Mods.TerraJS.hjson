@@ -1,0 +1,11 @@
+Items: {
+	testItem: {
+		DisplayName: test Item
+		Tooltip: ""
+	}
+
+	sdasdasdd: {
+		DisplayName: sdasdasdd
+		Tooltip: ""
+	}
+}

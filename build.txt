@@ -1,0 +1,4 @@
+displayName = TerraJS
+author = Mantodea
+version = 0.1
+dllReferences = Acornima,Jint

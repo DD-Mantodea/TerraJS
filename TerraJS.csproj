@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<!-- Import tModLoader mod properties -->
+	<Import Project="..\tModLoader.targets" />
+
+	<!-- General -->
+	<PropertyGroup>
+	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+	</PropertyGroup>
+	<ItemGroup>
+	  <None Remove="Textures\NULL.png" />
+	</ItemGroup>
+	<ItemGroup>
+	  <PackageReference Include="Jint" Version="4.2.2" />
+	</ItemGroup>
+
+	<!-- References -->
+
+</Project>
