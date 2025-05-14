@@ -1,22 +1,18 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Terraria.GameContent;
+using Jint.Native;
+using TerraJS.API.Items;
 using Terraria;
 using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using ReLogic.Graphics;
-using System.IO;
-using Jint.Native;
-using Jint;
 
-namespace TerraJS.API.Items
+namespace TerraJS.API.Projectiles
 {
     [Autoload(false)]
-    public class JSItem : ModItem
+    public class JSProjectile : ModProjectile
     {
         public void InvokeDelegate(string delegateName, params object[] args)
         {
@@ -37,6 +33,6 @@ namespace TerraJS.API.Items
             get => File.Exists(_texture) ? _texture : "TerraJS/Textures/NULL";
         }
 
-        public override void SetDefaults() => InvokeDelegate("SetDefaults", Item);
+        public override void SetDefaults() => InvokeDelegate("SetDefaults", Projectile);
     }
 }

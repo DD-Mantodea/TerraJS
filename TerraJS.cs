@@ -45,6 +45,8 @@ namespace TerraJS
 
             BindStatic("ItemID", typeof(ItemID));
 
+            BindStatic("AmmoID", typeof(AmmoID));
+
             BindStatic("ItemUseStyleID", typeof(ItemUseStyleID));
 
             BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));

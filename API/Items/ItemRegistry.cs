@@ -18,23 +18,11 @@ using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
 {
-    public class ItemRegistry
+    public class ItemRegistry : Registry<JSItem>
     {
-        private static Type _JSItem = typeof(JSItem);
-
-        private TypeBuilder _builder;
-
-        private string _texturePath = "";
-
-        public Dictionary<string, Delegate> _delegates = new();
-
-        internal Mod TJSMod = TerraJS.Instance;
-
-        internal static Dictionary<string, int> TJSItemTypes = new();
-
         public bool isEmpty = false;
 
-        public static ItemRegistry Empty => new ItemRegistry { isEmpty = true };
+        public static ItemRegistry Empty => new() { isEmpty = true };
 
         public ItemRegistry() { }
 
@@ -60,7 +48,7 @@ namespace TerraJS.API.Items
             return this;
         }
 
-        public void Register()
+        public override void Register()
         {
             if (isEmpty) return;
 
@@ -70,13 +58,13 @@ namespace TerraJS.API.Items
 
             ItemAPI.ItemDelegates.Add(itemType.Name, _delegates);
 
-            var entity = _JSItem.GetProperty("Entity", BindingFlags.Public | BindingFlags.Instance);
+            var entity = _contentType.GetProperty("Entity", BindingFlags.Public | BindingFlags.Instance);
 
             entity.GetSetMethod(true).Invoke(JSItem, [new Item()]);
 
             TJSMod.AddContent(JSItem);
 
-            TJSItemTypes.Add(_builder.FullName, JSItem.Type);
+            ContentTypes.Add(_builder.FullName, JSItem.Type);
 
             if(_texturePath != "")
             {
