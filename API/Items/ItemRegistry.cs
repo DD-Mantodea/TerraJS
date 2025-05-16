@@ -52,6 +52,15 @@ namespace TerraJS.API.Items
             return this;
         }
 
+        public ItemRegistry UpdateAccessory(Delegate @delegate)
+        {
+            if (isEmpty) return this;
+
+            _delegates["UpdateAccessory"] = @delegate;
+
+            return this;
+        }
+
         public ItemRegistry Name(GameCulture.CultureName gameCulture, string str)
         {
             if (isEmpty) return this;
