@@ -20,14 +20,12 @@ namespace TerraJS.API.Items
     {
         public void InvokeDelegate(string delegateName, params object[] args)
         {
-            if (!ItemAPI.ItemDelegates.ContainsKey(Name)) return;
+            if (!ItemAPI.ItemDelegates.TryGetValue(Name, out var dict) || 
+                !dict.TryGetValue(delegateName, out var @delegate)) return;
 
-            if (ItemAPI.ItemDelegates[Name].TryGetValue(delegateName, out var @delegate))
-            {
-                var jsArgs = args.Select((obj, i) => JsValue.FromObject(TerraJS.Engine, obj)).ToArray();
+            var jsArgs = args.Select((obj, i) => JsValue.FromObject(TerraJS.Engine, obj)).ToArray();
 
-                @delegate.DynamicInvoke(JsValue.Undefined, jsArgs);
-            }
+            @delegate.DynamicInvoke(JsValue.Undefined, jsArgs);
         }
 
         internal static string _texture = "";

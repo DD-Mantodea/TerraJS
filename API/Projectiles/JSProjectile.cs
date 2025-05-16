@@ -16,9 +16,9 @@ namespace TerraJS.API.Projectiles
     {
         public void InvokeDelegate(string delegateName, params object[] args)
         {
-            if (!ItemAPI.ItemDelegates.ContainsKey(Name)) return;
+            if (!ItemAPI.ItemDelegates.TryGetValue(Name, out Dictionary<string, Delegate> value)) return;
 
-            if (ItemAPI.ItemDelegates[Name].TryGetValue(delegateName, out var @delegate))
+            if (value.TryGetValue(delegateName, out var @delegate))
             {
                 var jsArgs = args.Select((obj, i) => JsValue.FromObject(TerraJS.Engine, obj)).ToArray();
 

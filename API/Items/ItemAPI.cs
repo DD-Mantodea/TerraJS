@@ -11,7 +11,7 @@ namespace TerraJS.API.Items
 {
     public class ItemAPI
     {
-        public static Dictionary<string, Dictionary<string, Delegate>> ItemDelegates = new();
+        public static Dictionary<string, Dictionary<string, Delegate>> ItemDelegates = [];
 
         public ItemRegistry? CreateItemRegistry(string name, string @namespace = "")
         {

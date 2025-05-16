@@ -24,6 +24,8 @@ namespace TerraJS
 
         public static GlobalAPI GlobalAPI;
 
+        static string ModPath => Path.Combine(Main.SavePath,"Mods", "TerraJS");
+
         public override void Load()
         {
             Instance = this;
@@ -84,15 +86,24 @@ namespace TerraJS
 
         public void BindStatic(string name, Type type) => Engine.SetValue(name, TypeReference.CreateTypeReference(Engine, type));
 
+        static void CreateFolderIfNotExist(string path) 
+        {
+            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
+        }
+
         public void LoadAllScripts()
         {
-            if (!Directory.Exists("./TerraJS")) Directory.CreateDirectory("./TerraJS");
+            var modPath = ModPath;
 
-            if (!Directory.Exists("./TerraJS/Scripts")) Directory.CreateDirectory("./TerraJS/Scripts");
+            CreateFolderIfNotExist(modPath);
 
-            if (!Directory.Exists("./TerraJS/Textures")) Directory.CreateDirectory("./TerraJS/Textures");
+            CreateFolderIfNotExist(Path.Combine(modPath, "Scripts"));
 
-            foreach (var file in Directory.GetFiles("./TerraJS/Scripts"))
+            CreateFolderIfNotExist(Path.Combine(modPath, "Textures"));
+
+            var files = Directory.GetFiles(Path.Combine(modPath, "Scripts"));
+
+            foreach (var file in files)
             {
                 string script = File.ReadAllText(file);
 
@@ -104,7 +115,8 @@ namespace TerraJS
         {
             if (key.StartsWith("Mods.TerraJS"))
             {
-                var value = TranslationAPI.LocalizedTexts.ContainsKey(key) ? TranslationAPI.LocalizedTexts[key] : TranslationAPI.DefaultLocalizedTexts[key];
+                if(!TranslationAPI.LocalizedTexts.TryGetValue(key, out string value))
+                    value = TranslationAPI.DefaultLocalizedTexts[key];
 
                 return typeof(LocalizedText).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Where(c => !c.IsPublic).First().Invoke([key, value]) as LocalizedText;
             }

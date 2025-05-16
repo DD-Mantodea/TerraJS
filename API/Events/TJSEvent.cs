@@ -8,7 +8,7 @@ namespace TerraJS.API.Events
 {
     public class TJSEvent
     {
-        public List<JsValue> Delegates = new();
+        public List<JsValue> Delegates = [];
 
         public bool Custom = false;
 

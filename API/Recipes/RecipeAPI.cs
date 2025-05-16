@@ -33,7 +33,7 @@ namespace TerraJS.API.Recipes
 
         public Recipe[] FindAllRecipe(Func<Recipe, bool> predicate)
         {
-            return EnumerableRecipes(predicate).ToArray();
+            return [.. EnumerableRecipes(predicate)];
         }
     }
 }
