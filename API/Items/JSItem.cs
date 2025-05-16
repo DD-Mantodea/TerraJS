@@ -38,5 +38,9 @@ namespace TerraJS.API.Items
         }
 
         public override void SetDefaults() => InvokeDelegate("SetDefaults", Item);
+
+        public override void UpdateAccessory(Player player, bool hideVisual) => InvokeDelegate("UpdateAccessory", player, hideVisual);
+
+        public override bool? UseItem(Player player) => InvokeDelegate("UseItem", player);
     }
 }

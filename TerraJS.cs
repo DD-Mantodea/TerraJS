@@ -56,17 +56,9 @@ namespace TerraJS
 
             BindInstance("TerraJS", GlobalAPI);
 
-            BindStatic("ItemID", typeof(ItemID));
-
-            BindStatic("AmmoID", typeof(AmmoID));
-
-            BindStatic("ItemUseStyleID", typeof(ItemUseStyleID));
+            BindItemThings();
 
             BindEnumOrConst("Cultures", typeof(GameCulture.CultureName));
-
-            BindEnumOrConst("ItemRarityID", typeof(ItemRarityID));
-
-            BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
         }
 
         public void BindProperties(string name, PropertyInfo[] members)
@@ -85,6 +77,19 @@ namespace TerraJS
         public void BindEnumOrConst(string name, Type type) => Engine.SetValue(name, type);
 
         public void BindStatic(string name, Type type) => Engine.SetValue(name, TypeReference.CreateTypeReference(Engine, type));
+
+        public void BindItemThings()
+        {
+            BindStatic("ItemID", typeof(ItemID));
+
+            BindStatic("AmmoID", typeof(AmmoID));
+
+            BindStatic("ItemUseStyleID", typeof(ItemUseStyleID));
+
+            BindEnumOrConst("ItemRarityID", typeof(ItemRarityID));
+
+            BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
+        }
 
         public void LoadAllScripts()
         {
