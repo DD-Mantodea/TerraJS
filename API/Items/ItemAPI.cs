@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Items

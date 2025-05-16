@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.API

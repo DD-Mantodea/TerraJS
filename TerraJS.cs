@@ -8,6 +8,11 @@ using System.Reflection;
 using System.Dynamic;
 using System.Collections.Generic;
 using Terraria.ID;
+using Terraria.Localization;
+using System.Linq;
+using TerraJS.API.Events;
+using TerraJS.API.Items;
+using Terraria;
 
 namespace TerraJS
 {
@@ -28,6 +33,14 @@ namespace TerraJS
             LoadAllScripts();
 
             GlobalAPI.Event.InvokeEvent("ModLoad");
+
+            MonoModHooks.Add(typeof(LanguageManager).GetMethod("GetOrRegister"), RedirectLocalizedText);
+            
+            MonoModHooks.Add(typeof(LocalizationLoader).GetMethod("UpdateLocalizationFilesForMod", BindingFlags.Static | BindingFlags.NonPublic), (Action<Mod, string, GameCulture> orig, Mod mod, string str, GameCulture cul) => 
+            {
+                if (mod is not TerraJS) 
+                    orig.Invoke(mod, str, cul);
+            });
         }
 
         public override void PostSetupContent()
@@ -49,6 +62,8 @@ namespace TerraJS
 
             BindStatic("ItemUseStyleID", typeof(ItemUseStyleID));
 
+            BindEnum("Cultures", typeof(GameCulture.CultureName));
+
             BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
         }
 
@@ -64,6 +79,8 @@ namespace TerraJS
         }
 
         public void BindInstance(string name, object instance) => Engine.SetValue(name, instance);
+
+        public void BindEnum(string name, Type type) => Engine.SetValue(name, type);
 
         public void BindStatic(string name, Type type) => Engine.SetValue(name, TypeReference.CreateTypeReference(Engine, type));
 
@@ -81,6 +98,17 @@ namespace TerraJS
 
                 Engine.Execute(script);
             }
+        }
+
+        public LocalizedText RedirectLocalizedText(Func<LanguageManager, string, Func<string>, LocalizedText> orig, LanguageManager instance, string key, Func<string> makeDefaultValue)
+        {
+            if (key.StartsWith("Mods.TerraJS"))
+            {
+                var value = TranslationAPI.LocalizedTexts.ContainsKey(key) ? TranslationAPI.LocalizedTexts[key] : TranslationAPI.DefaultLocalizedTexts[key];
+
+                return typeof(LocalizedText).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Where(c => !c.IsPublic).First().Invoke([key, value]) as LocalizedText;
+            }
+            else return orig.Invoke(instance, key, makeDefaultValue);
         }
 
         public override void Unload()

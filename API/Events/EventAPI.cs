@@ -16,8 +16,8 @@ namespace TerraJS.API.Events
     {
         public Dictionary<string, TJSEvent> Events = new Dictionary<string, TJSEvent>
         {
-            ["ModLoad"] = new TJSEvent<Action>(),
-            ["PostSetupContent"] = new TJSEvent<Action>()
+            ["ModLoad"] = new TJSEvent(),
+            ["PostSetupContent"] = new TJSEvent()
         };
 
         public SubEventAPI Item = new();
@@ -26,6 +26,7 @@ namespace TerraJS.API.Events
         {
             RecipeEvents();
             ItemEvents();
+            LocalizationEvents();
         }
 
         private void NewEvent<T>(string name) where T : Delegate => Events.Add(name, new TJSEvent<T>());
@@ -89,13 +90,18 @@ namespace TerraJS.API.Events
 
         private void RecipeEvents()
         {
-            NewEvent<Action>("AddRecipes");
-            NewEvent<Action>("PostAddRecipes");
+            NewEvent("AddRecipes");
+            NewEvent("PostAddRecipes");
         }
 
         private void ItemEvents()
         {
             Item.NewEvent("UpdateInventory");
+        }
+
+        private void LocalizationEvents()
+        {
+            NewEvent("TranslationModify");
         }
 
         public void InvokeEvent(string eventName, params object[] args)

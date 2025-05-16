@@ -11,17 +11,17 @@ using System.Reflection.Emit;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
+using TerraJS.API.Events;
 using TerraJS.Utils;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
 {
     public class ItemRegistry : Registry<JSItem>
     {
-        public bool isEmpty = false;
-
         public static ItemRegistry Empty => new() { isEmpty = true };
 
         public ItemRegistry() { }
@@ -29,6 +29,10 @@ namespace TerraJS.API.Items
         public ItemRegistry(TypeBuilder builder)
         {
             _builder = builder;
+
+            TranslationAPI.AddTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.DisplayName", _builder.Name);
+
+            TranslationAPI.AddTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.Tooltip", "");
         }
 
         public ItemRegistry Texture(string path)
@@ -44,6 +48,24 @@ namespace TerraJS.API.Items
             if (isEmpty) return this;
 
             _delegates["SetDefaults"] = @delegate;
+
+            return this;
+        }
+
+        public ItemRegistry Name(GameCulture.CultureName gameCulture, string str)
+        {
+            if (isEmpty) return this;
+
+            TranslationAPI.AddTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
+
+            return this;
+        }
+
+        public ItemRegistry Tooltip(GameCulture.CultureName gameCulture, string str)
+        {
+            if (isEmpty) return this;
+
+            TranslationAPI.AddTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.Tooltip", str);
 
             return this;
         }
@@ -66,7 +88,7 @@ namespace TerraJS.API.Items
 
             ContentTypes.Add(_builder.FullName, JSItem.Type);
 
-            if(_texturePath != "")
+            if (_texturePath != "")
             {
                 TerraJS.GlobalAPI.Event.OnEvent("PostSetupContent", () =>
                 {
