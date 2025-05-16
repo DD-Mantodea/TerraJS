@@ -11,7 +11,7 @@ namespace TerraJS.API.Projectiles
 {
     public class ProjectileAPI
     {
-        public static Dictionary<string, Dictionary<string, Delegate>> ProjectileDelegates = new();
+        public static Dictionary<string, Dictionary<string, Delegate>> ProjectileDelegates = [];
 
         public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "")
         {

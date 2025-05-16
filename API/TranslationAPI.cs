@@ -15,11 +15,11 @@ namespace TerraJS.API
             {
                 if (val == 9999) return;
 
-                Translations.Add(GameCulture.FromLegacyId(val), new());
+                Translations.Add(GameCulture.FromLegacyId(val), []);
             }
         }
 
-        public static Dictionary<GameCulture, Dictionary<string, string>> Translations = new();
+        public static Dictionary<GameCulture, Dictionary<string, string>> Translations = [];
 
         public static Dictionary<string, string> LocalizedTexts => Translations[Language.ActiveCulture];
 

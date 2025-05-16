@@ -47,7 +47,7 @@ namespace TerraJS.API.Events
                 _ => $"System.Action`{args.Count}"
             };
 
-            var bindType = Type.GetType(actionTypeName).MakeGenericType(args.ToArray());
+            var bindType = Type.GetType(actionTypeName).MakeGenericType([.. args]);
 
             var invokeEvent = GetType().GetMethod("InvokeEvent", BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -106,18 +106,14 @@ namespace TerraJS.API.Events
 
         public void InvokeEvent(string eventName, params object[] args)
         {
-            if (!Events.ContainsKey(eventName)) return;
-
-            var @event = Events[eventName];
+            if (!Events.TryGetValue(eventName, out TJSEvent @event)) return;
 
             @event.Invoke(args);
         }
 
         public void OnEvent(string eventName, Delegate @delegate)
         {
-            if (!Events.ContainsKey(eventName)) return;
-
-            var @event = Events[eventName];
+            if (!Events.TryGetValue(eventName, out TJSEvent @event)) return;
 
             @event.AddEventHandler(JsValue.FromObject(TerraJS.Engine, @delegate));
         }
@@ -125,22 +121,18 @@ namespace TerraJS.API.Events
 
     public class SubEventAPI
     {
-        public Dictionary<string, TJSEvent> Events = new Dictionary<string, TJSEvent>();
+        public Dictionary<string, TJSEvent> Events = [];
 
         public void InvokeEvent(string eventName, params object[] args)
         {
-            if (!Events.ContainsKey(eventName)) return;
-
-            var @event = Events[eventName];
+            if (!Events.TryGetValue(eventName, out var @event)) return;
 
             @event.Invoke(args);
         }
 
         public void OnEvent(string eventName, Delegate @delegate)
         {
-            if (!Events.ContainsKey(eventName)) return;
-
-            var @event = Events[eventName];
+            if (!Events.TryGetValue(eventName,out var @event)) return;
 
             @event.AddEventHandler(JsValue.FromObject(TerraJS.Engine, @delegate));
         }
