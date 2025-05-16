@@ -61,6 +61,33 @@ namespace TerraJS.API.Items
             return this;
         }
 
+        public ItemRegistry UseItem(Delegate @delegate)
+        {
+            if (isEmpty) return this;
+
+            _delegates["UseItem"] = @delegate;
+
+            return this;
+        }
+
+        public ItemRegistry CanUseItem(Delegate @delegate)
+        {
+            if (isEmpty) return this;
+
+            _delegates["CanUseItem"] = @delegate;
+
+            return this;
+        }
+
+        public ItemRegistry Shoot(Delegate @delegate)
+        {
+            if (isEmpty) return this;
+
+            _delegates["Shoot"] = @delegate;
+
+            return this;
+        }
+
         public ItemRegistry Name(GameCulture.CultureName gameCulture, string str)
         {
             if (isEmpty) return this;

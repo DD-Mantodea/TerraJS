@@ -12,6 +12,7 @@ using ReLogic.Graphics;
 using System.IO;
 using Jint.Native;
 using Jint;
+using Terraria.DataStructures;
 
 namespace TerraJS.API.Items
 {
@@ -39,5 +40,10 @@ namespace TerraJS.API.Items
         public override void UpdateAccessory(Player player, bool hideVisual) => InvokeDelegate("UpdateAccessory", player, hideVisual);
 
         public override bool? UseItem(Player player) => InvokeDelegate("UseItem", player) as bool?;
+
+        public override bool CanUseItem(Player player) => (InvokeDelegate("CanUseItem", player) as bool?).Value;
+
+        public override bool Shoot(Player player, EntitySource_ItemUse_WithAmmo source, Vector2 position, Vector2 velocity, int type, int damage, float knockback)
+            => (InvokeDelegate("Shoot", player, source, position, velocity, type, damage, knockback) as bool?).Value;
     }
 }
