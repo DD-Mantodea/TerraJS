@@ -1,1 +1,7 @@
-This description will show up on the steam page, check out https://steamcommunity.com/comment/Guide/formattinghelp.
+[h2]一个允许你使用JavaScript制作mod内容的模组[/h2]
+
+[h2]开源链接 (Github): https://github.com/DD-Mantodea/TerraJS[/h2]
+
+[h2]作者[/h2]
+画师：线框
+代码：Mantodea，错数螺线

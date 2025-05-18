@@ -10,6 +10,7 @@ using Microsoft.Xna.Framework.Graphics;
 using TerraJS.API.Items;
 using Terraria;
 using Terraria.GameContent;
+using Terraria.Localization;
 
 namespace TerraJS.API.Projectiles
 {
@@ -37,6 +38,15 @@ namespace TerraJS.API.Projectiles
             if (isEmpty) return this;
 
             _delegates["SetDefaults"] = @delegate;
+
+            return this;
+        }
+
+        public ProjectileRegistry Name(GameCulture.CultureName gameCulture, string str)
+        {
+            if (isEmpty) return this;
+
+            TranslationAPI.AddTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
 
             return this;
         }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
@@ -7,11 +7,19 @@
 	<PropertyGroup>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+	  <Optimize>False</Optimize>
+	</PropertyGroup>
 	<ItemGroup>
 	  <None Remove="Textures\NULL.png" />
 	</ItemGroup>
 	<ItemGroup>
 	  <PackageReference Include="Jint" Version="4.2.2" />
+	</ItemGroup>
+	<ItemGroup>
+	  <Reference Include="SilkyUIFramework">
+	    <HintPath>..\SilkyUIFramework\obj\Release\net8.0\SilkyUIFramework.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 	<!-- References -->

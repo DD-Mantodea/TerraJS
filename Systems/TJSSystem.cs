@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Terraria.ModLoader;
 
-namespace TerraJS
+namespace TerraJS.Systems
 {
     public class TJSSystem : ModSystem
     {

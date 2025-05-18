@@ -1,1 +1,6 @@
-Modify this file with a description of your mod.
+一个允许你使用JavaScript制作mod内容的模组
+---------------------------
+开源链接 (Github): https://github.com/DD-Mantodea/TerraJS
+---------------------------
+[c/00ff99:画师：线框]
+[c/0099ff:代码：Mantodea，错数螺线]

@@ -9,6 +9,7 @@ using TerraJS.API.Recipes;
 using Terraria.ModLoader;
 using TerraJS.Utils;
 using Terraria;
+using TerraJS.API.Projectiles;
 
 namespace TerraJS.API
 {
@@ -19,6 +20,8 @@ namespace TerraJS.API
         public EventAPI Event = new();
 
         public RecipeAPI Recipe = new();
+
+        public ProjectileAPI Projectile = new();
 
         internal static AssemblyName _an = new AssemblyName("TJSContents");
 

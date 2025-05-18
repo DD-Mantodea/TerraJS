@@ -3,16 +3,17 @@ using Jint;
 using System;
 using TerraJS.API;
 using System.IO;
-using Jint.Runtime.Interop;
 using System.Reflection;
-using System.Dynamic;
-using System.Collections.Generic;
 using Terraria.ID;
 using Terraria.Localization;
 using System.Linq;
-using TerraJS.API.Events;
-using TerraJS.API.Items;
 using Terraria;
+using TerraJS.Utils;
+using Terraria.UI;
+using Microsoft.Xna.Framework;
+using TerraJS.API.Quests.QuestGUI;
+using Microsoft.Xna.Framework.Graphics;
+using System.Collections.Generic;
 
 namespace TerraJS
 {
@@ -37,7 +38,13 @@ namespace TerraJS
             GlobalAPI.Event.InvokeEvent("ModLoad");
 
             MonoModHooks.Add(typeof(LanguageManager).GetMethod("GetOrRegister"), RedirectLocalizedText);
-            
+
+            MonoModHooks.Add(typeof(UserInterface).GetMethod("Update"), ModifyUpdate);
+
+            MonoModHooks.Add(typeof(UserInterface).GetMethod("Draw"), ModifyDraw);
+
+            MonoModHooks.Add(typeof(GameInterfaceLayer).GetMethod("Draw"), ModifyDrawLayer);
+
             MonoModHooks.Add(typeof(LocalizationLoader).GetMethod("UpdateLocalizationFilesForMod", BindingFlags.Static | BindingFlags.NonPublic), (Action<Mod, string, GameCulture> orig, Mod mod, string str, GameCulture cul) => 
             {
                 if (mod is not TerraJS) 
@@ -56,41 +63,31 @@ namespace TerraJS
 
             GlobalAPI = new();
 
-            BindInstance("TerraJS", GlobalAPI);
+            BindingUtils.BindInstance("TerraJS", GlobalAPI);
 
             BindItemThings();
 
-            BindEnumOrConst("Cultures", typeof(GameCulture.CultureName));
+            BindTileThings();
+
+            BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
         }
-
-        public void BindProperties(string name, PropertyInfo[] members)
-        {
-            dynamic expandoObj = new ExpandoObject();
-            var expandoDict = (IDictionary<string, object>)expandoObj;
-
-            foreach (var property in members)
-                expandoDict[property.Name] = property.GetValue(null);
-
-            Engine.SetValue(name, expandoObj);
-        }
-
-        public void BindInstance(string name, object instance) => Engine.SetValue(name, instance);
-
-        public void BindEnumOrConst(string name, Type type) => Engine.SetValue(name, type);
-
-        public void BindStatic(string name, Type type) => Engine.SetValue(name, TypeReference.CreateTypeReference(Engine, type));
 
         public void BindItemThings()
         {
-            BindStatic("ItemID", typeof(ItemID));
+            BindingUtils.BindStaticOrEnumOrConst("ItemID", typeof(ItemID));
 
-            BindStatic("AmmoID", typeof(AmmoID));
+            BindingUtils.BindStaticOrEnumOrConst("AmmoID", typeof(AmmoID));
 
-            BindStatic("ItemUseStyleID", typeof(ItemUseStyleID));
+            BindingUtils.BindStaticOrEnumOrConst("ItemUseStyleID", typeof(ItemUseStyleID));
 
-            BindEnumOrConst("ItemRarityID", typeof(ItemRarityID));
+            BindingUtils.BindStaticOrEnumOrConst("ItemRarityID", typeof(ItemRarityID));
 
-            BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
+            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
+        }
+
+        public void BindTileThings()
+        {
+            BindingUtils.BindStaticOrEnumOrConst("TileID", typeof(TileID));
         }
 
         static void CreateFolderIfNotExist(string path) 
@@ -127,7 +124,31 @@ namespace TerraJS
 
                 return typeof(LocalizedText).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Where(c => !c.IsPublic).First().Invoke([key, value]) as LocalizedText;
             }
-            else return orig.Invoke(instance, key, makeDefaultValue);
+            else return orig(instance, key, makeDefaultValue);
+        }
+
+        public void ModifyUpdate(Action<UserInterface, GameTime> orig, UserInterface ui, GameTime time)
+        {
+            if (QuestPanel.Instance != null && QuestPanel.Instance.Enabled) 
+                return;
+
+            orig(ui, time);
+        }
+
+        public void ModifyDraw(Action<UserInterface, SpriteBatch, GameTime> orig, UserInterface ui, SpriteBatch spriteBatch, GameTime time)
+        {
+            if (QuestPanel.Instance != null && QuestPanel.Instance.Enabled)
+                return;
+
+            orig(ui, spriteBatch, time);
+        }
+
+        public bool ModifyDrawLayer(Func<GameInterfaceLayer, bool> orig, GameInterfaceLayer layer)
+        {
+            if (layer.Name.StartsWith("Vanilla") && layer.Name != "Vanilla: Cursor" && QuestPanel.Instance != null && QuestPanel.Instance.Enabled)
+                return true;
+
+            return orig(layer);
         }
 
         public override void Unload()
