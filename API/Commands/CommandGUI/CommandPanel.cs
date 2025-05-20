@@ -27,7 +27,9 @@ namespace TerraJS.API.Commands.CommandGUI
 
         public string CurrentInput => Main.chatText[1..];
 
-        public List<string> matchingCommands = [];
+        public string[] Args => CurrentInput.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+
+        public List<ModCommand> MatchingCommands = [];
 
         public List<UITextView> CommandLines => ScrollView.Container.Children.Cast<UITextView>().ToList();
 
@@ -42,27 +44,38 @@ namespace TerraJS.API.Commands.CommandGUI
         public void UpdateMatchingCommands()
         {
             var allCommands = GetAvailableCommands();
-            matchingCommands = [.. allCommands
-                .Where(cmd => cmd.StartsWith(CurrentInput, StringComparison.OrdinalIgnoreCase))
-                .OrderBy(cmd => cmd)];
+
+            if (Args.Count() <= 1)
+                MatchingCommands = [.. allCommands
+                    .Where(cmd => cmd.Command.StartsWith(Args.Length == 0 ? "" : Args[0], StringComparison.OrdinalIgnoreCase))
+                    .OrderBy(cmd => cmd.Command)];
+            else
+                MatchingCommands = [.. allCommands
+                    .Where(cmd => {
+                        if(cmd is TJSCommand tjscmd)
+                            return tjscmd.TryGetArgumentsText(Args[1..], out var _) && tjscmd.Command.StartsWith(Args[0], StringComparison.OrdinalIgnoreCase);
+                        return false;
+                    })
+                    .OrderBy(cmd => cmd.Command)];
+
+            MatchingCommands = MatchingCommands.Count > 7 ? MatchingCommands[0..6] : MatchingCommands;
 
             selectedCommandIndex = 0;
         }
 
-        public List<string> GetAvailableCommands()
+        public List<ModCommand> GetAvailableCommands()
         {
-            List<string> commands = new List<string>();
+            List<ModCommand> commands = [];
 
             var allCommands = typeof(CommandLoader).GetField("Commands", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as IDictionary<string, List<ModCommand>>;
 
             foreach (var commandEntry in allCommands)
             {
-                // 只添加当前环境可用的命令（聊天命令）  
                 foreach (var command in commandEntry.Value)
                 {
                     if (CommandLoader.Matches(command.Type, CommandType.Chat))
                     {
-                        commands.Add(commandEntry.Key);
+                        commands.Add(command);
                         break;
                     }
                 }
@@ -111,7 +124,7 @@ namespace TerraJS.API.Commands.CommandGUI
 
             ScrollView.Container.SetHeight(0);
 
-            ScrollView.Container.SetMaxHeight(210);
+            ScrollView.Container.SetMaxHeight(208);
         }
 
         public override void HandleUpdate(GameTime gameTime)
@@ -124,15 +137,24 @@ namespace TerraJS.API.Commands.CommandGUI
 
                 ScrollView.Container.RemoveAllChildren();
 
-                foreach (var command in matchingCommands)
+                foreach (var command in MatchingCommands)
                 {
-                    var match = CurrentInput;
+                    var text = "";
 
-                    var dismatch = match.Length == 0 ? command : command.Replace(match, "");
+                    var key = command.Command;
+
+                    var match = Args.Length == 0 ? "" : Args[0];
+
+                    var dismatch = match.Length == 0 ? key : key.Replace(match, "");
+
+                    if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText(Args.Length <= 1 ? [] : Args[1..], out var argsText))
+                        text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + argsText;
+                    else
+                        text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
 
                     var cmdLine = new UITextView()
                     {
-                        Text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch,
+                        Text = text,
                         BackgroundColor = Color.Gray * 0.3f,
                         Padding = 0,
                     }.Join(ScrollView.Container);
@@ -149,21 +171,23 @@ namespace TerraJS.API.Commands.CommandGUI
                 LastChatText = CurrentChatText;
             }
 
-            if (isCommandInputActive && matchingCommands.Count > 0)
+            if (isCommandInputActive && MatchingCommands.Count > 0)
             {
                 if (Main.keyState.IsKeyDown(Keys.Tab) && !Main.oldKeyState.IsKeyDown(Keys.Tab))
                 {
-                    string selectedCommand = matchingCommands[selectedCommandIndex];
-                    Main.chatText = "/" + selectedCommand + " ";
+                    string selectedCommand = MatchingCommands[selectedCommandIndex].Command;
+
+                    if((Args.Length == 0 ? "" : Args[0]) != selectedCommand)
+                        Main.chatText = "/" + selectedCommand + " ";
                 }
 
                 if (Main.keyState.IsKeyDown(Keys.Down) && !Main.oldKeyState.IsKeyDown(Keys.Down))
                 {
-                    selectedCommandIndex = (selectedCommandIndex + 1) % matchingCommands.Count;
+                    selectedCommandIndex = (selectedCommandIndex + 1) % MatchingCommands.Count;
                 }
                 else if (Main.keyState.IsKeyDown(Keys.Up) && !Main.oldKeyState.IsKeyDown(Keys.Up))
                 {
-                    selectedCommandIndex = (selectedCommandIndex - 1 + matchingCommands.Count) % matchingCommands.Count;
+                    selectedCommandIndex = (selectedCommandIndex - 1 + MatchingCommands.Count) % MatchingCommands.Count;
                 }
             }
 

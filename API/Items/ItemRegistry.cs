@@ -20,8 +20,10 @@ using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
 {
-    public class ItemRegistry : Registry<JSItem>
+    public class ItemRegistry : Registry<TJSItem>
     {
+        internal static Dictionary<string, int> _contentTypes = [];
+
         public static ItemRegistry Empty => new() { isEmpty = true };
 
         public ItemRegistry() { }
@@ -112,9 +114,9 @@ namespace TerraJS.API.Items
 
             var itemType = _builder.CreateType();
 
-            var JSItem = Activator.CreateInstance(itemType) as JSItem;
+            var JSItem = Activator.CreateInstance(itemType) as TJSItem;
 
-            ItemAPI.ItemDelegates.Add(itemType.Name, _delegates);
+            ItemAPI.ItemDelegates.Add(itemType.FullName, _delegates);
 
             var entity = _contentType.GetProperty("Entity", BindingFlags.Public | BindingFlags.Instance);
 
@@ -122,7 +124,9 @@ namespace TerraJS.API.Items
 
             TJSMod.AddContent(JSItem);
 
-            ContentTypes.Add(_builder.FullName, JSItem.Type);
+            _contentTypes.Add(_builder.FullName, JSItem.Type);
+
+            _tjsInstances.Add(JSItem);
 
             if (_texturePath != "")
             {

@@ -17,11 +17,11 @@ using Terraria.DataStructures;
 namespace TerraJS.API.Items
 {
     [Autoload(false)]
-    public class JSItem : ModItem
+    public class TJSItem : ModItem
     {
         public object? InvokeDelegate(string delegateName, object defaultRet, params object[] args)
         {
-            if (!ItemAPI.ItemDelegates.TryGetValue(Name, out var dict) || !dict.TryGetValue(delegateName, out var @delegate)) return defaultRet;
+            if (!ItemAPI.ItemDelegates.TryGetValue(GetType().FullName, out var dict) || !dict.TryGetValue(delegateName, out var @delegate)) return defaultRet;
 
             var jsArgs = args.Select((obj, i) => JsValue.FromObject(TerraJS.Engine, obj)).ToArray();
 

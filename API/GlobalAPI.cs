@@ -10,14 +10,17 @@ using Terraria.ModLoader;
 using TerraJS.Utils;
 using Terraria;
 using TerraJS.API.Projectiles;
+using TerraJS.API.Commands;
 
 namespace TerraJS.API
 {
     public class GlobalAPI
     {
-        public ItemAPI Item = new();
+        public CommandAPI Command = new();
 
         public EventAPI Event = new();
+
+        public ItemAPI Item = new();
 
         public RecipeAPI Recipe = new();
 

@@ -17,7 +17,7 @@ namespace TerraJS.API.Projectiles
         {
             var projName = $"TerraJS.Projectiles.{(@namespace == "" ? "" : @namespace + ".")}{name}";
 
-            TypeBuilder builder = GlobalAPI._mb.DefineType(projName, TypeAttributes.Public, typeof(JSProjectile));
+            TypeBuilder builder = GlobalAPI._mb.DefineType(projName, TypeAttributes.Public, typeof(TJSProjectile));
 
             var registry = new ProjectileRegistry(builder);
 
@@ -53,7 +53,7 @@ namespace TerraJS.API.Projectiles
         {
             int projType = -1;
 
-            if (!ProjectileRegistry.ContentTypes.TryGetValue($"TerraJS.Projectiles.{fullName}", out projType)) projType = -1;
+            if (!ProjectileRegistry._contentTypes.TryGetValue($"TerraJS.Projectiles.{fullName}", out projType)) projType = -1;
 
             return projType;
         }

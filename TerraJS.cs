@@ -13,7 +13,8 @@ using Terraria.UI;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Quests.QuestGUI;
 using Microsoft.Xna.Framework.Graphics;
-using System.Collections.Generic;
+using TerraJS.API.Commands.CommandArguments.BasicArguments;
+using TerraJS.API.Commands.CommandArguments.MultipleArguments;
 
 namespace TerraJS
 {
@@ -37,6 +38,8 @@ namespace TerraJS
 
             GlobalAPI.Event.InvokeEvent("ModLoad");
 
+            CustomLoad();
+
             MonoModHooks.Add(typeof(LanguageManager).GetMethod("GetOrRegister"), RedirectLocalizedText);
 
             MonoModHooks.Add(typeof(UserInterface).GetMethod("Update"), ModifyUpdate);
@@ -50,6 +53,50 @@ namespace TerraJS
                 if (mod is not TerraJS) 
                     orig.Invoke(mod, str, cul);
             });
+        }
+
+        public void CustomLoad()
+        {
+            GlobalAPI.Command.CreateCommandRegistry("helloworld")
+                .Execute((g, caller) =>
+                {
+                    Main.NewText("Hello World");
+                }).Register();
+
+            GlobalAPI.Command.CreateCommandRegistry("say")
+                .NextArgument(new StringArgument("content"))
+                .Execute((g, caller) =>
+                {
+                    Main.NewText(g.GetString("content"));
+                })
+                .Register();
+
+            GlobalAPI.Command.CreateCommandRegistry("say")
+                .NextArgument(new IntArgument("content"))
+                .Execute((g, caller) =>
+                {
+                    Main.NewText(g.GetInt("content").ToString());
+                })
+                .Register();
+
+            GlobalAPI.Command.CreateCommandRegistry("add")
+                .NextArgument(new IntArgument("a1"))
+                .NextArgument(new IntArgument("a2", 0))
+                .Execute((g, caller) =>
+                {
+                    Main.NewText((g.GetInt("a1") + g.GetInt("a2")).ToString());
+                })
+                .Register();
+
+            GlobalAPI.Command.CreateCommandRegistry("mul")
+                .NextArgument(new ListArgument<IntArgument>("args", 2, 2))
+                .Execute((g, caller) =>
+                {
+                    var list = g.GetList("args");
+
+                    Main.NewText(((int)list[0] * (int)list[1]).ToString());
+                })
+                .Register();
         }
 
         public override void PostSetupContent()

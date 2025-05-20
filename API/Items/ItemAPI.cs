@@ -17,7 +17,7 @@ namespace TerraJS.API.Items
         {
             var itemName = $"TerraJS.Items.{(@namespace == "" ? "" : @namespace + ".")}{name}";
 
-            TypeBuilder builder = GlobalAPI._mb.DefineType(itemName, TypeAttributes.Public, typeof(JSItem));
+            TypeBuilder builder = GlobalAPI._mb.DefineType(itemName, TypeAttributes.Public, typeof(TJSItem));
 
             var registry = new ItemRegistry(builder);
 
@@ -54,7 +54,7 @@ namespace TerraJS.API.Items
         {
             int itemType = -1;
 
-            if (!ItemRegistry.ContentTypes.TryGetValue($"TerraJS.Items.{fullName}", out itemType)) itemType = -1;
+            if (!ItemRegistry._contentTypes.TryGetValue($"TerraJS.Items.{fullName}", out itemType)) itemType = -1;
 
             return itemType;
         }

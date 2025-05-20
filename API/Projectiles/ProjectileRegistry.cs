@@ -14,8 +14,10 @@ using Terraria.Localization;
 
 namespace TerraJS.API.Projectiles
 {
-    public class ProjectileRegistry : Registry<JSProjectile>
+    public class ProjectileRegistry : Registry<TJSProjectile>
     {
+        internal static Dictionary<string, int> _contentTypes = [];
+
         public static ProjectileRegistry Empty => new() { isEmpty = true };
 
         public ProjectileRegistry() { }
@@ -57,7 +59,7 @@ namespace TerraJS.API.Projectiles
 
             var projType = _builder.CreateType();
 
-            var JSProj = Activator.CreateInstance(projType) as JSProjectile;
+            var JSProj = Activator.CreateInstance(projType) as TJSProjectile;
 
             ProjectileAPI.ProjectileDelegates.Add(projType.Name, _delegates);
 
@@ -67,7 +69,9 @@ namespace TerraJS.API.Projectiles
 
             TJSMod.AddContent(JSProj);
 
-            ContentTypes.Add(_builder.FullName, JSProj.Type);
+            _contentTypes.Add(_builder.FullName, JSProj.Type);
+
+            _tjsInstances.Add(JSProj);
 
             if(_texturePath != null)
             {

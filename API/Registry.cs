@@ -19,7 +19,7 @@ namespace TerraJS.API
 
         internal Mod TJSMod = TerraJS.Instance;
 
-        internal static Dictionary<string, int> ContentTypes = [];
+        internal static List<T> _tjsInstances = [];
 
         public Dictionary<string, Delegate> _delegates = [];
 

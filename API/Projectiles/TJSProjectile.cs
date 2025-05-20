@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 namespace TerraJS.API.Projectiles
 {
     [Autoload(false)]
-    public class JSProjectile : ModProjectile
+    public class TJSProjectile : ModProjectile
     {
         public void InvokeDelegate(string delegateName, params object[] args)
         {
