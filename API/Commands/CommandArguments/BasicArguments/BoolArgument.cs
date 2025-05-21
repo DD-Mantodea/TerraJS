@@ -27,6 +27,8 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
             return false;
         }
 
+        public override Type InstanceType => typeof(bool);
+
         public override string ToString() => IsOptional ? $"[<{Name} : bool>]" : $"<{Name} : bool>";
 
         public override bool InScope(object value) => value is string;

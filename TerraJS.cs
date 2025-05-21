@@ -81,7 +81,7 @@ namespace TerraJS
 
             GlobalAPI.Command.CreateCommandRegistry("add")
                 .NextArgument(new IntArgument("a1"))
-                .NextArgument(new IntArgument("a2", 0))
+                .NextArgument(new IntArgument("a2"))
                 .Execute((g, caller) =>
                 {
                     Main.NewText((g.GetInt("a1") + g.GetInt("a2")).ToString());
@@ -92,9 +92,18 @@ namespace TerraJS
                 .NextArgument(new ListArgument<IntArgument>("args", 2, 2))
                 .Execute((g, caller) =>
                 {
-                    var list = g.GetList("args");
+                    var list = g.GetList<int>("args");
 
-                    Main.NewText(((int)list[0] * (int)list[1]).ToString());
+                    Main.NewText((list[0] * list[1]).ToString());
+                })
+                .Register();
+
+            GlobalAPI.Command.CreateCommandRegistry("mul")
+                .NextArgument(new IntArgument("a1"))
+                .NextArgument(new IntArgument("a2"))
+                .Execute((g, caller) =>
+                {
+                    Main.NewText((g.GetInt("a1") * g.GetInt("a2")).ToString());
                 })
                 .Register();
         }

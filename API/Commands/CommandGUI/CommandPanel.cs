@@ -69,15 +69,12 @@ namespace TerraJS.API.Commands.CommandGUI
 
             var allCommands = typeof(CommandLoader).GetField("Commands", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as IDictionary<string, List<ModCommand>>;
 
-            foreach (var commandEntry in allCommands)
+            foreach (var list in allCommands.Values)
             {
-                foreach (var command in commandEntry.Value)
+                foreach (var command in list)
                 {
                     if (CommandLoader.Matches(command.Type, CommandType.Chat))
-                    {
                         commands.Add(command);
-                        break;
-                    }
                 }
             }
 

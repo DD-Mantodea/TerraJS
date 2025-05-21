@@ -30,6 +30,8 @@ namespace TerraJS.API.Commands.CommandArguments
 
         public static bool operator !=(CommandArgument c1, CommandArgument c2) => !(c1 == c2);
 
+        public virtual Type InstanceType => typeof(object);
+
         public override bool Equals(object obj)
         {
             if (obj is null or not CommandArgument) return false;

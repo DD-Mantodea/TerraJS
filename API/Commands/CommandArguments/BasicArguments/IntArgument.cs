@@ -63,6 +63,9 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
             return IsOptional ? $"[{ret}]" : ret;
         }
 
+        public override Type InstanceType => typeof(int);
+
         public override bool InScope(object value) => value is int v && v >= _minVal && v <= _maxVal;
+
     }
 }

@@ -5,6 +5,8 @@ using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
+using TerraJS.API.Items;
+using TerraJS.Extensions;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Projectiles
@@ -15,6 +17,11 @@ namespace TerraJS.API.Projectiles
 
         public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "")
         {
+            if (name.IsNullOrEmptyOrWhiteSpace() || string.IsNullOrWhiteSpace(@namespace))
+            {
+                return ProjectileRegistry.Empty;
+            }
+
             var projName = $"TerraJS.Projectiles.{(@namespace == "" ? "" : @namespace + ".")}{name}";
 
             TypeBuilder builder = GlobalAPI._mb.DefineType(projName, TypeAttributes.Public, typeof(TJSProjectile));

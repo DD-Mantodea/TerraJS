@@ -54,7 +54,7 @@ namespace TerraJS.API.Commands
         {
             if (isEmpty || !_end) return;
 
-            if (_tjsInstances.Exists(c => c.Command == _content))
+            if (_tjsInstances.Exists(c => CommandAPI.CommandArgumentGroups[c.GetType().FullName] == _argumentGroup && c.Command == _content))
                 return;
 
             var cmdType = _builder.CreateType();

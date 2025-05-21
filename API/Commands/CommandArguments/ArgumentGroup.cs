@@ -25,8 +25,6 @@ namespace TerraJS.API.Commands.CommandArguments
 
             int argIndex = 0;
 
-            if (args.Length == 0) return true;
-
             foreach (var arg in _arguments)
             {
                 if (argIndex >= args.Length)
@@ -59,8 +57,6 @@ namespace TerraJS.API.Commands.CommandArguments
             arguments = new();
 
             int argIndex = 0;
-
-            if (args.Length == 0) return true;
 
             foreach (var arg in _arguments)
             {
@@ -120,6 +116,6 @@ namespace TerraJS.API.Commands.CommandArguments
 
         public bool GetBool(string name) => Get<bool>(name);
 
-        public List<object> GetList(string name) => Get<List<object>>(name);
+        public List<T> GetList<T>(string name) => Get<List<T>>(name);
     }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using TerraJS.Extensions;
 
 namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 {
@@ -24,7 +25,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 
             var list = new List<object>();
 
-            var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").Split(",");
+            var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").SplitListElements();
 
             foreach (var arg in args)
             {
@@ -58,7 +59,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 
             var list = new List<object>();
 
-            var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").Split(",");
+            var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").SplitListElements().ToList();
 
             foreach (var arg in args)
             {
@@ -85,7 +86,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
                 scope = $"length({_minLength}, {_maxLength})";
             else scope = $"length({_minLength}, INTMAX)";
 
-            var content = $"<{Name} : list<{nameof(T)}> {scope}>";
+            var content = $"<{Name} : list<{typeof(T).Name}> {scope}>";
 
             return IsOptional ? $"[{content}]" : content;
         }
@@ -94,6 +95,8 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
         {
             return value is List<object> list && list.Count >= _minLength && list.Count <= _maxLength;
         }
+
+        public override Type InstanceType => typeof(List<>);
 
         private static Regex Pattern => new("\\[(.*)\\]");
     }

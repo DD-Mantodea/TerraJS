@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using TerraJS.API.Commands;
+using TerraJS.Extensions;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -15,6 +17,11 @@ namespace TerraJS.API.Items
 
         public ItemRegistry? CreateItemRegistry(string name, string @namespace = "")
         {
+            if (name.IsNullOrEmptyOrWhiteSpace() || string.IsNullOrWhiteSpace(@namespace))
+            {
+                return ItemRegistry.Empty;
+            }
+
             var itemName = $"TerraJS.Items.{(@namespace == "" ? "" : @namespace + ".")}{name}";
 
             TypeBuilder builder = GlobalAPI._mb.DefineType(itemName, TypeAttributes.Public, typeof(TJSItem));
