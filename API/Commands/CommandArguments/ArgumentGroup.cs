@@ -85,6 +85,13 @@ namespace TerraJS.API.Commands.CommandArguments
         }
 
         public static bool operator !=(ArgumentGroup g1, ArgumentGroup g2) => !(g1 == g2);
+
+        public override bool Equals(object obj)
+        {
+            if (obj is null or not ArgumentGroup) return false;
+
+            return this == (ArgumentGroup)obj;
+        }
     }
 
     public class ArgumentInstanceGroup

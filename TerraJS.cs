@@ -14,7 +14,7 @@ using Microsoft.Xna.Framework;
 using TerraJS.API.Quests.QuestGUI;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
-using TerraJS.API.Commands.CommandArguments.MultipleArguments;
+using TerraJS.Managers;
 
 namespace TerraJS
 {
@@ -26,6 +26,11 @@ namespace TerraJS
 
         public static GlobalAPI GlobalAPI;
 
+        public Matrix CurrentView = Matrix.Identity;
+
+        public Matrix CurrentProjection = Matrix.Identity;
+
+        public FontManager FontManager = new();
         static string ModPath => Path.Combine(Main.SavePath,"Mods", "TerraJS");
 
         public override void Load()
@@ -53,57 +58,35 @@ namespace TerraJS
                 if (mod is not TerraJS) 
                     orig.Invoke(mod, str, cul);
             });
+
+            FontManager.Load();
         }
 
         public void CustomLoad()
         {
-            GlobalAPI.Command.CreateCommandRegistry("helloworld")
-                .Execute((g, caller) =>
+            GlobalAPI.Command.CreateCommandRegistry("tjsquest")
+                .NextArgument(new ComboArgument("value", ["edit"]))
+                .Execute((g, _) =>
                 {
-                    Main.NewText("Hello World");
-                }).Register();
+                    var value = g.GetString("value");
 
-            GlobalAPI.Command.CreateCommandRegistry("say")
-                .NextArgument(new StringArgument("content"))
-                .Execute((g, caller) =>
-                {
-                    Main.NewText(g.GetString("content"));
+                    switch (value)
+                    {
+                        case "edit":
+                            QuestPanel.Instance.EditingMode = !QuestPanel.Instance.EditingMode;
+                            break;
+                    }
                 })
                 .Register();
 
-            GlobalAPI.Command.CreateCommandRegistry("say")
-                .NextArgument(new IntArgument("content"))
-                .Execute((g, caller) =>
-                {
-                    Main.NewText(g.GetInt("content").ToString());
-                })
-                .Register();
-
-            GlobalAPI.Command.CreateCommandRegistry("add")
+            GlobalAPI.Command.CreateCommandRegistry("test")
                 .NextArgument(new IntArgument("a1"))
                 .NextArgument(new IntArgument("a2"))
-                .Execute((g, caller) =>
+                .Execute((g, _) =>
                 {
-                    Main.NewText((g.GetInt("a1") + g.GetInt("a2")).ToString());
-                })
-                .Register();
+                    var a1 = g.GetInt("a1");
 
-            GlobalAPI.Command.CreateCommandRegistry("mul")
-                .NextArgument(new ListArgument<IntArgument>("args", 2, 2))
-                .Execute((g, caller) =>
-                {
-                    var list = g.GetList<int>("args");
-
-                    Main.NewText((list[0] * list[1]).ToString());
-                })
-                .Register();
-
-            GlobalAPI.Command.CreateCommandRegistry("mul")
-                .NextArgument(new IntArgument("a1"))
-                .NextArgument(new IntArgument("a2"))
-                .Execute((g, caller) =>
-                {
-                    Main.NewText((g.GetInt("a1") * g.GetInt("a2")).ToString());
+                    var a2 = g.GetInt("a2");
                 })
                 .Register();
         }

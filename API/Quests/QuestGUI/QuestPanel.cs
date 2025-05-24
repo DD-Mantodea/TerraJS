@@ -17,7 +17,7 @@ namespace TerraJS.API.Quests.QuestGUI
 
         public QuestPanel() => Instance = this;
 
-        public bool EditingMode = false;
+        public bool EditingMode = true;
 
         public UIElementGroup LeftGroupBar;
 

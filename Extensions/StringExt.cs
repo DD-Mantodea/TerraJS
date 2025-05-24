@@ -45,6 +45,36 @@ namespace TerraJS.Extensions
                 yield return current.ToString();
         }
 
-        public static bool IsNullOrEmptyOrWhiteSpace(this string str) => string.IsNullOrEmpty(str) || string.IsNullOrWhiteSpace(str);
+        public static bool IsNullOrWhiteSpaceNotEmpty(this string value)
+        {
+            if (value == null) 
+                return true;
+
+            if (value == "")
+                return false;
+
+            for (int i = 0; i < value.Length; i++)
+            {
+                if (!char.IsWhiteSpace(value[i])) return false;
+            }
+
+            return true;
+        }
+
+        public static List<string> SplitWithCount(this string str, int count)
+        {
+            var ret = new List<string>();
+            int i = 0;
+            while (i < str.Length)
+            {
+                var sub = str.Substring(i, Math.Min(count, str.Length - i));
+
+                ret.Add(sub);
+
+                i += count;
+            }
+
+            return ret;
+        }
     }
 }

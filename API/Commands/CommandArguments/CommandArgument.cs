@@ -37,8 +37,6 @@ namespace TerraJS.API.Commands.CommandArguments
             if (obj is null or not CommandArgument) return false;
 
             return this == (CommandArgument)obj;
-
-            throw new NotImplementedException();
         }
     }
 }

@@ -119,7 +119,7 @@ namespace TerraJS.API.Commands
                 name = name.Substring(1);
             }
 
-            var args = input.TrimEnd().Split(' ');
+            var args = input.TrimEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
             args = args.Skip(1).ToArray();
 
             if (!GetCommand(caller, name, args, out ModCommand mc))
@@ -155,7 +155,7 @@ namespace TerraJS.API.Commands
         {
             //只允许拉丁字母?
 
-            if (content.IsNullOrEmptyOrWhiteSpace() || string.IsNullOrWhiteSpace(name) || string.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(content) || name.IsNullOrWhiteSpaceNotEmpty() || @namespace.IsNullOrWhiteSpaceNotEmpty())
             {
                 return CommandRegistry.Empty;
             }

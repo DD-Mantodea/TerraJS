@@ -1,45 +1,54 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
 using Microsoft.Xna.Framework;
-using SilkyUIFramework.BasicElements;
-using Terraria.GameInput;
-using Terraria;
-using Terraria.ModLoader;
-using SilkyUIFramework.Extensions;
-using Terraria.GameContent;
-using SilkyUIFramework.Attributes;
-using SilkyUIFramework;
 using Microsoft.Xna.Framework.Graphics;
+using TerraJS.Attributes;
+using TerraJS.UI.Components.Containers;
+using TerraJS.Extensions;
+using Terraria.ModLoader;
+using Terraria;
+using System.Reflection;
 using Microsoft.Xna.Framework.Input;
+using Terraria.GameInput;
+using Terraria.GameContent;
+using TerraJS.UI.Components;
 
 namespace TerraJS.API.Commands.CommandGUI
 {
-    [RegisterUI("Vanilla: Radial Hotbars", "TerraJS: CommandPanel", int.MaxValue)]
-    public class CommandPanel : BasicBody
+    [RegisterUI("CommandPanel")]
+    public class CommandPanel : SizeContainer
     {
+        public CommandPanel()
+        {
+            Instance = this;
+
+            RelativePosition = new(78, 0);
+
+            _width = TextureAssets.TextBack.Width() - 100;
+
+            Column = new ColumnContainer().Join(this);
+        }
+
         public static CommandPanel Instance;
 
         public string LastChatText = "";
 
         public string CurrentChatText = "";
 
-        public string CurrentInput => Main.chatText[1..];
+        public string CurrentInput => Main.chatText.StartsWith('/') ? Main.chatText.Substring(1) : "";
 
         public string[] Args => CurrentInput.Split(" ", StringSplitOptions.RemoveEmptyEntries);
 
         public List<ModCommand> MatchingCommands = [];
 
-        public List<UITextView> CommandLines => ScrollView.Container.Children.Cast<UITextView>().ToList();
+        public List<SizeContainer> CommandLines => Column.Children.Cast<SizeContainer>().ToList();
 
         public int selectedCommandIndex = 0;
 
-        public SUIScrollView ScrollView;
+        public ColumnContainer Column;
 
         public bool isCommandInputActive => Main.chatText.StartsWith('/');
-
-        public CommandPanel() => Instance = this;
 
         public void UpdateMatchingCommands()
         {
@@ -81,50 +90,12 @@ namespace TerraJS.API.Commands.CommandGUI
             return commands;
         }
 
-        protected override void OnInitialize()
+        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            SetLeft(78);
-
-            SetWidth(TextureAssets.TextBack.Width() - 100);
-
-            SetGap(0);
-
-            SetHeight(0);
-
-            FitHeight = true;
-
-            Border = 0;
-
-            ScrollView = new SUIScrollView()
-            {
-                FitHeight = true,
-                FlexDirection = FlexDirection.Column
-            }.Join(this);
-
-            ScrollView.SetGap(0);
-
-            ScrollView.SetWidth(0, 1);
-
-            ScrollView.Mask.FitHeight = true;
-
-            ScrollView.Mask.SetWidth(0, 1);
-
-            ScrollView.Container.FitHeight = true;
-
-            ScrollView.Container.SetGap(2);
-
-            ScrollView.Container.FlexDirection = FlexDirection.Column;
-
-            ScrollView.Container.FlexWrap = false;
-
-            ScrollView.Container.SetWidth(0, 1);
-
-            ScrollView.Container.SetHeight(0);
-
-            ScrollView.Container.SetMaxHeight(208);
+            base.Draw(spriteBatch, gameTime);
         }
 
-        public override void HandleUpdate(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             CurrentChatText = Main.chatText;
 
@@ -132,7 +103,7 @@ namespace TerraJS.API.Commands.CommandGUI
             {
                 UpdateMatchingCommands();
 
-                ScrollView.Container.RemoveAllChildren();
+                Column.RemoveAllChild();
 
                 foreach (var command in MatchingCommands)
                 {
@@ -149,20 +120,18 @@ namespace TerraJS.API.Commands.CommandGUI
                     else
                         text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
 
-                    var cmdLine = new UITextView()
+                    var cmdLine = new SizeContainer(Width, 36)
                     {
-                        Text = text,
                         BackgroundColor = Color.Gray * 0.3f,
-                        Padding = 0,
-                    }.Join(ScrollView.Container);
+                    }.Join(Column);
 
-                    cmdLine.SetHeight(30);
+                    var content = new UIText("MouseText", text: text, fontSize: 25).Join(cmdLine);
 
-                    cmdLine.FitWidth = false;
+                    content.RelativePosition = new(4, 0);
 
-                    cmdLine.SetWidth(0, 1);
+                    content.TextVerticalMiddle = true;
 
-                    cmdLine.Padding = new Margin(4, 0, 4, 0);
+                    content.VerticalMiddle = true;
                 }
 
                 LastChatText = CurrentChatText;
@@ -174,7 +143,7 @@ namespace TerraJS.API.Commands.CommandGUI
                 {
                     string selectedCommand = MatchingCommands[selectedCommandIndex].Command;
 
-                    if((Args.Length == 0 ? "" : Args[0]) != selectedCommand)
+                    if ((Args.Length == 0 ? "" : Args[0]) != selectedCommand)
                         Main.chatText = "/" + selectedCommand + " ";
                 }
 
@@ -188,19 +157,19 @@ namespace TerraJS.API.Commands.CommandGUI
                 }
             }
 
-            base.HandleUpdate(gameTime);
+            RelativePosition.Y = Main.screenHeight - (50 + Column.Height);
 
-            SetTop(Main.screenHeight - (50 + Bounds.Height));
-
-            for(int i = 0; i < CommandLines.Count; i++)
+            for (int i = 0; i < CommandLines.Count; i++)
             {
                 if (selectedCommandIndex == i)
                     CommandLines[i].BackgroundColor = Color.LightGray * 0.3f;
                 else
                     CommandLines[i].BackgroundColor = Color.Gray * 0.3f;
             }
+
+            base.Update(gameTime);
         }
 
-        public override bool Enabled => Main.chatText.StartsWith('/') && Main.drawingPlayerChat;
+        public override bool Visible => Main.chatText.StartsWith('/') && Main.drawingPlayerChat;
     }
 }

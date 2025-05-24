@@ -32,13 +32,13 @@ namespace TerraJS.API.Quests.QuestGUI
 
             var icon = new UIView().Join(button);
             icon.SetSize(30, 30);
-            icon.DrawAction += (gameTime, spritebatch) =>
+            icon.DrawAction += (gameTime, spriteBatch) =>
             {
                 var texture = IsMouseHovering
-                ? ModContent.Request<Texture2D>("TerraJS/Textures/QuestButtonHover").Value
-                : ModContent.Request<Texture2D>("TerraJS/Textures/QuestButton").Value;
+                ? ModContent.Request<Texture2D>("TerraJS/Textures/UI/Quests/QuestButtonHover").Value
+                : ModContent.Request<Texture2D>("TerraJS/Textures/UI/Quests/QuestButton").Value;
 
-                spritebatch.Draw(texture, icon.GetBounds().LeftTop, Color.White);
+                spriteBatch.Draw(texture, icon.GetBounds().LeftTop, Color.White);
                 
                 if(IsMouseHovering)
                     Main.instance.MouseText(TranslationAPI.LocalizedTexts["Mods.TerraJS.QuestButton.HoverText"], 0, 0);

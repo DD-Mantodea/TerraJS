@@ -17,7 +17,7 @@ namespace TerraJS.API.Projectiles
 
         public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "")
         {
-            if (name.IsNullOrEmptyOrWhiteSpace() || string.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
             {
                 return ProjectileRegistry.Empty;
             }

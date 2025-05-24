@@ -17,7 +17,7 @@ namespace TerraJS.API.Items
 
         public ItemRegistry? CreateItemRegistry(string name, string @namespace = "")
         {
-            if (name.IsNullOrEmptyOrWhiteSpace() || string.IsNullOrWhiteSpace(@namespace))
+            if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
             {
                 return ItemRegistry.Empty;
             }

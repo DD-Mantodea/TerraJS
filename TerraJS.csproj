@@ -10,13 +10,15 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <Optimize>False</Optimize>
 	</PropertyGroup>
-	<ItemGroup>
-	  <None Remove="Textures\NULL.png" />
-	</ItemGroup>
+	
 	<ItemGroup>
 	  <PackageReference Include="Jint" Version="4.2.2" />
 	</ItemGroup>
+	
 	<ItemGroup>
+	  <Reference Include="FontStashSharp.FNA">
+	    <HintPath>F:\CSharpRepos\FontStashSharp\src\XNA\bin\FNA.Core\Debug\net8.0\FontStashSharp.FNA.dll</HintPath>
+	  </Reference>
 	  <Reference Include="SilkyUIFramework">
 	    <HintPath>..\SilkyUIFramework\obj\Release\net8.0\SilkyUIFramework.dll</HintPath>
 	  </Reference>
