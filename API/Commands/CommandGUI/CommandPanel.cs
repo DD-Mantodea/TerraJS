@@ -13,6 +13,7 @@ using Microsoft.Xna.Framework.Input;
 using Terraria.GameInput;
 using Terraria.GameContent;
 using TerraJS.UI.Components;
+using TerraJS.UI;
 
 namespace TerraJS.API.Commands.CommandGUI
 {
@@ -25,7 +26,7 @@ namespace TerraJS.API.Commands.CommandGUI
 
             RelativePosition = new(78, 0);
 
-            _width = TextureAssets.TextBack.Width() - 100;
+            SetSize(TextureAssets.TextBack.Width() - 100, 0);
 
             Column = new ColumnContainer().Join(this);
         }
@@ -125,7 +126,7 @@ namespace TerraJS.API.Commands.CommandGUI
                         BackgroundColor = Color.Gray * 0.3f,
                     }.Join(Column);
 
-                    var content = new UIText("MouseText", text: text, fontSize: 25).Join(cmdLine);
+                    var content = new UIText("MouseText", text: text, fontSize: 22).Join(cmdLine);
 
                     content.RelativePosition = new(4, 0);
 
@@ -139,7 +140,7 @@ namespace TerraJS.API.Commands.CommandGUI
 
             if (isCommandInputActive && MatchingCommands.Count > 0)
             {
-                if (Main.keyState.IsKeyDown(Keys.Tab) && !Main.oldKeyState.IsKeyDown(Keys.Tab))
+                if (UserInput.IsJustPress(Keys.Tab))
                 {
                     string selectedCommand = MatchingCommands[selectedCommandIndex].Command;
 
@@ -147,14 +148,10 @@ namespace TerraJS.API.Commands.CommandGUI
                         Main.chatText = "/" + selectedCommand + " ";
                 }
 
-                if (Main.keyState.IsKeyDown(Keys.Down) && !Main.oldKeyState.IsKeyDown(Keys.Down))
-                {
+                if (UserInput.IsJustPress(Keys.Down))
                     selectedCommandIndex = (selectedCommandIndex + 1) % MatchingCommands.Count;
-                }
-                else if (Main.keyState.IsKeyDown(Keys.Up) && !Main.oldKeyState.IsKeyDown(Keys.Up))
-                {
+                else if (UserInput.IsJustPress(Keys.Up))
                     selectedCommandIndex = (selectedCommandIndex - 1 + MatchingCommands.Count) % MatchingCommands.Count;
-                }
             }
 
             RelativePosition.Y = Main.screenHeight - (50 + Column.Height);

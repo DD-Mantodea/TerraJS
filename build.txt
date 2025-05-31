@@ -4,4 +4,3 @@ version = 1.0.0.0
 homepage = https://github.com/DD-Mantodea/TerraJS
 includeSource = true
 dllReferences = Acornima,Jint,FontStashSharp.FNA,FontStashSharp.Base,Cyotek.Drawing.BitmapFont,FontStashSharp.Rasterizers.StbTrueTypeSharp,StbImageSharp,StbTrueTypeSharp
-modReferences = SilkyUIFramework

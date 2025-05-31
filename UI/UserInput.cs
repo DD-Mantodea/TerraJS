@@ -138,33 +138,21 @@ namespace TerraJS.UI
             }
         }
 
-        public static bool IsPressed(Keys key)
-        {
-            return PreviousKeyState.IsKeyDown(key) && CurrentKeyState.IsKeyUp(key);
-        }
+        public static bool IsPressed(Keys key) => PreviousKeyState.IsKeyDown(key) && CurrentKeyState.IsKeyUp(key);
 
         public static bool IsKeyDown(Keys key) => CurrentKeyState.IsKeyDown(key);
 
         public static bool IsKeyUp(Keys key) => CurrentKeyState.IsKeyUp(key);
 
-        public static bool IsJustPress(Keys key)
-        {
-            return PreviousKeyState.IsKeyUp(key) && CurrentKeyState.IsKeyDown(key);
-        }
+        public static bool IsJustPress(Keys key) => PreviousKeyState.IsKeyUp(key) && CurrentKeyState.IsKeyDown(key);
 
         public static bool MouseLeft => CurrentMouseState.LeftButton == ButtonState.Pressed;
 
         public static bool MouseRight => CurrentMouseState.RightButton == ButtonState.Pressed;
 
-        public static int GetDeltaWheelValue()
-        {
-            return CurrentMouseState.ScrollWheelValue - PreviousMouseState.ScrollWheelValue;
-        }
+        public static int GetDeltaWheelValue() => CurrentMouseState.ScrollWheelValue - PreviousMouseState.ScrollWheelValue;
 
-        public static Rectangle GetMouseRectangle()
-        {
-            return new Rectangle(CurrentMouseState.X, CurrentMouseState.Y, 1, 1);
-        }
+        public static Rectangle GetMouseRectangle() => new Rectangle(CurrentMouseState.X, CurrentMouseState.Y, 1, 1);
 
         public static bool Shift => IsKeyDown(Keys.LeftShift) || IsKeyDown(Keys.RightShift);
 

@@ -11,7 +11,6 @@ using Terraria;
 using TerraJS.Utils;
 using Terraria.UI;
 using Microsoft.Xna.Framework;
-using TerraJS.API.Quests.QuestGUI;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.Managers;
@@ -25,10 +24,6 @@ namespace TerraJS
         public static TerraJS Instance;
 
         public static GlobalAPI GlobalAPI;
-
-        public Matrix CurrentView = Matrix.Identity;
-
-        public Matrix CurrentProjection = Matrix.Identity;
 
         public FontManager FontManager = new();
         static string ModPath => Path.Combine(Main.SavePath,"Mods", "TerraJS");
@@ -46,13 +41,13 @@ namespace TerraJS
             CustomLoad();
 
             MonoModHooks.Add(typeof(LanguageManager).GetMethod("GetOrRegister"), RedirectLocalizedText);
-
+            /*
             MonoModHooks.Add(typeof(UserInterface).GetMethod("Update"), ModifyUpdate);
 
             MonoModHooks.Add(typeof(UserInterface).GetMethod("Draw"), ModifyDraw);
 
             MonoModHooks.Add(typeof(GameInterfaceLayer).GetMethod("Draw"), ModifyDrawLayer);
-
+            */
             MonoModHooks.Add(typeof(LocalizationLoader).GetMethod("UpdateLocalizationFilesForMod", BindingFlags.Static | BindingFlags.NonPublic), (Action<Mod, string, GameCulture> orig, Mod mod, string str, GameCulture cul) => 
             {
                 if (mod is not TerraJS) 
@@ -64,6 +59,7 @@ namespace TerraJS
 
         public void CustomLoad()
         {
+            /*
             GlobalAPI.Command.CreateCommandRegistry("tjsquest")
                 .NextArgument(new ComboArgument("value", ["edit"]))
                 .Execute((g, _) =>
@@ -78,17 +74,7 @@ namespace TerraJS
                     }
                 })
                 .Register();
-
-            GlobalAPI.Command.CreateCommandRegistry("test")
-                .NextArgument(new IntArgument("a1"))
-                .NextArgument(new IntArgument("a2"))
-                .Execute((g, _) =>
-                {
-                    var a1 = g.GetInt("a1");
-
-                    var a2 = g.GetInt("a2");
-                })
-                .Register();
+            */
         }
 
         public override void PostSetupContent()
@@ -98,17 +84,19 @@ namespace TerraJS
 
         public void InitializeEngine()
         {
-            Engine = new Engine();
+            Engine = new Engine(cfg => cfg.AllowClr());
 
             GlobalAPI = new();
 
             BindingUtils.BindInstance("TerraJS", GlobalAPI);
 
+            BindingUtils.BindStaticOrEnumOrConst("Main", typeof(Main));
+
+            BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
+
             BindItemThings();
 
             BindTileThings();
-
-            BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
         }
 
         public void BindItemThings()
@@ -165,7 +153,7 @@ namespace TerraJS
             }
             else return orig(instance, key, makeDefaultValue);
         }
-
+        /*
         public void ModifyUpdate(Action<UserInterface, GameTime> orig, UserInterface ui, GameTime time)
         {
             if (QuestPanel.Instance != null && QuestPanel.Instance.Enabled) 
@@ -189,6 +177,7 @@ namespace TerraJS
 
             return orig(layer);
         }
+        */
 
         public override void Unload()
         {

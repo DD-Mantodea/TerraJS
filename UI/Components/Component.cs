@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using TerraJS.Extensions;
 using TerraJS.UI.Components.Containers;
 using FontStashSharp;
+using Terraria;
 
 namespace TerraJS.UI.Components
 {
@@ -25,38 +26,28 @@ namespace TerraJS.UI.Components
 
         public virtual void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (!Visible)
-                return;
             if (BackgroundColor != default)
-                spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * _alpha);
+                spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * Alpha);
 
             if (!string.IsNullOrEmpty(Text))
             {
-                var x = Rectangle.X + Rectangle.Width / 2 - _font.MeasureString(Text).X / 2;
-                var y = Rectangle.Y + Rectangle.Height / 2 - _font.MeasureString(Text).Y / 2;
+                var x = (int)Position.X + Width / 2 - Font.MeasureString(Text).X / 2;
+                var y = (int)Position.Y + Height / 2 - Font.MeasureString(Text).Y / 2;
 
-                spriteBatch.DrawString(_font, Text, new Vector2(x, y), BackgroundColor * _alpha);
+                spriteBatch.DrawString(Font, Text, new Vector2(x, y), BackgroundColor * Alpha);
             }
         }
 
         public virtual void PostDraw(SpriteBatch spriteBatch, GameTime gameTime) { }
 
-        internal void DrawBorder(SpriteBatch spriteBatch, Color? borderColor = null, bool drawOri = false)
+        public virtual void DrawSelf(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            Color[] data = new Color[_texture.Width * _texture.Height];
-            _texture.GetData(data);
-            data = (from c in data select c.A == 0 ? c : Color.White).ToArray();
-            Texture2D t = new Texture2D(spriteBatch.GraphicsDevice, _texture.Width, _texture.Height);
-            t.SetData(data);
+            PreDraw(spriteBatch, gameTime);
 
-            Color borderC = borderColor == null ? Color.White : (Color)borderColor;
+            if (Visible)
+                Draw(spriteBatch, gameTime);
 
-            spriteBatch.Draw(t, Position - new Vector2(0, 2), borderC);
-            spriteBatch.Draw(t, Position - new Vector2(2, 0), borderC);
-            spriteBatch.Draw(t, Position + new Vector2(0, 2), borderC);
-            spriteBatch.Draw(t, Position + new Vector2(2, 0), borderC);
-            if (!drawOri) spriteBatch.Draw(t, Position, Color.White);
-            else spriteBatch.Draw(_texture, Position, Color.White);
+            PostDraw(spriteBatch, gameTime);
         }
 
         public virtual void LeftClick(object sender, int pressTime, Vector2 mouseStart)
@@ -94,48 +85,47 @@ namespace TerraJS.UI.Components
         {
             OnUpdate?.Invoke(this, new EventArgs());
 
+            UpdateMouse(gameTime);
+
+            DrawOffset = new(0, 0);
+
+            Position = RelativePosition + (Parent == null ? new(0, 0) : Parent.Position);
+        }
+
+        public virtual void UpdateMouse(GameTime gameTime)
+        {
             var mouseRect = UserInput.GetMouseRectangle();
 
-            _isHovering = false;
+            IsHovering = false;
+
             Clicked = false;
 
             if (mouseRect.Intersects(Rectangle))
             {
-                _isHovering = true;
+                IsHovering = true;
                 OnHover?.Invoke(this, new EventArgs());
             }
-
-            if (HorizontalMiddle) RelativePosition.X = (Parent.Width - Width) / 2;
-            if (VerticalMiddle) RelativePosition.Y = (Parent.Height - Height) / 2;
-
-            switch (Anchor)
-            {
-                case Anchor.Left:
-                    RelativePosition.X = 0;
-                    break;
-                case Anchor.Right:
-                    RelativePosition.X = Parent.Width - Width;
-                    break;
-                case Anchor.Top:
-                    RelativePosition.Y = 0;
-                    break;
-                case Anchor.Bottom:
-                    RelativePosition.Y = Parent.Height - Height;
-                    break;
-                case Anchor.None:
-                    break;
-            }
-
-            DrawOffset = new(0, 0);
         }
 
-        public float _alpha = 1;
+        internal int _width = 0;
 
-        public SpriteFontBase _font;
+        internal int _height = 0;
 
-        public bool _isHovering;
+        internal float _alpha = 1;
 
-        public Texture2D _texture;
+        public Matrix View => Main.UIScaleMatrix;
+
+        public Matrix SelfMatrix = Matrix.Identity;
+
+        public Matrix Transform => View * SelfMatrix;
+
+        public virtual float Alpha { get => _alpha; set => _alpha = value; }
+
+        public SpriteFontBase Font;
+
+        public bool IsHovering;
+
+        public Texture2D Texture;
 
         public event EventHandler OnClick;
 
@@ -149,9 +139,9 @@ namespace TerraJS.UI.Components
 
         public Vector2 Size => new(Width, Height);
 
-        public virtual int Height => _texture.Height;
+        public virtual int Height => _height;
 
-        public virtual int Width => _texture.Width;
+        public virtual int Width => _width;
 
         public bool Clicked { get; internal set; }
 
@@ -186,15 +176,17 @@ namespace TerraJS.UI.Components
         {
             get
             {
-                return new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
+                var screenPos = ScreenToWorld(Position);
+
+                var realSize = ScreenToWorld(Size);
+
+                return new Rectangle((int)screenPos.X, (int)screenPos.Y, (int)realSize.X, (int)realSize.Y);
             }
         }
 
-        public virtual float Alpha
-        {
-            get => _alpha;
-            set => _alpha = value;
-        }
+        public virtual Vector2 ScreenToWorld(Vector2 vec) => Vector2.Transform(vec, Transform);
+
+        public virtual Vector2 WorldToScreen(Vector2 vec) => Vector2.Transform(vec, Matrix.Invert(Transform));
 
         public string Text { get; set; }
 
@@ -208,6 +200,13 @@ namespace TerraJS.UI.Components
             UserInput.RightClick -= RightClick;
             UserInput.KeepPressLeft -= KeepPressLeft;
             UserInput.KeepPressRight -= KeepPressRight;
+        }
+
+        public void SetSize(int width, int height)
+        {
+            _width = width;
+
+            _height = height;
         }
     }
 }

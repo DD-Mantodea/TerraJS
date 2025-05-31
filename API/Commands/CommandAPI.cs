@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Ionic.Zlib;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands.CommandArguments;
+using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.API.Items;
 using TerraJS.Extensions;
 using Terraria.Localization;
@@ -170,5 +171,13 @@ namespace TerraJS.API.Commands
 
             return registry;
         }
+
+        public static BoolArgument BoolArgument(string name, bool isOptional = false) => new(name, isOptional);
+
+        public static IntArgument IntArgument(string name, int minValue = int.MinValue, int maxValue = int.MaxValue, bool isOptional = false) => new(name, minValue, maxValue, isOptional);
+
+        public static StringArgument StringArgument(string name, bool isOptional = false) => new(name, isOptional);
+
+        public static ComboArgument ComboArgument(string name, List<string> enableValues, bool isOptional = false) => new(name, enableValues, isOptional);
     }
 }

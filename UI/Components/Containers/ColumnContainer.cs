@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Xna.Framework;
 
 namespace TerraJS.UI.Components.Containers
 {
@@ -12,20 +14,22 @@ namespace TerraJS.UI.Components.Containers
 
         public int ChildrenMargin = 0;
 
-        public override void SetChildrenRelativePos()
+        public override void SetChildRelativePos(Component child)
+        {
+            _width = Math.Max(child.Width + (int)child.RelativePosition.X, Width);
+
+            child.RelativePosition.Y = _height;
+
+            _height += child.Height + ChildrenMargin;
+
+            base.SetChildRelativePos(child);
+        }
+
+        public override void UpdateChildren(GameTime gameTime)
         {
             _height = 0;
 
-            foreach (var component in Children)
-                if (component.Visible)
-                    _width = Math.Max(component.Width + (int)component.RelativePosition.X, Width);
-            foreach (var component in Children)
-            {
-                component.RelativePosition.Y = _height;
-                if (!component.Visible)
-                    continue;
-                _height += component.Height + ChildrenMargin;
-            }
+            base.UpdateChildren(gameTime);
         }
     }
 }

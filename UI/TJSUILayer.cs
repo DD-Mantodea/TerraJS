@@ -23,7 +23,7 @@ namespace TerraJS.UI
 
             spriteBatch.Rebegin(transformMatrix: Main.UIScaleMatrix);
 
-            ScreenContainer.Draw(spriteBatch, Main.gameTimeCache);
+            ScreenContainer.DrawSelf(spriteBatch, Main.gameTimeCache);
 
             spriteBatch.Change(transformMatrix: Matrix.Identity);
 
@@ -32,7 +32,7 @@ namespace TerraJS.UI
 
         public void Update(GameTime gameTime)
         {
-            //ScreenContainer.Update(gameTime);
+            ScreenContainer.Update(gameTime);
         }
     }
 }

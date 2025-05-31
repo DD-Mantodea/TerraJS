@@ -12,41 +12,59 @@ namespace TerraJS.UI.Components.Containers
     {
         public List<Component> Children = new List<Component>();
 
-        internal int _width;
-
-        internal int _height;
-
-        public override int Height => _height;
-
-        public override int Width => _width;
-
-        public Matrix View;
-
-        public Matrix Projection;
-
-        public Matrix Transform => View * Projection;
-
         public virtual void RegisterChild(Component component)
         {
             if (SelectChildById(component.ID) != null && component.ID != "")
                 return;
             component.Parent = this;
             Children.Add(component);
-            //SetChildrenRelativePos();
         }
 
-        public virtual void SetChildrenRelativePos()
+        public virtual void SetChildRelativePos(Component child)
         {
+            if (child.HorizontalMiddle)
+                child.RelativePosition.X = (Width - child.Width) / 2;
+            if (child.VerticalMiddle)
+                child.RelativePosition.Y = (Height - child.Height) / 2;
 
+            switch (child.Anchor)
+            {
+                case Anchor.Left:
+                    child.RelativePosition.X = 0;
+                    break;
+                case Anchor.Right:
+                    child.RelativePosition.X = Width - child.Width;
+                    break;
+                case Anchor.Top:
+                    child.RelativePosition.Y = 0;
+                    break;
+                case Anchor.Bottom:
+                    child.RelativePosition.Y = Height - child.Height;
+                    break;
+                case Anchor.None:
+                    break;
+            }
         }
 
         public override void Update(GameTime gameTime)
         {
+            base.Update(gameTime);
+
+            UpdateChildren(gameTime);
+        }
+
+        public virtual void UpdateChildren(GameTime gameTime)
+        {
             foreach (var child in Children)
             {
+                if(child.Visible)
+                    SetChildRelativePos(child);
+
                 child.Position = child.RelativePosition + Position;
+
                 child.Update(gameTime);
             }
+
             for (int i = 0; i < Children.Count; i++)
             {
                 if (Children[i].shouldCollect)
@@ -55,19 +73,21 @@ namespace TerraJS.UI.Components.Containers
                     i--;
                 }
             }
-            base.Update(gameTime);
-            SetChildrenRelativePos();
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (!Visible) return;
             base.Draw(spriteBatch, gameTime);
 
             //TODO 添加是否剪切的选项
 
+            DrawChildren(spriteBatch, gameTime);
+        }
+
+        public virtual void DrawChildren(SpriteBatch spriteBatch, GameTime gameTime)
+        {
             foreach (var component in Children)
-                component.Draw(spriteBatch, gameTime);
+                component.DrawSelf(spriteBatch, gameTime);
         }
 
         public virtual void RegisterChildAt(int index, Component component, bool behind = false)
@@ -78,7 +98,8 @@ namespace TerraJS.UI.Components.Containers
                 Children.Insert(Children.Count - index, component);
             else
                 Children.Insert(index, component);
-            SetChildrenRelativePos();
+
+            SetChildRelativePos(component);
         }
 
         public bool ContainsChild(Predicate<Component> match)

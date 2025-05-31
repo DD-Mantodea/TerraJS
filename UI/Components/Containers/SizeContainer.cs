@@ -27,17 +27,15 @@ namespace TerraJS.UI.Components.Containers
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (!Visible) return;
             if (BackgroundColor != default)
-                spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * _alpha);
+                spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * Alpha);
 
             spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, BorderWidth.X, Height), BorderColor);
             spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, BorderWidth.Y), BorderColor);
             spriteBatch.DrawRectangle(new(Width - BorderWidth.Z + (int)Position.X, (int)Position.Y, BorderWidth.Z, Height), BorderColor);
             spriteBatch.DrawRectangle(new((int)Position.X, Height - BorderWidth.W + (int)Position.Y, Width, BorderWidth.W), BorderColor);
 
-            foreach (var component in Children)
-                component.Draw(spriteBatch, gameTime);
+            DrawChildren(spriteBatch, gameTime);
         }
     }
 }

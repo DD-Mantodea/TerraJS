@@ -8,9 +8,9 @@ namespace TerraJS.UI.Components.Containers
 {
     public class ZoomableContainer : SizeContainer
     {
-        public float ZoomScale;
+        public float ZoomScale = 1f;
 
-        public Vector2 CameraPosition;
+        public Vector2 CameraPosition = Vector2.Zero;
 
         public ZoomableContainer(int width, int height) 
         { 
@@ -24,14 +24,6 @@ namespace TerraJS.UI.Components.Containers
             _height = (int)size.Y;
         }
 
-        public void Initialize()
-        {
-            CameraPosition = new(0, 0);
-            ZoomScale = 1f;
-            Projection = Matrix.Identity;
-            View = Matrix.Identity;
-        }
-
         public void MoveCamera(Vector2 vec)
         {
             CameraPosition += vec;
@@ -43,24 +35,15 @@ namespace TerraJS.UI.Components.Containers
             ZoomScale = (float)Math.Round(ZoomScale, 4);
         }
 
-        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+        public override void DrawChildren(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (!Visible) return;
-            if (BackgroundColor != default)
-                spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * _alpha);
-
-            spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, BorderWidth.X, _height), BorderColor);
-            spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, _width, BorderWidth.Y), BorderColor);
-            spriteBatch.DrawRectangle(new(_width - BorderWidth.Z + (int)Position.X, (int)Position.Y, BorderWidth.Z, Height), BorderColor);
-            spriteBatch.DrawRectangle(new((int)Position.X, _height - BorderWidth.W + (int)Position.Y, _width, BorderWidth.W), BorderColor);
-
-            spriteBatch.Rebegin(samplerState: SamplerState.PointClamp, rasterizerState: RasterizerState.CullNone, 
+            spriteBatch.Rebegin(samplerState: SamplerState.PointClamp, rasterizerState: RasterizerState.CullNone,
                 transformMatrix: Transform);
             spriteBatch.EnableScissor();
             spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle;
 
             foreach (var component in Children)
-                component.Draw(spriteBatch, gameTime);
+                component.DrawSelf(spriteBatch, gameTime);
 
             spriteBatch.Rebegin(samplerState: SamplerState.PointClamp, rasterizerState: RasterizerState.CullNone);
             spriteBatch.GraphicsDevice.ScissorRectangle = RectangleExt.FormPoint(Point.Zero, Main.ScreenSize);
@@ -81,7 +64,7 @@ namespace TerraJS.UI.Components.Containers
 
             var deltaWheel = UserInput.GetDeltaWheelValue();
 
-            if (_isHovering)
+            if (IsHovering)
             {
                 if (deltaWheel > 0)
                     ZoomCamera(1.25f);
@@ -91,13 +74,10 @@ namespace TerraJS.UI.Components.Containers
                 if (ZoomScale < 0.2) ZoomScale = 0.2f;
             }
 
-            View = Matrix.CreateTranslation(new(-Position - Size / 2, 0)) *
+            SelfMatrix = Matrix.CreateTranslation(new(-Position - Size / 2, 0)) *
                 Matrix.CreateScale(ZoomScale, ZoomScale, 1) *
                 Matrix.CreateTranslation(new(Position + Size / 2, 0)) *
                 Matrix.CreateTranslation(new(CameraPosition * ZoomScale, 0));
-
-            TerraJS.Instance.CurrentProjection = Projection;
-            TerraJS.Instance.CurrentView = View;
 
             foreach (var child in Children)
             {
@@ -116,11 +96,11 @@ namespace TerraJS.UI.Components.Containers
 
             var mouseRect = UserInput.GetMouseRectangle();
 
-            _isHovering = false;
+            IsHovering = false;
 
             if (mouseRect.Intersects(Rectangle))
             {
-                _isHovering = true;
+                IsHovering = true;
             }
 
             if (HorizontalMiddle) RelativePosition.X = (Parent.Width - Width) / 2;

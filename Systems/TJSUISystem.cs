@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using TerraJS.Attributes;
@@ -31,17 +32,25 @@ namespace TerraJS.Systems
                     Layer.Register(container);
                 }
             }
+
+            UserInput.Initialize();
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
         {
             base.ModifyInterfaceLayers(layers);
 
-            layers.Add(Layer);
+            var target = layers.Where(layer => layer.Name == "Vanilla: Radial Hotbars").First();
+
+            var index = layers.IndexOf(target);
+
+            layers.Insert(index, Layer);
         }
 
         public override void UpdateUI(GameTime gameTime)
         {
+            UserInput.Update();
+
             base.UpdateUI(gameTime);
 
             Layer.Update(gameTime);
