@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using Ionic.Zlib;
+using Jint.Native;
+using Jint.Runtime;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands.CommandArguments;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
@@ -172,12 +175,56 @@ namespace TerraJS.API.Commands
             return registry;
         }
 
-        public static BoolArgument BoolArgument(string name, bool isOptional = false) => new(name, isOptional);
+        public static BoolArgument BoolArgument(string name, dynamic arguments = default)
+        {
+            if (arguments == null)
+                return new(name);
 
-        public static IntArgument IntArgument(string name, int minValue = int.MinValue, int maxValue = int.MaxValue, bool isOptional = false) => new(name, minValue, maxValue, isOptional);
+            var args = (IDictionary<string, object>)arguments;
 
-        public static StringArgument StringArgument(string name, bool isOptional = false) => new(name, isOptional);
+            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
 
-        public static ComboArgument ComboArgument(string name, List<string> enableValues, bool isOptional = false) => new(name, enableValues, isOptional);
+            return new(name, isOptional);
+        }
+
+        public static IntArgument IntArgument(string name, dynamic arguments = default)
+        {
+            if(arguments == null)
+                return new(name);
+
+            var args = (IDictionary<string, object>)arguments;
+
+            int minValue = args.ContainsKey("minValue") ? (int)arguments.minValue : int.MinValue;
+
+            int maxValue = args.ContainsKey("maxValue") ? (int)arguments.maxValue : int.MaxValue;
+
+            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
+
+            return new(name, minValue, maxValue, isOptional);
+        }
+
+        public static StringArgument StringArgument(string name, dynamic arguments = default)
+        {
+            if (arguments == null)
+                return new(name);
+
+            var args = (IDictionary<string, object>)arguments;
+
+            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
+
+            return new(name, isOptional);
+        }
+
+        public static ComboArgument ComboArgument(string name, string[] enableValues, dynamic arguments = default)
+        {
+            if (arguments == null)
+                return new(name, [..enableValues]);
+
+            var args = (IDictionary<string, object>)arguments;
+
+            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
+
+            return new(name, [..enableValues], isOptional);
+        }
     }
 }

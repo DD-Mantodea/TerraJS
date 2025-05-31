@@ -56,7 +56,7 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
                 else scope = $"({_minVal}, INTMAX)";
             }
             else if (_maxVal != int.MaxValue)
-                scope = $"INTMIN, {_maxVal}";
+                scope = $"(INTMIN, {_maxVal})";
 
             var ret = $"<{Name} : int{scope}>";
 

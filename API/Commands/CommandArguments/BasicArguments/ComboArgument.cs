@@ -29,7 +29,7 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
             return true;
         }
 
-        public override string ToString() => IsOptional ? $"[<{Name}({string.Join("/", _enableValues.Take(2))}..) : string>]" : $"<{Name}({string.Join(", ", _enableValues[..1])}..) : string>";
+        public override string ToString() => IsOptional ? $"[<{Name}({string.Join("/", _enableValues.Take(2))}..) : string>]" : $"<{Name}({string.Join(", ", _enableValues.Take(2))}..) : string>";
 
         public override bool InScope(object value) => value is string str && _enableValues.Contains(str);
 
