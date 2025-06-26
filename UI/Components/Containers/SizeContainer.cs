@@ -2,6 +2,8 @@
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.DataStructures;
 using TerraJS.Extensions;
+using TerraJS.Utils;
+using Terraria;
 
 namespace TerraJS.UI.Components.Containers
 {
@@ -35,7 +37,22 @@ namespace TerraJS.UI.Components.Containers
             spriteBatch.DrawRectangle(new(Width - BorderWidth.Z + (int)Position.X, (int)Position.Y, BorderWidth.Z, Height), BorderColor);
             spriteBatch.DrawRectangle(new((int)Position.X, Height - BorderWidth.W + (int)Position.Y, Width, BorderWidth.W), BorderColor);
 
-            DrawChildren(spriteBatch, gameTime);
+            if (Scissor)
+            {
+                var state = spriteBatch.SaveState();
+
+                spriteBatch.EnableScissor();
+
+                spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle;
+
+                DrawChildren(spriteBatch, gameTime);
+
+                spriteBatch.LoadState(state);
+            }
+            else
+                DrawChildren(spriteBatch, gameTime);
+
+            //spriteBatch.DrawRectangle(RectangleUtils.FormVector2(Position, Size), Color.Green);
         }
     }
 }

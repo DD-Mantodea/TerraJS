@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using TerraJS.Extensions;
+using TerraJS.Utils;
 using Terraria;
 
 namespace TerraJS.UI.Components.Containers
@@ -46,7 +47,7 @@ namespace TerraJS.UI.Components.Containers
                 component.DrawSelf(spriteBatch, gameTime);
 
             spriteBatch.Rebegin(samplerState: SamplerState.PointClamp, rasterizerState: RasterizerState.CullNone);
-            spriteBatch.GraphicsDevice.ScissorRectangle = RectangleExt.FormPoint(Point.Zero, Main.ScreenSize);
+            spriteBatch.GraphicsDevice.ScissorRectangle = RectangleUtils.FormPoint(Point.Zero, Main.ScreenSize);
         }
 
         public override void Update(GameTime gameTime)

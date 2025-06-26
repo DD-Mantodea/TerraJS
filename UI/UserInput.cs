@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
 using System.Runtime.InteropServices;
-using Terraria;
 
 namespace TerraJS.UI
 {

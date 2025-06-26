@@ -7,7 +7,7 @@ using Terraria;
 
 namespace TerraJS.API.Recipes
 {
-    public class RecipeAPI
+    public class RecipeAPI : BaseAPI
     {
         public Recipe CreateRecipe(int item, int amount = 1) => Recipe.Create(item, amount);
     
@@ -34,6 +34,10 @@ namespace TerraJS.API.Recipes
         public Recipe[] FindAllRecipe(Func<Recipe, bool> predicate)
         {
             return [.. EnumerableRecipes(predicate)];
+        }
+
+        internal override void Reload()
+        {
         }
     }
 }

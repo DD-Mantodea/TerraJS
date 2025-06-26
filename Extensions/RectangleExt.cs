@@ -18,7 +18,5 @@ namespace TerraJS.Extensions
         {
             return new Rectangle(rect.X / num, rect.Y / num, rect.Width / num, rect.Height / num);
         }
-
-        public static Rectangle FormPoint(Point position, Point size) => new(position.X, position.Y, size.X, size.Y);
     }
 }

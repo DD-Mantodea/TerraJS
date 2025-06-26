@@ -28,16 +28,25 @@ namespace TerraJS.Extensions
             }
         }
 
-        public static void Rebegin(this SpriteBatch spriteBatch, SpriteSortMode sortMode = SpriteSortMode.Deferred, BlendState blendState = null, SamplerState samplerState = null, DepthStencilState depthStencilState = null, RasterizerState rasterizerState = null, Effect effect = null, Matrix? transformMatrix = null)
+        public static void Rebegin(this SpriteBatch spriteBatch, SpriteSortMode? sortMode = null, BlendState blendState = null, SamplerState samplerState = null, DepthStencilState depthStencilState = null, RasterizerState rasterizerState = null, Effect effect = null, Matrix? transformMatrix = null)
         {
+            var state = spriteBatch.SaveState();
             spriteBatch.End();
-            spriteBatch.Begin(sortMode, blendState, samplerState, depthStencilState, rasterizerState, effect, transformMatrix ?? Matrix.Identity);
+            spriteBatch.Begin(
+                sortMode ?? state.SpriteSortMode, 
+                blendState ?? state.BlendState, 
+                samplerState ?? state.SamplerState, 
+                depthStencilState ?? state.DepthStencilState, 
+                rasterizerState ?? state.RasterizerState, 
+                effect ?? state.Effect, 
+                transformMatrix ?? state.Matrix
+            );
         }
 
         public static void EnableScissor(this SpriteBatch spriteBatch)
         {
             var type = spriteBatch.GetType();
-            var rState = (RasterizerState)type.GetField("_rasterizerState", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+            var rState = (RasterizerState)type.GetField("rasterizerState", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
             Change(spriteBatch, rasterizerState: new() { ScissorTestEnable = true, CullMode = rState.CullMode });
         }
 
@@ -60,6 +69,34 @@ namespace TerraJS.Extensions
             var matrix = transformMatrix ?? (Matrix)type.GetField("transformMatrix", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
 
             spriteBatch.Rebegin(sMode, bState, sState, dsState, rState, efct, matrix);
+        }
+
+        public static SpriteBatchState SaveState(this SpriteBatch spriteBatch)
+        {
+            var state = new SpriteBatchState();
+
+            var type = spriteBatch.GetType();
+
+            state.SpriteSortMode = (SpriteSortMode)type.GetField("sortMode", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            state.BlendState = (BlendState)type.GetField("blendState", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            state.SamplerState = (SamplerState)type.GetField("samplerState", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            state.DepthStencilState = (DepthStencilState)type.GetField("depthStencilState", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            state.RasterizerState = (RasterizerState)type.GetField("rasterizerState", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            state.Effect = (Effect)type.GetField("spriteEffect", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            state.Matrix = (Matrix)type.GetField("transformMatrix", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(spriteBatch);
+
+            return state;
+        }
+
+        public static void LoadState(this SpriteBatch spriteBatch, SpriteBatchState state)
+        {
+            spriteBatch.Rebegin(state.SpriteSortMode, state.BlendState, state.SamplerState, state.DepthStencilState, state.RasterizerState, state.Effect, state.Matrix);
         }
 
         public static void DrawLine(this SpriteBatch batch, Line line, Color color)
@@ -190,6 +227,25 @@ namespace TerraJS.Extensions
         public Vector2 ToVector2()
         {
             return End - Start;
+        }
+    }
+
+    public class SpriteBatchState
+    {
+        public SpriteBatchState() { }
+
+        public SpriteSortMode SpriteSortMode { get; set; }
+        public BlendState BlendState { get; set; }
+        public SamplerState SamplerState { get; set; }
+        public DepthStencilState DepthStencilState { get; set; }
+        public RasterizerState RasterizerState { get; set; }
+
+        public Effect Effect { get; set; }
+        public Matrix Matrix { get; set; }
+
+        public void Begin(SpriteBatch spriteBatch, SpriteSortMode spriteSortMode, Effect effect = null, Matrix? matrix = null)
+        {
+            spriteBatch.Begin(spriteSortMode, BlendState, SamplerState, DepthStencilState, RasterizerState, effect, matrix ?? Matrix);
         }
     }
 }

@@ -14,17 +14,19 @@ namespace TerraJS.API.Commands.CommandArguments
 
         public bool IsOptional { get; set; } = isOptional;
 
-        public abstract bool FromString(string content, out object value);
+        public abstract bool FromString(string content, object last, out object value);
 
-        public virtual bool FromStringWithoutClamp(string content, out object value) => FromString(content, out value);
+        public virtual bool FromStringWithoutClamp(string content, object last, out object value) => FromString(content, last, out value);
 
         public abstract override string ToString();
 
         public override int GetHashCode() => Name.GetHashCode();
 
-        public virtual bool InScope(object value) => true;
+        public virtual bool InScope(object value, object last) => true;
 
-        public bool SameType(CommandArgument arg) => GetType().FullName == arg.GetType().FullName;
+        public virtual bool SameType(CommandArgument arg) => GetType().FullName == arg.GetType().FullName;
+
+        public virtual bool SameValue(CommandArgument arg) => SameType(arg);
 
         public static bool operator ==(CommandArgument c1, CommandArgument c2) => c1.Name == c2.Name;
 

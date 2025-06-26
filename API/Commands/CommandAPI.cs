@@ -14,12 +14,13 @@ using TerraJS.API.Commands.CommandArguments;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.API.Items;
 using TerraJS.Extensions;
+using TerraJS.Utils;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Commands
 {
-    public class CommandAPI
+    public class CommandAPI : BaseAPI
     {
         public static Dictionary<string, string> CommandContents = [];
 
@@ -143,11 +144,9 @@ namespace TerraJS.API.Commands
             {
                 var ue = e as UsageException;
 
-                var msg = typeof(UsageException).GetField("msg", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ue) as string;
-
                 var color = typeof(UsageException).GetField("color", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ue);
 
-                if (msg != null)
+                if (typeof(UsageException).GetField("msg", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ue) is string msg)
                     caller.Reply(msg, (Color)color);
                 else
                     caller.Reply("Usage: " + mc.Usage, Color.Red);
@@ -175,56 +174,9 @@ namespace TerraJS.API.Commands
             return registry;
         }
 
-        public static BoolArgument BoolArgument(string name, dynamic arguments = default)
+        internal override void Reload()
         {
-            if (arguments == null)
-                return new(name);
 
-            var args = (IDictionary<string, object>)arguments;
-
-            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
-
-            return new(name, isOptional);
-        }
-
-        public static IntArgument IntArgument(string name, dynamic arguments = default)
-        {
-            if(arguments == null)
-                return new(name);
-
-            var args = (IDictionary<string, object>)arguments;
-
-            int minValue = args.ContainsKey("minValue") ? (int)arguments.minValue : int.MinValue;
-
-            int maxValue = args.ContainsKey("maxValue") ? (int)arguments.maxValue : int.MaxValue;
-
-            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
-
-            return new(name, minValue, maxValue, isOptional);
-        }
-
-        public static StringArgument StringArgument(string name, dynamic arguments = default)
-        {
-            if (arguments == null)
-                return new(name);
-
-            var args = (IDictionary<string, object>)arguments;
-
-            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
-
-            return new(name, isOptional);
-        }
-
-        public static ComboArgument ComboArgument(string name, string[] enableValues, dynamic arguments = default)
-        {
-            if (arguments == null)
-                return new(name, [..enableValues]);
-
-            var args = (IDictionary<string, object>)arguments;
-
-            bool isOptional = args.ContainsKey("isOptional") ? arguments.isOptional : false;
-
-            return new(name, [..enableValues], isOptional);
         }
     }
 }

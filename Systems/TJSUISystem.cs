@@ -40,11 +40,11 @@ namespace TerraJS.Systems
         {
             base.ModifyInterfaceLayers(layers);
 
-            var target = layers.Where(layer => layer.Name == "Vanilla: Radial Hotbars").First();
+            var target = layers.Where(layer => layer.Name == "Vanilla: Player Chat").First();
 
             var index = layers.IndexOf(target);
 
-            layers.Insert(index, Layer);
+            layers.Insert(index + 1, Layer);
         }
 
         public override void UpdateUI(GameTime gameTime)

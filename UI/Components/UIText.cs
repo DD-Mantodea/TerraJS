@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TerraJS.Extensions;
 using TerraJS.Utils;
+using Terraria.UI.Chat;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace TerraJS.UI.Components
@@ -30,20 +31,22 @@ namespace TerraJS.UI.Components
 
             FontColor = fontColor == null ? Color.White : (Color)fontColor;
 
+            var noColorText = Text.NoColored();
+
             if (size == default)
-                size = Font.MeasureString(text);
+                size = Font.MeasureString(noColorText);
 
             _width = (int)size.X;
 
             _height = (int)size.Y;
 
-            if (!string.IsNullOrEmpty(Text))
+            if (!string.IsNullOrEmpty(noColorText))
             {
                 var texts = new List<string>();
                 if (NewLineNum != int.MaxValue)
-                    texts = Text.SplitWithCount(NewLineNum);
+                    texts = noColorText.SplitWithCount(NewLineNum);
                 if (SplitCharacter != null)
-                    texts = Text.Split(SplitCharacter).ToList();
+                    texts = noColorText.Split(SplitCharacter).ToList();
 
                 if (_width == 0 || _height == 0)
                 {

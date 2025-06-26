@@ -8,7 +8,7 @@ using Terraria.Localization;
 
 namespace TerraJS.API
 {
-    public class TranslationAPI
+    public class TranslationAPI : BaseAPI
     {
         static TranslationAPI()
         {
@@ -41,6 +41,11 @@ namespace TerraJS.API
                 return ret;
 
             return key;
+        }
+
+        internal override void Reload()
+        {
+
         }
     }
 }

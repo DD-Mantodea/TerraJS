@@ -25,7 +25,7 @@ namespace TerraJS.API.Items
 
             var jsArgs = args.Select((obj, i) => JsValue.FromObject(TerraJS.Engine, obj)).ToArray();
 
-            return @delegate.DynamicInvoke(JsValue.Undefined, jsArgs);
+            return @delegate.DynamicInvoke(JsValue.FromObject(TerraJS.Engine, this), jsArgs);
         }
 
         internal static string _texture = "";

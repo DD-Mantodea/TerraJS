@@ -12,7 +12,13 @@ namespace TerraJS.Utils
 {
     public class BindingUtils
     {
-        public static void BindInstance(string name, object instance) => TerraJS.Engine.SetValue(name, instance);
+        public static List<(string, object)> Values = [];
+
+        public static void BindInstance(string name, object instance)
+        {
+            TerraJS.Engine.SetValue(name, instance);
+            Values.Add((name, instance));
+        }
 
         public static void BindProperties(string name, PropertyInfo[] members)
         {
@@ -23,8 +29,14 @@ namespace TerraJS.Utils
                 expandoDict[property.Name] = property.GetValue(null);
 
             TerraJS.Engine.SetValue(name, expandoObj);
+
+            Values.Add((name, expandoObj));
         }
 
-        public static void BindStaticOrEnumOrConst(string name, Type type) => TerraJS.Engine.SetValue(name, TypeReference.CreateTypeReference(TerraJS.Engine, type));
+        public static void BindStaticOrEnumOrConst(string name, Type type)
+        {
+            TerraJS.Engine.SetValue(name, TypeReference.CreateTypeReference(TerraJS.Engine, type));
+            Values.Add((name, type));
+        }
     }
 }

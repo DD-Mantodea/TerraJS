@@ -6,15 +6,15 @@ using System.Reflection;
 using TerraJS.API.Events;
 using TerraJS.API.Items;
 using TerraJS.API.Recipes;
-using Terraria.ModLoader;
-using TerraJS.Utils;
-using Terraria;
 using TerraJS.API.Projectiles;
 using TerraJS.API.Commands;
+using TerraJS.API.Tiles;
+using TerraJS.API.Players;
+using TerraJS.API.Reflections;
 
 namespace TerraJS.API
 {
-    public class GlobalAPI
+    public class GlobalAPI : BaseAPI
     {
         public CommandAPI Command = new();
 
@@ -26,10 +26,34 @@ namespace TerraJS.API
 
         public ProjectileAPI Projectile = new();
 
+        public TileAPI Tile = new();
+
+        public PlayerAPI Player = new();
+
+        public ReflectionAPI Reflection = new();
+
         internal static AssemblyName _an = new AssemblyName("TJSContents");
 
         internal static AssemblyBuilder _ab = AssemblyBuilder.DefineDynamicAssembly(_an, AssemblyBuilderAccess.RunAndCollect);
 
         internal static ModuleBuilder _mb = _ab.DefineDynamicModule(_an.Name);
+
+        public void Info(object obj) => TerraJS.Instance.Logger.Info(obj);
+
+        public void Debug(object obj) => TerraJS.Instance.Logger.Debug(obj);
+
+        public void Warn(object obj) => TerraJS.Instance.Logger.Warn(obj);
+
+        internal override void Reload()
+        {
+            Command.Reload();
+            Event.Reload();
+            Item.Reload();
+            Recipe.Reload();
+            Projectile.Reload();
+            Tile.Reload();
+            Player.Reload();
+            Reflection.Reload();
+        }
     }
 }

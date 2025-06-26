@@ -26,8 +26,6 @@ namespace TerraJS.API.Commands.CommandGUI
 
             RelativePosition = new(78, 0);
 
-            SetSize(TextureAssets.TextBack.Width() - 100, 0);
-
             Column = new ColumnContainer().Join(this);
         }
 
@@ -91,14 +89,11 @@ namespace TerraJS.API.Commands.CommandGUI
             return commands;
         }
 
-        public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
-        {
-            base.Draw(spriteBatch, gameTime);
-        }
-
         public override void Update(GameTime gameTime)
         {
             CurrentChatText = Main.chatText;
+
+            int maxWidth = 0;
 
             if (Main.drawingPlayerChat && PlayerInput.WritingText && (LastChatText != CurrentChatText))
             {
@@ -121,19 +116,24 @@ namespace TerraJS.API.Commands.CommandGUI
                     else
                         text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
 
-                    var cmdLine = new SizeContainer(Width, 36)
+                    var cmdLine = new SizeContainer(0, 36)
                     {
-                        BackgroundColor = Color.Gray * 0.3f,
+                        BackgroundColor = Color.Gray * 0.7f
                     }.Join(Column);
 
                     var content = new UIText("MouseText", text: text, fontSize: 22).Join(cmdLine);
 
-                    content.RelativePosition = new(4, 0);
+                    content.RelativePosition = new(8, 0);
 
                     content.TextVerticalMiddle = true;
 
                     content.VerticalMiddle = true;
+
+                    maxWidth = Math.Max(maxWidth, Math.Clamp(content.Width + 8, 300, int.MaxValue));
                 }
+
+                foreach (var i in Column.Children)
+                    i.SetSize(maxWidth, 36);
 
                 LastChatText = CurrentChatText;
             }
@@ -159,9 +159,9 @@ namespace TerraJS.API.Commands.CommandGUI
             for (int i = 0; i < CommandLines.Count; i++)
             {
                 if (selectedCommandIndex == i)
-                    CommandLines[i].BackgroundColor = Color.LightGray * 0.3f;
+                    CommandLines[i].BackgroundColor = Color.LightGray * 0.7f;
                 else
-                    CommandLines[i].BackgroundColor = Color.Gray * 0.3f;
+                    CommandLines[i].BackgroundColor = Color.Gray * 0.7f;
             }
 
             base.Update(gameTime);

@@ -25,6 +25,8 @@ namespace TerraJS.API.Commands.CommandArguments
 
             int argIndex = 0;
 
+            object last = null;
+
             foreach (var arg in _arguments)
             {
                 if (argIndex >= args.Length)
@@ -34,9 +36,12 @@ namespace TerraJS.API.Commands.CommandArguments
                     continue;
                 }
 
-                if (arg.FromString(args[argIndex], out var value))
+                if (arg.FromString(args[argIndex], last, out var value))
                 {
                     group.Add(arg.Name, value);
+
+                    last = value;
+
                     argIndex++;
                 }
                 else if (!arg.IsOptional)
@@ -58,14 +63,19 @@ namespace TerraJS.API.Commands.CommandArguments
 
             int argIndex = 0;
 
+            object last = null;
+
             foreach (var arg in _arguments)
             {
                 if (argIndex >= args.Length)
                     return true;
 
-                if (arg.FromStringWithoutClamp(args[argIndex], out var value))
+                if (arg.FromStringWithoutClamp(args[argIndex], last, out var value))
                 {
                     arguments.Add(arg, value);
+
+                    last = value;
+
                     argIndex++;
                 }
                 else if (!arg.IsOptional)
@@ -81,7 +91,7 @@ namespace TerraJS.API.Commands.CommandArguments
 
             var args2 = g2._arguments;
 
-            return args1.Count == args2.Count && args1.All(a1 => args2.Any(a2 => a2.SameType(a1)));
+            return args1.Count == args2.Count && args1.All(a1 => args2.Any(a2 => a2.SameType(a1) && a2.SameValue(a1)));
         }
 
         public static bool operator !=(ArgumentGroup g1, ArgumentGroup g2) => !(g1 == g2);

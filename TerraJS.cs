@@ -14,6 +14,10 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.Managers;
+using System.Collections.Generic;
+using TerraJS.Attributes;
+using Terraria.ModLoader.Core;
+using TerraJS.DetectorJS;
 
 namespace TerraJS
 {
@@ -25,8 +29,10 @@ namespace TerraJS
 
         public static GlobalAPI GlobalAPI;
 
+        public static TranslationAPI TranslationAPI;
+
         public FontManager FontManager = new();
-        static string ModPath => Path.Combine(Main.SavePath,"Mods", "TerraJS");
+        public static string ModPath => Path.Combine(Main.SavePath, "Mods", "TerraJS");
 
         public override void Load()
         {
@@ -75,6 +81,16 @@ namespace TerraJS
                 })
                 .Register();
             */
+
+            GlobalAPI.Command.CreateCommandRegistry("terrajs")
+                .NextArgument(new ConstantArgument("feature", "reload"))
+                .Execute((_, _) => ReloadAllScripts())
+                .Register();
+
+            GlobalAPI.Command.CreateCommandRegistry("terrajs")
+                .NextArgument(new ConstantArgument("feature", "detect"))
+                .Execute((_, _) => Detector.Detect())
+                .Register();
         }
 
         public override void PostSetupContent()
@@ -84,9 +100,13 @@ namespace TerraJS
 
         public void InitializeEngine()
         {
-            Engine = new Engine(cfg => cfg.AllowClr());
+            Engine = new Engine(cfg => {
+                cfg.AllowClr();
+            });
 
             GlobalAPI = new();
+
+            TranslationAPI = new();
 
             BindingUtils.BindInstance("TerraJS", GlobalAPI);
 
@@ -97,9 +117,11 @@ namespace TerraJS
             BindItemThings();
 
             BindTileThings();
+
+            BindClasses();
         }
 
-        public void BindItemThings()
+        private void BindItemThings()
         {
             BindingUtils.BindStaticOrEnumOrConst("ItemID", typeof(ItemID));
 
@@ -112,12 +134,23 @@ namespace TerraJS
             BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
         }
 
-        public void BindTileThings()
+        private void BindTileThings()
         {
             BindingUtils.BindStaticOrEnumOrConst("TileID", typeof(TileID));
         }
 
-        static void CreateFolderIfNotExist(string path) 
+        private void BindClasses()
+        {
+            foreach (var type in AssemblyManager.GetLoadableTypes(GetType().Assembly))
+            {
+                if (type.GetCustomAttribute<BindToEngineAttribute>() is { })
+                {
+                    BindingUtils.BindStaticOrEnumOrConst(type.Name, type);
+                }
+            }
+        }
+
+        public static void CreateFolderIfNotExist(string path) 
         {
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         }
@@ -140,6 +173,15 @@ namespace TerraJS
 
                 Engine.Execute(script);
             }
+        }
+
+        public void ReloadAllScripts()
+        {
+            GlobalAPI.Reload();
+
+            TranslationAPI.Reload();
+
+            LoadAllScripts();
         }
 
         public LocalizedText RedirectLocalizedText(Func<LanguageManager, string, Func<string>, LocalizedText> orig, LanguageManager instance, string key, Func<string> makeDefaultValue)

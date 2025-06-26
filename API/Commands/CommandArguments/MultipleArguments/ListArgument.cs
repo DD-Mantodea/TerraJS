@@ -16,7 +16,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 
         private int _maxLength = maxLength >= minLength ? maxLength : minLength;
 
-        public override bool FromString(string content, out object value)
+        public override bool FromString(string content, object last, out object value)
         {
             value = null;
 
@@ -27,11 +27,15 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 
             var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").SplitListElements();
 
+            object lastArg = null;
+
             foreach (var arg in args)
             {
-                if (_argumentInstance.FromString(arg, out var val))
+                if (_argumentInstance.FromString(arg, lastArg, out var val))
                 {
                     list.Add(val);
+
+                    lastArg = val;
 
                     continue;
                 }
@@ -50,7 +54,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
             return true;
         }
 
-        public override bool FromStringWithoutClamp(string content, out object value)
+        public override bool FromStringWithoutClamp(string content, object last, out object value)
         {
             value = null;
 
@@ -61,11 +65,15 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 
             var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").SplitListElements().ToList();
 
+            object lastArg = null;
+
             foreach (var arg in args)
             {
-                if (_argumentInstance.FromString(arg, out var val))
+                if (_argumentInstance.FromString(arg, lastArg, out var val))
                 {
                     list.Add(val);
+
+                    lastArg = val;
 
                     continue;
                 }
@@ -91,7 +99,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
             return IsOptional ? $"[{content}]" : content;
         }
 
-        public override bool InScope(object value)
+        public override bool InScope(object value, object last)
         {
             return value is List<object> list && list.Count >= _minLength && list.Count <= _maxLength;
         }

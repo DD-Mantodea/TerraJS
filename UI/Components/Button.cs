@@ -7,6 +7,7 @@ using FontStashSharp;
 using Terraria.ModLoader;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
+using TerraJS.Utils;
 
 namespace TerraJS.UI.Components
 {
@@ -60,17 +61,17 @@ namespace TerraJS.UI.Components
             if (BackgroundColor != default)
                 spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * Alpha);
 
-            var destination = RectangleExt.FormPoint(Position.ToPoint() + (Size / 2).ToPoint(), Size.ToPoint());
+            var destination = RectangleUtils.FormPoint(Position.ToPoint() + (Size / 2).ToPoint(), Size.ToPoint());
             
             if (IsHovering)
             {
                 if (UserInput.CurrentMouseState.LeftButton == ButtonState.Pressed)
-                    spriteBatch.Draw(Press, destination, RectangleExt.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
+                    spriteBatch.Draw(Press, destination, RectangleUtils.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
                 else
-                    spriteBatch.Draw(Hover, destination, RectangleExt.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
+                    spriteBatch.Draw(Hover, destination, RectangleUtils.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
             }
             else
-                spriteBatch.Draw(Texture, destination, RectangleExt.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
+                spriteBatch.Draw(Texture, destination, RectangleUtils.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
 
             if (!string.IsNullOrEmpty(Text))
             {

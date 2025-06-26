@@ -5,12 +5,16 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
+using TerraJS.Extensions;
+using TerraJS.Utils;
 
 namespace TerraJS.UI.Components.Containers
 {
     public abstract class Container : Component
     {
         public List<Component> Children = new List<Component>();
+
+        public bool Scissor = false;
 
         public virtual void RegisterChild(Component component)
         {
@@ -79,9 +83,20 @@ namespace TerraJS.UI.Components.Containers
         {
             base.Draw(spriteBatch, gameTime);
 
-            //TODO 添加是否剪切的选项
+            if (Scissor)
+            {
+                var state = spriteBatch.SaveState();
 
-            DrawChildren(spriteBatch, gameTime);
+                spriteBatch.EnableScissor();
+
+                spriteBatch.GraphicsDevice.ScissorRectangle = RectangleUtils.FormVector2(Position, Size);
+
+                DrawChildren(spriteBatch, gameTime);
+
+                spriteBatch.End();
+            }
+            else
+                DrawChildren(spriteBatch, gameTime);
         }
 
         public virtual void DrawChildren(SpriteBatch spriteBatch, GameTime gameTime)

@@ -32,10 +32,16 @@ namespace TerraJS.API.Commands
 
             if (argsGroup.GetUseArguments(args, out var arguments))
             {
+                object last = null;
+
                 foreach (var arg in argsGroup.Arguments)
                 {
                     if (arguments.ContainsKey(arg))
-                        text += arg.InScope(arguments[arg]) ? $" [c/F4F32B:{arg}]" : $" [c/E74032:{arg}]";
+                    {
+                        text += arg.InScope(arguments[arg], last) ? $" [c/F4F32B:{arg}]" : $" [c/E74032:{arg}]";
+
+                        last = arguments[arg];
+                    }
                     else
                         text += $" [c/A0A0A0:{arg}]";
                 }

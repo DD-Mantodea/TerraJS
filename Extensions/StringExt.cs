@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.Xna.Framework;
+using TerraJS.Utils;
 
 namespace TerraJS.Extensions
 {
@@ -75,6 +78,13 @@ namespace TerraJS.Extensions
             }
 
             return ret;
+        }
+
+        public static string NoColored(this string str)
+        {
+            var snippets = StringUtils.ParseMessage(str, Color.White);
+
+            return string.Join(" ", snippets.ConvertAll(s => s.Text));
         }
     }
 }

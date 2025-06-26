@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
 {
-    public class ItemAPI
+    public class ItemAPI : BaseAPI
     {
         public static Dictionary<string, Dictionary<string, Delegate>> ItemDelegates = [];
 
@@ -64,6 +64,11 @@ namespace TerraJS.API.Items
             if (!ItemRegistry._contentTypes.TryGetValue($"TerraJS.Items.{fullName}", out itemType)) itemType = -1;
 
             return itemType;
+        }
+
+        internal override void Reload()
+        {
+
         }
     }
 }

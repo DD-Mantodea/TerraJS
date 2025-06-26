@@ -1,5 +1,6 @@
 ﻿using Jint;
 using Jint.Native;
+using Microsoft.Build.Tasks;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,20 +9,21 @@ namespace TerraJS.API.Events
 {
     public class TJSEvent
     {
-        public List<JsValue> Delegates = [];
+        public List<Delegate> Delegates = [];
 
         public bool Custom = false;
 
         public void Invoke(params object[] args)
         {
-            if (Delegates.Count == 0) return;
+            if (Delegates.Count == 0) 
+                return;
 
             try
             {
                 var jsArgs = args.Select((obj, i) => JsValue.FromObject(TerraJS.Engine, obj)).ToArray();
 
-                foreach (var jsFunc in Delegates)
-                    jsFunc.Call(JsValue.Undefined, jsArgs);
+                foreach (var @delegate in Delegates)
+                    @delegate.DynamicInvoke(JsValue.Undefined, jsArgs);
             }
             catch
             {
@@ -29,14 +31,20 @@ namespace TerraJS.API.Events
             }
         }
 
-        public void AddEventHandler(JsValue jsValue)
+        public void AddEventHandler(Delegate @delegate)
         {
-            Delegates.Add(jsValue);
+            Delegates.Add(@delegate);
         }
+
+        public void ClearEventHandlers() => Delegates.Clear();
     }
 
-    public class TJSEvent<T> : TJSEvent where T : Delegate
+    public abstract class TJSEvent<T> : TJSEvent where T : struct
     {
-
+        public new abstract T? Invoke(params object[] args);
+        public new virtual void AddEventHandler(Delegate @delegate)
+        {
+            Delegates.Add(@delegate);
+        }
     }
 }

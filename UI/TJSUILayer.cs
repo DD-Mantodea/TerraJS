@@ -21,11 +21,13 @@ namespace TerraJS.UI
         {
             var spriteBatch = Main.spriteBatch;
 
-            spriteBatch.Rebegin(transformMatrix: Main.UIScaleMatrix);
+            var state = spriteBatch.SaveState();
+
+            spriteBatch.Change(transformMatrix: Main.UIScaleMatrix);
 
             ScreenContainer.DrawSelf(spriteBatch, Main.gameTimeCache);
 
-            spriteBatch.Change(transformMatrix: Matrix.Identity);
+            spriteBatch.Change(transformMatrix: state.Matrix);
 
             return true;
         }

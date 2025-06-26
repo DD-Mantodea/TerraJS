@@ -11,7 +11,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.API.Projectiles
 {
-    public class ProjectileAPI
+    public class ProjectileAPI : BaseAPI
     {
         public static Dictionary<string, Dictionary<string, Delegate>> ProjectileDelegates = [];
 
@@ -63,6 +63,10 @@ namespace TerraJS.API.Projectiles
             if (!ProjectileRegistry._contentTypes.TryGetValue($"TerraJS.Projectiles.{fullName}", out projType)) projType = -1;
 
             return projType;
+        }
+
+        internal override void Reload()
+        {
         }
     }
 }

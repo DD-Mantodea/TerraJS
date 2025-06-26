@@ -1,7 +1,13 @@
 [h2]一个允许你使用JavaScript制作mod内容的模组[/h2]
+[h2]A mod allows you to make mod content using JavaScript[/h2]
 
 [h2]开源链接 (Github): https://github.com/DD-Mantodea/TerraJS[/h2]
+[h2]github link: https://github.com/DD-Mantodea/TerraJS[/h2]
 
 [h2]作者[/h2]
 画师：线框
 代码：Mantodea，错数螺线
+
+[h2]Authors[/h2]
+Sprite: 线框
+Code: Mantodea，错数螺线

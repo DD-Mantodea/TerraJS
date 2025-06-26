@@ -6,17 +6,9 @@ using System.Threading.Tasks;
 
 namespace TerraJS.API.Events
 {
-    public unsafe class RefBox<T>
+    public unsafe class RefBox<T>(T* ptr) where T : unmanaged
     {
-        private T* _ptr;
-
-        public RefBox(ref T value)
-        {
-            fixed (T* ptr = &value)
-            {
-                _ptr = ptr;
-            }
-        }
+        private readonly T* _ptr = ptr;
 
         public T Value
         {

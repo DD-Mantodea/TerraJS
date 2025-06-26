@@ -12,13 +12,37 @@ namespace TerraJS.Global
     {
         public override void AddRecipes()
         {
-            TerraJS.GlobalAPI.Event.InvokeEvent("AddRecipes", []);
-            base.AddRecipes();
+            TerraJS.GlobalAPI.Event.InvokeEvent("AddRecipes");
         }
 
-        public override void UpdateInventory(Item item, Player player)
+        public override void SetDefaults(Item item)
         {
-            base.UpdateInventory(item, player);
+            TerraJS.GlobalAPI.Event.Item.InvokeEvent("SetDefaults", item);
+        }
+
+        public override void RightClick(Item item, Player player)
+        {
+            TerraJS.GlobalAPI.Event.Item.InvokeEvent("RightClick", item, player);
+        }
+
+        public override bool CanRightClick(Item item)
+        {
+            return TerraJS.GlobalAPI.Event.Item.InvokeBoolEvent("CanRightClick", item).Value;
+        }
+
+        public override bool ConsumeItem(Item item, Player player)
+        {
+            return TerraJS.GlobalAPI.Event.Item.InvokeBoolEvent("ConsumeItem", item).Value;
+        }
+
+        public override bool? UseItem(Item item, Player player)
+        {
+            return TerraJS.GlobalAPI.Event.Item.InvokeBoolEvent("UseItem", item, player);
+        }
+
+        public override bool CanUseItem(Item item, Player player)
+        {
+            return TerraJS.GlobalAPI.Event.Item.InvokeBoolEvent("CanUseItem", item, player).Value;
         }
     }
 }

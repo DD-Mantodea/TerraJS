@@ -21,6 +21,8 @@ This mod is just begin so only has few functions and lots of bugs. Plz send issu
 
 `> Command completing and structured command register.`
 
+`> Feature like ProbeJS that can export type infos and method infos to .d.ts file for VSCode.`
+
 #### ➕ Contents Under Develop
 
 `> Quest tree and quest tree UI.`
@@ -30,6 +32,8 @@ This mod is just begin so only has few functions and lots of bugs. Plz send issu
 ## ✨ Usage
 
 After the first loading, the mod will create a directory named `TerraJS` under `Mods` directory, which contains two child directories named `Scripts` and `Textures`.
+
+Before modding, you can type `/terrajs detect` in the game's chatbox to start the detector, when it shows `[Detector] Collect complete`, the `.d.ts` file is done for VSCode.
 
 Create a  `.js` file in the `Scripts` directory, then you can start the first step!
 
