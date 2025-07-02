@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Dynamic;
 using System.IO;
 using System.Linq;
+using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
@@ -20,7 +21,11 @@ namespace TerraJS.DetectorJS
     {
         public static void Detect()
         {
-            var allTypes = new List<Type>();
+            List<Type> allTypes = [
+                ..typeof(Detector).Assembly.GetTypes(), 
+                ..typeof(Main).Assembly.GetTypes(), 
+                ..typeof(Vector2).Assembly.GetTypes()
+            ];
 
             BindingUtils.Values.ForEach(i =>
             {
@@ -30,6 +35,8 @@ namespace TerraJS.DetectorJS
                     allTypes.TryAdd(i.Item2.GetType());
                 else allTypes.TryAddRange([.. ((IDictionary<string, object>)i.Item2).Select(o => o.GetType())]);
             });
+
+            allTypes = [..allTypes.Where(t => !t.IsIllegal())];
 
             var task = AsyncTypeCollector.CollectAllRelatedTypesAsync(allTypes);
 

@@ -31,12 +31,15 @@ namespace TerraJS.API.Recipes
             }
         }
 
-        public Recipe[] FindAllRecipe(Func<Recipe, bool> predicate)
+        public Recipe[] FindAllRecipe(Func<Recipe, bool> predicate = null)
         {
+            if (predicate == null)
+                return Main.recipe;
+
             return [.. EnumerableRecipes(predicate)];
         }
 
-        internal override void Reload()
+        internal override void Unload()
         {
         }
     }

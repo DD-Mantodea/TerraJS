@@ -1,12 +1,12 @@
-﻿using Jint.Native;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using TerraJS.API.Commands;
+using Microsoft.Xna.Framework;
 using TerraJS.Extensions;
-using Terraria.Localization;
+using Terraria;
+using Terraria.DataStructures;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
@@ -56,7 +56,6 @@ namespace TerraJS.API.Items
             return (int)itemTypeMethod.MakeGenericMethod(type).Invoke(null, []);
         }
 
-
         public int GetTJSItem(string fullName)
         {
             int itemType = -1;
@@ -66,7 +65,10 @@ namespace TerraJS.API.Items
             return itemType;
         }
 
-        internal override void Reload()
+        public void NewItem(IEntitySource source, Vector2 pos, int type, Vector2 randomBox = default, int stack = 1, bool noBroadcast = false, int prefixGiven = 0, bool noGrabDelay = false, bool reverseLookup = false)
+            => Item.NewItem(source, pos, randomBox, type, stack, noBroadcast, prefixGiven, noGrabDelay, reverseLookup);
+
+        internal override void Unload()
         {
 
         }

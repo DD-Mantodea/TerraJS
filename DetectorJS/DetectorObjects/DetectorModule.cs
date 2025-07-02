@@ -44,8 +44,12 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
                     case MethodInfo method:
                         AddImport(method.ReturnType);
+
                         foreach (var p in method.GetParameters())
                             AddImport(p.ParameterType);
+
+                        if (method.IsGenericMethod)
+                            AddImport(typeof(Type));
                         break;
 
                     default:
@@ -56,7 +60,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public void AddClass(Type type)
         {
-            if (type.IsArray || (type.IsGenericType && !type.IsGenericTypeDefinition) || type.IsGenericTypeParameter)
+            if (type.IsArray || (type.IsGenericType && !type.IsGenericTypeDefinition) || type.IsGenericTypeParameter || type.IsIllegal())
                 return;
 
             Classes.TryAdd(new(type));
@@ -64,7 +68,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public void AddImport(Type type)
         {
-            if (type.IsPointer || type.IsByRef || type.IsGenericParameter)
+            if (type.IsArray || type.IsIllegal())
                 return;
 
             var import = new DetectorImport(Type2ImportName(type), type.Namespace);
@@ -102,13 +106,6 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             foreach (var import in Imports)
                 ret.AppendLine(import.Serialize());
-
-            if (ModuleName == "TerraJS.API.Events")
-            {
-                ret.AppendLine("type CommonEvent = " + string.Join(" | ", TerraJS.GlobalAPI.Event.Events.Keys.Select(s => $"\"{s}\"")));
-                ret.AppendLine("type ItemEvent = " + string.Join(" | ", TerraJS.GlobalAPI.Event.Item.Events.Keys.Select(s => $"\"{s}\"")));
-                ret.AppendLine("type TileEvent = " + string.Join(" | ", TerraJS.GlobalAPI.Event.Tile.Events.Keys.Select(s => $"\"{s}\"")));
-            }
 
             foreach (var clazz in Classes)
                 ret.AppendLine(clazz.Serialize());

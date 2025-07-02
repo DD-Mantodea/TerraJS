@@ -75,7 +75,7 @@ namespace TerraJS.API.Projectiles
 
             if(_texturePath != null)
             {
-                TerraJS.GlobalAPI.Event.OnEvent("PostSetupContent", () =>
+                TerraJS.GlobalAPI.Event.PostSetupContent(() =>
                 {
                     TextureAssets.Item[JSProj.Type] = TJSMod.Assets.CreateUntracked<Texture2D>(File.OpenRead(_texturePath), _texturePath);
                 });

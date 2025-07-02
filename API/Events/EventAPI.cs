@@ -1,206 +1,145 @@
-﻿using Jint;
-using Jint.Native;
-using MonoMod.Utils;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
-using TerraJS.API.Events.BasicEvents;
+using TerraJS.Attributes;
 using TerraJS.Utils;
 using Terraria;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Events
 {
-    public class EventAPI : BaseAPI
+    public class BaseEventAPI : BaseAPI
     {
-        public Dictionary<string, TJSEvent> Events = new Dictionary<string, TJSEvent>
+        internal override void Unload()
         {
-            ["ModLoad"] = new(),
-            ["PostSetupContent"] = new(),
-        };
+            GetType().GetFields().Where(f => typeof(Delegate).IsAssignableFrom(f.FieldType))
+                .ToList().ForEach(f => f.SetValue(this, null));
+        }
+    }
 
+    public class EventAPI : BaseEventAPI
+    {
         public ItemEventAPI Item = new();
 
         public TileEventAPI Tile = new();
 
-        public EventAPI()
+        public RecipeEventAPI Recipe = new();
+
+        [HideToJS]
+        public Action ModLoadEvent;
+
+        [HideToJS]
+        public Action InGameReloadEvent;
+
+        [HideToJS]
+        public Action PostSetupContentEvent;
+
+        [EventInfo([])]
+        public void ModLoad(Action @delegate) => ModLoadEvent += @delegate;
+
+        [EventInfo([])]
+        public void InGameReload(Action @delegate) => InGameReloadEvent += @delegate;
+
+        [EventInfo([])]
+        public void PostSetupContent(Action @delegate) => PostSetupContentEvent += @delegate;
+
+        internal override void Unload()
         {
-            RecipeEvents();
-            ItemEvents();
-            TileEvents();
-            LocalizationEvents();
-        }
-        public void NewEvent(string name) => Events.Add(name, new TJSEvent());
+            base.Unload();
 
-        public void NewBoolEvent(string name, bool defaultValue) => Events.Add(name, new TJSBoolEvent(defaultValue));
-        private void DefaultEventHook(Type hookType, string methodName, string eventName)
-        {
-            var method = hookType.GetMethod(methodName);
-
-            var args = RegistryUtils.Parameters2Types(method.GetParameters()).ToList();
-
-            if (!method.IsStatic)
-                args.Insert(0, hookType);
-
-            string actionTypeName = args.Count switch
-            {
-                0 => "System.Action",
-                _ => $"System.Action`{args.Count}"
-            };
-
-            var bindType = Type.GetType(actionTypeName).MakeGenericType([.. args]);
-
-            var invokeEvent = GetType().GetMethod("InvokeEvent", BindingFlags.NonPublic | BindingFlags.Instance);
-
-            var argsExpr = new List<Expression>();
-
-            var paramsExpr = new List<ParameterExpression>();
-
-            for (int i = 0; i < args.Count; i++)
-            {
-                var parameter = Expression.Parameter(args[i]);
-
-                if (!args[i].IsValueType)
-                    argsExpr.Add(parameter);
-                else
-                {
-                    argsExpr.Add(Expression.Convert(parameter, typeof(object)));
-                }
-
-                paramsExpr.Add(parameter);
-            }
-
-            var argArrayExpr = Expression.NewArrayInit(typeof(object), argsExpr);
-
-            var globalAPI = Expression.Field(null, typeof(TerraJS), "GlobalAPI");
-
-            var eventAPI = Expression.Field(globalAPI, typeof(GlobalAPI), "Event");
-
-            var callExpr = Expression.Call(eventAPI, invokeEvent, Expression.Constant(eventName), argArrayExpr);
-
-            var lambdaExpr = Expression.Lambda(callExpr, paramsExpr);
-
-            var str = lambdaExpr.ToString();
-
-            var @delegate = lambdaExpr.Compile();
-
-            var del = @delegate.Method.CreateDelegate(bindType);
-
-            MonoModHooks.Add(method, @delegate);
-        }
-
-        private void RecipeEvents()
-        {
-            NewEvent("AddRecipes");
-            NewEvent("PostAddRecipes");
-        }
-
-        private void ItemEvents()
-        {
-            Item.NewEvent("UpdateInventory");
-            Item.NewEvent("SetDefaults");
-            Item.NewEvent("RightClick");
-            Item.NewBoolEvent("CanRightClick", false);
-            Item.NewBoolEvent("UseItem", null);
-            Item.NewBoolEvent("CanUseItem", true);
-            Item.NewBoolEvent("ConsumeItem", true);
-        }
-
-        private void TileEvents()
-        {
-            Tile.NewBoolEvent("CanPlaceTile", true);
-            Tile.NewEvent("PlaceTile");
-            Tile.NewBoolEvent("CanBreakTile", true);
-            Tile.NewEvent("BreakTile");
-        }
-
-        private void LocalizationEvents()
-        {
-            NewEvent("TranslationModify");
-        }
-
-        public void InvokeEvent(string eventName, params object[] args)
-        {
-            if (!Events.TryGetValue(eventName, out TJSEvent @event)) return;
-
-            @event.Invoke(args);
-        }
-
-        public bool? InvokeBoolEvent(string eventName, params object[] args)
-        {
-            if (!Events.TryGetValue(eventName, out TJSEvent @event)) 
-                return false;
-
-            if(@event is TJSBoolEvent boolEvent)
-                return boolEvent.Invoke(args);
-
-            return false;
-        }
-
-        public void OnEvent(string eventName, Delegate @delegate)
-        {
-            if (!Events.TryGetValue(eventName, out TJSEvent @event)) return;
-
-            @event.AddEventHandler(@delegate);
-        }
-
-        internal override void Reload()
-        {
-            foreach(var @event in Events.Values)
-            {
-                @event.ClearEventHandlers();
-            }
-
-            Item.Reload();
-            Tile.Reload();
+            Item.Unload();
+            Tile.Unload();
+            Recipe.Unload();
         }
     }
 
-    public abstract class SubEventAPI : BaseAPI
+    public class ItemEventAPI : BaseEventAPI
     {
-        public Dictionary<string, TJSEvent> Events = [];
+        [HideToJS]
+        public Action<Item, Player> UpdateInventoryEvent;
 
-        public void InvokeEvent(string eventName, params object[] args)
-        {
-            if (!Events.TryGetValue(eventName, out var @event)) return;
+        [HideToJS]
+        public Action<Item> SetDefaultsEvent;
 
-            @event.Invoke(args);
-        }
+        [HideToJS]
+        public Action<Item, Player> RightClickEvent;
 
-        public bool? InvokeBoolEvent(string eventName, params object[] args)
-        {
-            if (!Events.TryGetValue(eventName, out TJSEvent @event))
-                return false;
+        [HideToJS]
+        public Func<Item, bool> CanRightClickEvent;
 
-            if (@event is TJSBoolEvent boolEvent)
-                return boolEvent.Invoke(args);
+        [HideToJS]
+        public Func<Item, Player, bool?> UseItemEvent;
 
-            return false;
-        }
+        [HideToJS]
+        public Func<Item, Player, bool> CanUseItemEvent;
 
-        public void OnEvent(string eventName, Delegate @delegate)
-        {
-            if (!Events.TryGetValue(eventName,out var @event)) return;
+        [HideToJS]
+        public Func<Item, Player, bool> ConsumeItemEvent;
 
-            @event.AddEventHandler(@delegate);
-        }
+        [EventInfo(["item", "player"])]
+        public void UpdateInventory(Action<Item, Player> @delegate) => UpdateInventoryEvent += @delegate;
 
-        public void NewEvent(string name) => Events.Add(name, new TJSEvent());
+        [EventInfo(["item"])]
+        public void SetDefaults(Action<Item> @delegate) => SetDefaultsEvent += @delegate;
 
-        public void NewBoolEvent(string name, bool? defaultValue) => Events.Add(name, new TJSBoolEvent(defaultValue));
+        [EventInfo(["item", "player"])]
+        public void RightClick(Action<Item, Player> @delegate) => RightClickEvent += @delegate;
 
-        internal override void Reload()
-        {
-            foreach (var @event in Events.Values)
-            {
-                @event.ClearEventHandlers();
-            }
-        }
+        [EventInfo(["item"])]
+        public void CanRightClick(Func<Item, bool> @delegate) => CanRightClickEvent += @delegate;
+
+        [EventInfo(["item", "player"])]
+        public void UseItem(Func<Item, Player, bool?> @delegate) => UseItemEvent += @delegate;
+
+        [EventInfo(["item", "player"])]
+        public void CanUseItem(Func<Item, Player, bool> @delegate) => CanUseItemEvent += @delegate;
+
+        [EventInfo(["item", "player"])]
+        public void ConsumeItem(Func<Item, Player, bool> @delegate) => ConsumeItemEvent += @delegate;
     }
 
-    public class ItemEventAPI : SubEventAPI { }
+    public class TileEventAPI : BaseEventAPI
+    {
+        [HideToJS]
+        public Action<int, int, int, Item> PlaceTileEvent;
 
-    public class TileEventAPI : SubEventAPI { }
+        [HideToJS]
+        public Func<int, int, int, bool> CanPlaceTileEvent;
+
+        [HideToJS]
+        public Action<int, int, int, RefBox<bool>, RefBox<bool>, RefBox<bool>> BreakTileEvent;
+
+        [HideToJS]
+        public Func<int, int, int, RefBox<bool>, bool> CanBreakTileEvent;
+
+        [EventInfo(["x", "y", "type", "item"])]
+        public void PlaceTile(Action<int, int, int, Item> @delegate) => PlaceTileEvent += @delegate;
+
+        [EventInfo(["x", "y", "type"])]
+        public void CanPlaceTile(Func<int, int, int, bool> @delegate) => CanPlaceTileEvent += @delegate;
+
+        [EventInfo(["x", "y", "type", "fail", "effectOnly", "noItem"])]
+        public void BreakTile(Action<int, int, int, RefBox<bool>, RefBox<bool>, RefBox<bool>> @delegate)
+            => BreakTileEvent += @delegate;
+
+        [EventInfo(["x", "y", "type", "blockDamaged"])]
+        public void CanBreakTile(Func<int, int, int, RefBox<bool>, bool> @delegate) => CanBreakTileEvent += @delegate;
+    }
+
+    public class RecipeEventAPI : BaseEventAPI
+    {
+        [HideToJS]
+        public Action AddRecipesEvent;
+
+        [HideToJS]
+        public Action PostAddRecipesEvent;
+
+        [EventInfo([])]
+        public void AddRecipes(Action @delegate) => AddRecipesEvent += @delegate;
+
+        [EventInfo([])]
+        public void PostAddRecipes(Action @delegate) => PostAddRecipesEvent += @delegate;
+    }
 }

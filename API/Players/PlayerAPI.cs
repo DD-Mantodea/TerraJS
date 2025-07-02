@@ -11,7 +11,7 @@ namespace TerraJS.API.Players
     {
         public Item[] GetPlayerAccessories(Player player) => player.armor[3..9];
 
-        internal override void Reload()
+        internal override void Unload()
         {
         }
     }

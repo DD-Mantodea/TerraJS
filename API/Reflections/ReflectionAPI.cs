@@ -10,6 +10,6 @@ namespace TerraJS.API.Reflections
     {
         public object CreateInstance(Type type, params object[] args) => Activator.CreateInstance(type, args);
 
-        internal override void Reload() { }
+        internal override void Unload() { }
     }
 }

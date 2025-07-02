@@ -83,7 +83,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
         public override string Serialize()
         {
             if (Object.Item2 is Type type)
-                return $"type {Object.Item1} = {Type2ClassName(type)}";
+                return $"class {Object.Item1} extends {Type2ClassName(type)} {{}}";
             else if (Object.Item2 is not ExpandoObject)
                 return $"const {Object.Item1}: {Type2ClassName(Object.Item2.GetType())}";
 

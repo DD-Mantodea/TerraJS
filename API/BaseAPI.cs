@@ -8,6 +8,6 @@ namespace TerraJS.API
 {
     public abstract class BaseAPI
     {
-        internal abstract void Reload();
+        internal abstract void Unload();
     }
 }

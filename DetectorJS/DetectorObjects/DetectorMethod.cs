@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Events;
+using TerraJS.Attributes;
 using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
@@ -17,47 +18,23 @@ namespace TerraJS.DetectorJS.DetectorObjects
         {
             var parameters = Method.GetParameters();
 
-            string paramTexts = "";
+            var eventInfo = Method.GetCustomAttribute<EventInfoAttribute>();
 
-            var nameList = new List<string>
+            var paramTexts = string.Join(", ", Method.GetParameters().Select(p =>
             {
-                "OnEvent",
-                "InvokeBoolEvent",
-                "InvokeEvent"
-            };
+                var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
 
-            if (Method.ReflectedType == typeof(EventAPI) || Method.ReflectedType.IsSubclassOf(typeof(SubEventAPI)))
+                return $"{p.Name}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
+            }));
+
+            if (Method.IsGenericMethod)
             {
-                bool replaceEvent = nameList.Contains(Method.Name);
+                paramTexts = "type: Type, " + paramTexts;
 
-                var prefix = method.ReflectedType switch
-                {
-                    Type t when t == typeof(EventAPI) => "Common",
-                    Type t when t == typeof(ItemEventAPI) => "Item",
-                    Type t when t == typeof(TileEventAPI) => "Tile",
-                    _ => ""
-                };
-
-                paramTexts = string.Join(", ", method.GetParameters().Select(p =>
-                {
-                    var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
-
-                    if(replaceEvent && p.Name == "eventName")
-                        return $"{p.Name}: {prefix}Event";
-
-                    return $"{p.Name}: {Type2ClassName(p.ParameterType)}{@default}";
-                }));
+                return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"({paramTexts}): Object";
             }
-            else
-            {
-                paramTexts = string.Join(", ", method.GetParameters().Select(p =>
-                {
-                    var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
 
-                    return $"{p.Name}: {Type2ClassName(p.ParameterType)}{@default}";
-                }));
-            }
-            return $"{(method.IsStatic ? "static " : "")}\"{method.Name}\"({paramTexts}): {Type2ClassName(method.ReturnType)}";
+            return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";
         }
 
         public string Default2String(object @default)
@@ -69,6 +46,12 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
                 case null:
                     return "null";
+
+                case false:
+                    return "false";
+
+                case true:
+                    return "true";
 
                 default:
                     return @default.ToString();

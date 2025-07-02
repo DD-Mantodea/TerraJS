@@ -17,7 +17,7 @@ namespace TerraJS.UI.Components
             bool textHorizontalMiddle = false, bool textVerticalMiddle = false, Color? fontColor = null, string splitCharacter = "",
             Vector2 relativePos = default)
         {
-            Font = TerraJS.Instance.FontManager[fontID, fontSize];
+            Font = TerraJS.FontManager[fontID, fontSize];
 
             Text = text;
 

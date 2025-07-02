@@ -31,7 +31,7 @@ namespace TerraJS.API.Tiles
             }
         }
 
-        internal override void Reload()
+        internal override void Unload()
         {
         }
     }

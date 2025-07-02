@@ -9,15 +9,13 @@ using Terraria.Localization;
 using System.Linq;
 using Terraria;
 using TerraJS.Utils;
-using Terraria.UI;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.Managers;
-using System.Collections.Generic;
 using TerraJS.Attributes;
 using Terraria.ModLoader.Core;
 using TerraJS.DetectorJS;
+using Jint.Native;
+using System.Threading;
 
 namespace TerraJS
 {
@@ -31,7 +29,9 @@ namespace TerraJS
 
         public static TranslationAPI TranslationAPI;
 
-        public FontManager FontManager = new();
+        public static FontManager FontManager = new();
+
+        public static bool IsLoading => (bool)typeof(ModLoader).GetField("isLoading").GetValue(null);
         public static string ModPath => Path.Combine(Main.SavePath, "Mods", "TerraJS");
 
         public override void Load()
@@ -42,7 +42,7 @@ namespace TerraJS
 
             LoadAllScripts();
 
-            GlobalAPI.Event.InvokeEvent("ModLoad");
+            GlobalAPI.Event.ModLoadEvent?.Invoke();
 
             CustomLoad();
 
@@ -95,13 +95,20 @@ namespace TerraJS
 
         public override void PostSetupContent()
         {
-            GlobalAPI.Event.InvokeEvent("PostSetupContent");
+            GlobalAPI.Event.PostSetupContentEvent?.Invoke();
         }
 
         public void InitializeEngine()
         {
-            Engine = new Engine(cfg => {
-                cfg.AllowClr();
+            Assembly[] assemblies = [..AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.FullName.Contains("Steam"))];
+
+            Engine = new Engine(option => {
+                option.AllowClr(assemblies);
+                option.CatchClrExceptions(exception =>
+                {
+                    Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
+                    return true;
+                });
             });
 
             GlobalAPI = new();
@@ -118,7 +125,7 @@ namespace TerraJS
 
             BindTileThings();
 
-            BindClasses();
+            BindInnerMethods();
         }
 
         private void BindItemThings()
@@ -139,15 +146,11 @@ namespace TerraJS
             BindingUtils.BindStaticOrEnumOrConst("TileID", typeof(TileID));
         }
 
-        private void BindClasses()
+        private void BindInnerMethods()
         {
-            foreach (var type in AssemblyManager.GetLoadableTypes(GetType().Assembly))
-            {
-                if (type.GetCustomAttribute<BindToEngineAttribute>() is { })
-                {
-                    BindingUtils.BindStaticOrEnumOrConst(type.Name, type);
-                }
-            }
+            JsValue require(string path) => Engine.Evaluate($"importNamespace(\"{path}\")");
+
+            Engine.SetValue("require", require);
         }
 
         public static void CreateFolderIfNotExist(string path) 
@@ -177,9 +180,32 @@ namespace TerraJS
 
         public void ReloadAllScripts()
         {
-            GlobalAPI.Reload();
+            var assemblies = AppDomain.CurrentDomain.GetAssemblies();//.Where(a => !a.FullName.Contains("Steam")).ToArray();
 
-            TranslationAPI.Reload();
+            Engine = new Engine(option => {
+                option.AllowClr(assemblies);
+                option.CatchClrExceptions(exception =>
+                {
+                    Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
+                    return true;
+                });
+            });
+
+            BindingUtils.BindInstance("TerraJS", GlobalAPI);
+
+            BindingUtils.BindStaticOrEnumOrConst("Main", typeof(Main));
+
+            BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
+
+            BindItemThings();
+
+            BindTileThings();
+
+            BindInnerMethods();
+
+            GlobalAPI.Unload();
+
+            TranslationAPI.Unload();
 
             LoadAllScripts();
         }
@@ -223,8 +249,7 @@ namespace TerraJS
 
         public override void Unload()
         {
-            foreach(var i in GlobalAPI.Event.Events.Values)
-                i.Delegates.Clear();
+            GlobalAPI.Unload();
 
             base.Unload();
         }

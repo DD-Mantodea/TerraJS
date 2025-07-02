@@ -10,10 +10,6 @@ namespace TerraJS.Managers
     {
         internal Dictionary<string, Dictionary<string, T>> LoadTargets = new();
 
-        public event EventHandler PreLoad;
-
-        public event EventHandler PostLoad;
-
         public virtual void Load()
         {
             GetType().GetFields()
@@ -23,16 +19,10 @@ namespace TerraJS.Managers
                     var a = t.GetValue(this);
                     LoadTargets.Add(t.Name, t.GetValue(this) as Dictionary<string, T>);
                 });
-            PreLoad?.Invoke(LoadTargets, new EventArgs());
             foreach (var target in LoadTargets)
-            {
                 LoadOne(target.Key, target.Value);
-                PostLoad?.Invoke(target, new EventArgs());
-            }
         }
 
         public abstract void LoadOne(string dir, Dictionary<string, T> dictronary);
-
-        public abstract bool ExistAsset(string path);
     }
 }

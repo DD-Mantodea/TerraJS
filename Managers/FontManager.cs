@@ -14,11 +14,6 @@ namespace TerraJS.Managers
 
         public TerraJS Mod => TerraJS.Instance;
 
-        public override void Load()
-        {
-            base.Load();
-        }
-
         public override void LoadOne(string dir, Dictionary<string, FontSystem> dictronary)
         {
             foreach (var file in Mod.GetFileNames().Where(name => name.StartsWith(dir)))
@@ -33,7 +28,5 @@ namespace TerraJS.Managers
         {
             get => Fonts[index].GetFont(size);
         }
-
-        public override bool ExistAsset(string path) => Fonts.ContainsKey(path);
     }
 }

@@ -154,7 +154,7 @@ namespace TerraJS.API.Commands
             return true;
         }
 
-        public CommandRegistry? CreateCommandRegistry(string content, string name = "", string @namespace = "")
+        public CommandRegistry CreateCommandRegistry(string content, string name = "", string @namespace = "")
         {
             //只允许拉丁字母?
 
@@ -174,7 +174,7 @@ namespace TerraJS.API.Commands
             return registry;
         }
 
-        internal override void Reload()
+        internal override void Unload()
         {
 
         }

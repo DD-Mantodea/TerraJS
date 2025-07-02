@@ -1,6 +1,6 @@
 displayName = TerraJS
 author = Mantodea, 错数螺线
-version = 1.0.1.0
+version = 1.0.2.1
 homepage = https://github.com/DD-Mantodea/TerraJS
 includeSource = true
 dllReferences = Acornima,Jint,FontStashSharp.FNA,FontStashSharp.Base,Cyotek.Drawing.BitmapFont,FontStashSharp.Rasterizers.StbTrueTypeSharp,StbImageSharp,StbTrueTypeSharp

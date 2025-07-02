@@ -43,7 +43,7 @@ namespace TerraJS.API
             return key;
         }
 
-        internal override void Reload()
+        internal override void Unload()
         {
 
         }

@@ -31,8 +31,6 @@ namespace TerraJS.DetectorJS.DetectorObjects
                     ret.AppendLine(i.Serialize());
             }
 
-            ret.AppendLine("constructor()");
-
             ret.AppendLine("}");
 
             return ret.ToString();

@@ -4,6 +4,11 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using TerraJS.Attributes;
+using TerraJS.Extensions;
+using Terraria;
+using Terraria.DataStructures;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -13,14 +18,23 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public override string Serialize()
         {
+            if (MemberInfo.GetCustomAttribute<HideToJSAttribute>() != null)
+                return "";
+
             switch (MemberInfo)
             {
                 case PropertyInfo property:
+                    if (property.GetMethod == null || property.PropertyType.IsIllegal())
+                        return "";
+                    
                     return $"{(property.SetMethod == null ? "readonly " : "")}" +
                         $"{(property.GetMethod.IsStatic ? "static " : "")}" +
                         $"\"{MemberInfo.Name}\": {Type2ClassName(property.PropertyType)}";
 
                 case FieldInfo field:
+                    if (field.FieldType.IsIllegal())
+                        return "";
+
                     return $"{(field.IsInitOnly ? "readonly " : "")}" +
                         $"{(field.IsStatic ? "static " : "")}" +
                         $"\"{MemberInfo.Name}\": {Type2ClassName(field.FieldType)}";
@@ -28,8 +42,12 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 case MethodInfo method:
                     return new DetectorMethod(method).Serialize();
 
+                case ConstructorInfo constructor:
+                    return new DetectorConstructor(constructor).Serialize();
+
                 default:
                     return "";
+
             }
         }
     }

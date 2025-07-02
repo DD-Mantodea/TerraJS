@@ -130,7 +130,7 @@ namespace TerraJS.API.Items
 
             if (_texturePath != "")
             {
-                TerraJS.GlobalAPI.Event.OnEvent("PostSetupContent", () =>
+                TerraJS.GlobalAPI.Event.PostSetupContent(() =>
                 {
                     TextureAssets.Item[JSItem.Type] = TJSMod.Assets.CreateUntracked<Texture2D>(File.OpenRead(_texturePath), _texturePath);
                 });

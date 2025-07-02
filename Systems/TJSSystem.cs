@@ -11,7 +11,7 @@ namespace TerraJS.Systems
     {
         public override void PostAddRecipes()
         {
-            TerraJS.GlobalAPI.Event.InvokeEvent("PostAddRecipes");
+            TerraJS.GlobalAPI.Event.Recipe.PostAddRecipesEvent?.Invoke();
         }
     }
 }

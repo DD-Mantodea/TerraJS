@@ -8,25 +8,28 @@ namespace TerraJS.Global
     {
         public override void PlaceInWorld(int x, int y, int type, Item item)
         {
-            TerraJS.GlobalAPI.Event.Tile.InvokeEvent("PlaceTile", x, y, type, item);
+            TerraJS.GlobalAPI.Event.Tile.PlaceTileEvent?.Invoke(x, y, type, item);
         }
 
         public override bool CanPlace(int x, int y, int type)
         {
-            return TerraJS.GlobalAPI.Event.Tile.InvokeBoolEvent("CanPlaceTile", x, y, type).Value;
+            return TerraJS.GlobalAPI.Event.Tile.CanPlaceTileEvent?.Invoke(x, y, type) ?? true;
         }
 
         public override void KillTile(int x, int y, int type, ref bool fail, ref bool effectOnly, ref bool noItem)
         {
             fixed (bool* pFail = &fail, pEffectOnly = &effectOnly, pNoItem = &noItem)
             {
-                TerraJS.GlobalAPI.Event.Tile.InvokeEvent("BreakTile", x, y, type, new RefBox<bool>(pFail), new RefBox<bool>(pEffectOnly), new RefBox<bool>(pNoItem));
+                TerraJS.GlobalAPI.Event.Tile.BreakTileEvent?.Invoke(x, y, type, new RefBox<bool>(pFail), new RefBox<bool>(pEffectOnly), new RefBox<bool>(pNoItem));
             }
         }
 
         public override bool CanKillTile(int x, int y, int type, ref bool blockDamaged)
         {
-            return TerraJS.GlobalAPI.Event.Tile.InvokeBoolEvent("CanBreakTile", x, y, type).Value;
+            fixed (bool* pBlockDamaged = &blockDamaged)
+            {
+                return TerraJS.GlobalAPI.Event.Tile.CanBreakTileEvent?.Invoke(x, y, type, new RefBox<bool>(pBlockDamaged)) ?? true;
+            }
         }
     }
 }

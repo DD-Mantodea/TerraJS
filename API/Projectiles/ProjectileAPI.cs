@@ -65,7 +65,7 @@ namespace TerraJS.API.Projectiles
             return projType;
         }
 
-        internal override void Reload()
+        internal override void Unload()
         {
         }
     }

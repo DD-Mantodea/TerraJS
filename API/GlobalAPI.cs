@@ -44,16 +44,16 @@ namespace TerraJS.API
 
         public void Warn(object obj) => TerraJS.Instance.Logger.Warn(obj);
 
-        internal override void Reload()
+        internal override void Unload()
         {
-            Command.Reload();
-            Event.Reload();
-            Item.Reload();
-            Recipe.Reload();
-            Projectile.Reload();
-            Tile.Reload();
-            Player.Reload();
-            Reflection.Reload();
+            Command.Unload();
+            Event.Unload();
+            Item.Unload();
+            Recipe.Unload();
+            Projectile.Unload();
+            Tile.Unload();
+            Player.Unload();
+            Reflection.Unload();
         }
     }
 }

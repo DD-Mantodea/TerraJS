@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using TerraJS.Extensions;
 
 namespace TerraJS.DetectorJS
 {
@@ -26,7 +27,7 @@ namespace TerraJS.DetectorJS
             }
 
             await Task.WhenAll(tasks);
-            return [.. collectedTypes];
+            return [.. collectedTypes.Where(t => !t.IsIllegal())];
         }
 
         private static async Task ProcessTypeAsync(Type type,

@@ -22,7 +22,7 @@ namespace TerraJS.UI.Components
             CanClick = true;
             BackgroundColor = backgroundColor ?? Color.Transparent;
             Text = text;
-            Font = fontID == "" ? TerraJS.Instance.FontManager["MouseText", fontSize] : TerraJS.Instance.FontManager[fontID, fontSize];
+            Font = fontID == "" ? TerraJS.FontManager["MouseText", fontSize] : TerraJS.FontManager[fontID, fontSize];
             TextHorizontalMiddle = textHorizontalMiddle;
             TextVerticalMiddle = textVerticalMiddle;
             DrawShadow = drawShadow;
