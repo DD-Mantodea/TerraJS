@@ -3,10 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Events;
-using TerraJS.Extensions;
-using Terraria;
+using TerraJS.Contents.Extensions;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -52,9 +49,10 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 var target = Members.First(t => t.MemberInfo.Name == info.Name);
 
                 if (target.MemberInfo.DeclaringType != Type)
+                {
                     target.MemberInfo = info;
-
-                return;
+                    return;
+                }
             }
 
             Members.TryAdd(new(info));

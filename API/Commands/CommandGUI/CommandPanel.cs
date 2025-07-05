@@ -2,18 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
-using TerraJS.Attributes;
-using TerraJS.UI.Components.Containers;
-using TerraJS.Extensions;
 using Terraria.ModLoader;
 using Terraria;
 using System.Reflection;
 using Microsoft.Xna.Framework.Input;
 using Terraria.GameInput;
-using Terraria.GameContent;
-using TerraJS.UI.Components;
-using TerraJS.UI;
+using TerraJS.Contents.UI;
+using TerraJS.Contents.Extensions;
+using TerraJS.Contents.UI.Components.Containers;
+using TerraJS.Contents.Attributes;
+using TerraJS.Contents.UI.Components;
 
 namespace TerraJS.API.Commands.CommandGUI
 {
@@ -109,7 +107,7 @@ namespace TerraJS.API.Commands.CommandGUI
 
                     var match = Args.Length == 0 ? "" : Args[0];
 
-                    var dismatch = match.Length == 0 ? key : key.Replace(match, "");
+                    var dismatch = key.Substring(match.Length);
 
                     if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText(Args.Length <= 1 ? [] : Args[1..], out var argsText))
                         text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + argsText;

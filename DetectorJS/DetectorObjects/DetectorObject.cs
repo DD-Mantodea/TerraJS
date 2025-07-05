@@ -1,18 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using TerraJS.Attributes;
-using TerraJS.Extensions;
-using TerraJS.Utils;
+using TerraJS.Contents.Utils;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
-    [Indetectable]
     public abstract class DetectorObject
     {
         public abstract string Serialize();
 
-        public string Type2ImportName(Type type)
+        public static string Type2ImportName(Type type)
         {
             if (type.IsPrimitive || type == typeof(string))
                 return Type2PrimitiveName(type);
@@ -31,7 +28,32 @@ namespace TerraJS.DetectorJS.DetectorObjects
             return name;
         }
 
-        public string Type2ClassName(Type type, string[] nameData = null, bool asParameter = false)
+        public static string Type2ParameterName(Type type)
+        {
+            if (type.IsPrimitive || type == typeof(string))
+                return Type2PrimitiveName(type);
+
+            var name = type.Name;
+
+            if (type.IsGenericType)
+                name = name.Split("`")[0] + type.GetGenericArguments().Length;
+
+            if (type.IsNested && !type.IsGenericTypeParameter)
+                name = $"{Type2ImportName(type.DeclaringType)}${name}";
+
+            if (type.IsArray)
+            {
+                var element = type.GetElementType();
+
+                name = Type2ParameterName(element);
+
+                name += "s";
+            }
+
+            return name;
+        }
+
+        public static string Type2ClassName(Type type, string[] nameData = null, bool asParameter = false)
         {
             if (type.IsPrimitive || type == typeof(string))
                 return Type2PrimitiveName(type);
@@ -42,31 +64,34 @@ namespace TerraJS.DetectorJS.DetectorObjects
             {
                 name = name.Split("`")[0];
 
-                if(name == "Func")
+                if (asParameter)
                 {
-                    var genericArguments = type.GetGenericArguments().ToList();
+                    if (name == "Func")
+                    {
+                        var genericArguments = type.GetGenericArguments().ToList();
 
-                    genericArguments.RemoveAt(genericArguments.Count - 1);
+                        genericArguments.RemoveAt(genericArguments.Count - 1);
 
-                    var index = 0;
+                        var index = 0;
 
-                    var args = string.Join(", ", [.. genericArguments.Select(type => {
-                        return $"{(nameData == null ? type.Name : nameData[index++])}: {Type2ClassName(type)}";
+                        var args = string.Join(", ", [.. genericArguments.Select(type => {
+                        return $"{(nameData == null ? Type2ParameterName(type) : nameData[index++])}: {Type2ClassName(type)}";
                     })]);
 
-                    name = $"({args}) => {Type2ClassName(type.GetGenericArguments().Last())}";
-                }
-                else if (name == "Action")
-                {
-                    var genericArguments = type.GetGenericArguments().ToList();
+                        name = $"({args}) => {Type2ClassName(type.GetGenericArguments().Last())}";
+                    }
+                    else if (name == "Action")
+                    {
+                        var genericArguments = type.GetGenericArguments().ToList();
 
-                    var index = 0;
+                        var index = 0;
 
-                    var args = string.Join(", ", [.. genericArguments.Select(type => {
-                        return $"{(nameData == null ? type.Name : nameData[index++])}: {Type2ClassName(type)}";
+                        var args = string.Join(", ", [.. genericArguments.Select(type => {
+                        return $"{(nameData == null ? Type2ParameterName(type) : nameData[index++])}: {Type2ClassName(type)}";
                     })]);
 
-                    name = $"({args}) => void";
+                        name = $"({args}) => void";
+                    }
                 }
                 else
                 {
@@ -92,7 +117,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             return name;
         }
 
-        public string Type2PrimitiveName(Type type)
+        public static string Type2PrimitiveName(Type type)
         {
             List<Type> numberList = [
                 typeof(byte),
@@ -117,6 +142,29 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 return "string";
 
             return type.Name;
+        }
+
+        public static string SpecialNameCheck(string name)
+        {
+            if (name == "function")
+                return "$function";
+
+            if (name == "continue")
+                return "$continue";
+
+            if (name == "default")
+                return "$default";
+
+            if (name == "finally")
+                return "$finally";
+
+            if (name == "break")
+                return "$break";
+
+            if (name == "enum")
+                return "$enum";
+
+            return name;
         }
     }
 }

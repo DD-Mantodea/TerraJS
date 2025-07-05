@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.Xna.Framework;
-using TerraJS.Extensions;
+using TerraJS.Contents.Extensions;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;

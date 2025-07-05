@@ -5,8 +5,8 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml;
-using TerraJS.Attributes;
-using TerraJS.Extensions;
+using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Extensions;
 using Terraria;
 using Terraria.DataStructures;
 
@@ -40,6 +40,10 @@ namespace TerraJS.DetectorJS.DetectorObjects
                         $"\"{MemberInfo.Name}\": {Type2ClassName(field.FieldType)}";
 
                 case MethodInfo method:
+                    foreach (var p in method.GetParameters())
+                        if (p.ParameterType.IsIllegal())
+                            return "";
+
                     return new DetectorMethod(method).Serialize();
 
                 case ConstructorInfo constructor:

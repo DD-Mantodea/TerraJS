@@ -1,15 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using TerraJS.Attributes;
-using TerraJS.Utils;
+using TerraJS.Contents.Utils;
 
 namespace TerraJS.API.Commands.CommandArguments.BasicArguments
 {
-    [BindToEngine]
     public class ConstantArgument(string name, string content, bool isOptional = false) : CommandArgument(name, isOptional)
     {
         public readonly string _content = content;   

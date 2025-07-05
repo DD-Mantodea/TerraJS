@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using TerraJS.Extensions;
+using TerraJS.Contents.Extensions;
 
 namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
 {

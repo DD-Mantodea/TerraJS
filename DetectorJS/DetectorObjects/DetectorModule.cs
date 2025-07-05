@@ -4,8 +4,9 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using TerraJS.API.Commands.CommandArguments;
 using TerraJS.API.Events;
-using TerraJS.Extensions;
+using TerraJS.Contents.Extensions;
 using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
@@ -60,7 +61,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public void AddClass(Type type)
         {
-            if (type.IsArray || (type.IsGenericType && !type.IsGenericTypeDefinition) || type.IsGenericTypeParameter || type.IsIllegal())
+            if (type.IsArray || (type.IsGenericType && !type.IsGenericTypeDefinition) || type.IsGenericTypeParameter)
                 return;
 
             Classes.TryAdd(new(type));

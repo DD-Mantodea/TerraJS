@@ -4,17 +4,10 @@ using System.Dynamic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Ionic.Zlib;
-using Jint.Native;
 using Jint.Runtime;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands.CommandArguments;
-using TerraJS.API.Commands.CommandArguments.BasicArguments;
-using TerraJS.API.Items;
-using TerraJS.Extensions;
-using TerraJS.Utils;
+using TerraJS.Contents.Extensions;
 using Terraria.Localization;
 using Terraria.ModLoader;
 

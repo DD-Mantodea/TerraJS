@@ -6,7 +6,7 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Items;
-using TerraJS.Extensions;
+using TerraJS.Contents.Extensions;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Projectiles

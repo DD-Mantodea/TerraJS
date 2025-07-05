@@ -8,10 +8,10 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using TerraJS.Attributes;
+using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
 using TerraJS.DetectorJS.DetectorObjects;
-using TerraJS.Extensions;
-using TerraJS.Utils;
 using Terraria;
 using Terraria.Localization;
 

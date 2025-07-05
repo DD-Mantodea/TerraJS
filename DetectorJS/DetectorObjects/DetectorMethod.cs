@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Events;
-using TerraJS.Attributes;
+using TerraJS.Contents.Attributes;
 using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
@@ -24,7 +24,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             {
                 var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
 
-                return $"{p.Name}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
+                return $"{SpecialNameCheck(p.Name)}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
             }));
 
             if (Method.IsGenericMethod)

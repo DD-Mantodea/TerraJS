@@ -6,7 +6,10 @@ using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using TerraJS.Extensions;
+using Jint.Runtime;
+using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Extensions;
+using Terraria;
 
 namespace TerraJS.DetectorJS
 {
@@ -25,9 +28,16 @@ namespace TerraJS.DetectorJS
             {
                 tasks.Add(ProcessTypeAsync(type, collectedTypes, processedTypes));
             }
-
             await Task.WhenAll(tasks);
-            return [.. collectedTypes.Where(t => !t.IsIllegal())];
+
+            var resultTypes = collectedTypes.Where(t =>
+            {
+                return !t.IsIllegal() && 
+                t.GetCustomAttribute<HideToJSAttribute>() == null &&
+                !(t.FullName?.Contains("ObjectiveCMarshal") ?? false);
+            });
+
+            return [..resultTypes];
         }
 
         private static async Task ProcessTypeAsync(Type type,

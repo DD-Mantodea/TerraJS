@@ -23,6 +23,8 @@ This mod is just begin so only has few functions and lots of bugs. Plz send issu
 
 `> Feature like ProbeJS that can export type infos and method infos to .d.ts file for VSCode.`
 
+`> Reload JS scripts in game.`
+
 #### ➕ Contents Under Develop
 
 `> Quest tree and quest tree UI.`

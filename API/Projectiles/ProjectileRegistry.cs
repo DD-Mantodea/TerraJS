@@ -8,9 +8,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.API.Items;
+using TerraJS.Assets.Managers;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace TerraJS.API.Projectiles
 {
@@ -31,7 +33,25 @@ namespace TerraJS.API.Projectiles
         {
             if (isEmpty) return this;
 
-            _texturePath = path;
+            _texture.TexturePath = path;
+
+            _texture.TextureType = TextureType.Empty;
+
+            _texture.ID = -1;
+
+            return this;
+        }
+
+        public ProjectileRegistry Texture(TextureType type, int ID)
+        {
+            if (isEmpty) return this;
+
+            _texture.TexturePath = "";
+
+            _texture.TextureType = type;
+
+            _texture.ID = ID;
+
             return this;
         }
 
@@ -73,13 +93,10 @@ namespace TerraJS.API.Projectiles
 
             _tjsInstances.Add(JSProj);
 
-            if(_texturePath != null)
+            TerraJS.GlobalAPI.Event.PostSetupContent(() =>
             {
-                TerraJS.GlobalAPI.Event.PostSetupContent(() =>
-                {
-                    TextureAssets.Item[JSProj.Type] = TJSMod.Assets.CreateUntracked<Texture2D>(File.OpenRead(_texturePath), _texturePath);
-                });
-            }
+                TextureAssets.Projectile[JSProj.Type] = _texture.Get() ?? TextureAssets.Projectile[JSProj.Type];
+            });
         }
     }
 }

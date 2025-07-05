@@ -4,18 +4,17 @@ using System;
 using TerraJS.API;
 using System.IO;
 using System.Reflection;
-using Terraria.ID;
 using Terraria.Localization;
 using System.Linq;
 using Terraria;
-using TerraJS.Utils;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
-using TerraJS.Managers;
-using TerraJS.Attributes;
 using Terraria.ModLoader.Core;
 using TerraJS.DetectorJS;
 using Jint.Native;
-using System.Threading;
+using TerraJS.Assets.Managers;
+using TerraJS.Contents.Utils;
+using TerraJS.Contents.Attributes;
+using Microsoft.Xna.Framework;
 
 namespace TerraJS
 {
@@ -31,9 +30,12 @@ namespace TerraJS
 
         public static FontManager FontManager = new();
 
-        public static bool IsLoading => (bool)typeof(ModLoader).GetField("isLoading").GetValue(null);
+        public static TextureManager TextureManager = new();
+
+        public static bool IsLoading => (bool)typeof(ModLoader).GetField("isLoading", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
         public static string ModPath => Path.Combine(Main.SavePath, "Mods", "TerraJS");
 
+        [HideToJS]
         public override void Load()
         {
             Instance = this;
@@ -44,7 +46,7 @@ namespace TerraJS
 
             GlobalAPI.Event.ModLoadEvent?.Invoke();
 
-            CustomLoad();
+            RegisterCommands();
 
             MonoModHooks.Add(typeof(LanguageManager).GetMethod("GetOrRegister"), RedirectLocalizedText);
             /*
@@ -59,11 +61,24 @@ namespace TerraJS
                 if (mod is not TerraJS) 
                     orig.Invoke(mod, str, cul);
             });
-
-            FontManager.Load();
         }
 
-        public void CustomLoad()
+        [HideToJS]
+        public void Reload()
+        {
+            FontManager.Reload();
+
+            TextureManager.Reload();
+
+            ReloadAllScripts();
+
+            GlobalAPI.Event.InGameReloadEvent?.Invoke();
+
+            Main.NewText("重载完成");
+        }
+
+        [HideToJS]
+        public void RegisterCommands()
         {
             /*
             GlobalAPI.Command.CreateCommandRegistry("tjsquest")
@@ -84,7 +99,7 @@ namespace TerraJS
 
             GlobalAPI.Command.CreateCommandRegistry("terrajs")
                 .NextArgument(new ConstantArgument("feature", "reload"))
-                .Execute((_, _) => ReloadAllScripts())
+                .Execute((_, _) => Reload())
                 .Register();
 
             GlobalAPI.Command.CreateCommandRegistry("terrajs")
@@ -93,14 +108,24 @@ namespace TerraJS
                 .Register();
         }
 
+        [HideToJS]
         public override void PostSetupContent()
         {
+            FontManager.Load();
+
+            TextureManager.Load();
+
             GlobalAPI.Event.PostSetupContentEvent?.Invoke();
         }
 
+        [HideToJS]
         public void InitializeEngine()
         {
-            Assembly[] assemblies = [..AppDomain.CurrentDomain.GetAssemblies().Where(a => !a.FullName.Contains("Steam"))];
+            Assembly[] assemblies = [
+                ..AssemblyManager.GetModAssemblies("TerraJS"), 
+                typeof(ModLoader).Assembly,
+                typeof(Vector2).Assembly
+            ];
 
             Engine = new Engine(option => {
                 option.AllowClr(assemblies);
@@ -115,60 +140,37 @@ namespace TerraJS
 
             TranslationAPI = new();
 
-            BindingUtils.BindInstance("TerraJS", GlobalAPI);
-
-            BindingUtils.BindStaticOrEnumOrConst("Main", typeof(Main));
+            BindingUtils.BindInstance("TJS", GlobalAPI);
 
             BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
 
-            BindItemThings();
-
-            BindTileThings();
+            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
 
             BindInnerMethods();
         }
 
-        private void BindItemThings()
-        {
-            BindingUtils.BindStaticOrEnumOrConst("ItemID", typeof(ItemID));
-
-            BindingUtils.BindStaticOrEnumOrConst("AmmoID", typeof(AmmoID));
-
-            BindingUtils.BindStaticOrEnumOrConst("ItemUseStyleID", typeof(ItemUseStyleID));
-
-            BindingUtils.BindStaticOrEnumOrConst("ItemRarityID", typeof(ItemRarityID));
-
-            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
-        }
-
-        private void BindTileThings()
-        {
-            BindingUtils.BindStaticOrEnumOrConst("TileID", typeof(TileID));
-        }
-
+        [HideToJS]
         private void BindInnerMethods()
         {
-            JsValue require(string path) => Engine.Evaluate($"importNamespace(\"{path}\")");
-
             Engine.SetValue("require", require);
         }
 
+        [HideToJS]
         public static void CreateFolderIfNotExist(string path) 
         {
             if (!Directory.Exists(path)) Directory.CreateDirectory(path);
         }
 
+        [HideToJS]
         public void LoadAllScripts()
         {
-            var modPath = ModPath;
+            CreateFolderIfNotExist(ModPath);
 
-            CreateFolderIfNotExist(modPath);
+            CreateFolderIfNotExist(Path.Combine(ModPath, "Scripts"));
 
-            CreateFolderIfNotExist(Path.Combine(modPath, "Scripts"));
+            CreateFolderIfNotExist(Path.Combine(ModPath, "Textures"));
 
-            CreateFolderIfNotExist(Path.Combine(modPath, "Textures"));
-
-            var files = Directory.GetFiles(Path.Combine(modPath, "Scripts"));
+            var files = Directory.GetFiles(Path.Combine(ModPath, "Scripts"), "*.js", SearchOption.AllDirectories);
 
             foreach (var file in files)
             {
@@ -180,7 +182,11 @@ namespace TerraJS
 
         public void ReloadAllScripts()
         {
-            var assemblies = AppDomain.CurrentDomain.GetAssemblies();//.Where(a => !a.FullName.Contains("Steam")).ToArray();
+            Assembly[] assemblies = [
+                ..AssemblyManager.GetModAssemblies("TerraJS"),
+                typeof(ModLoader).Assembly,
+                typeof(Vector2).Assembly
+            ];
 
             Engine = new Engine(option => {
                 option.AllowClr(assemblies);
@@ -191,15 +197,11 @@ namespace TerraJS
                 });
             });
 
-            BindingUtils.BindInstance("TerraJS", GlobalAPI);
-
-            BindingUtils.BindStaticOrEnumOrConst("Main", typeof(Main));
+            BindingUtils.BindInstance("TJS", GlobalAPI);
 
             BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
 
-            BindItemThings();
-
-            BindTileThings();
+            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
 
             BindInnerMethods();
 
@@ -210,6 +212,7 @@ namespace TerraJS
             LoadAllScripts();
         }
 
+        [HideToJS]
         public LocalizedText RedirectLocalizedText(Func<LanguageManager, string, Func<string>, LocalizedText> orig, LanguageManager instance, string key, Func<string> makeDefaultValue)
         {
             if (key.StartsWith("Mods.TerraJS"))
@@ -221,6 +224,12 @@ namespace TerraJS
             }
             else return orig(instance, key, makeDefaultValue);
         }
+
+        private JsValue require(string path)
+        {
+            return Engine.Evaluate($"importNamespace(\"{path}\")");
+        }
+
         /*
         public void ModifyUpdate(Action<UserInterface, GameTime> orig, UserInterface ui, GameTime time)
         {
@@ -250,6 +259,8 @@ namespace TerraJS
         public override void Unload()
         {
             GlobalAPI.Unload();
+
+            TranslationAPI.Unload();
 
             base.Unload();
         }

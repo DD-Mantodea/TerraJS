@@ -5,8 +5,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.VisualBasic;
-using TerraJS.Extensions;
-using TerraJS.Utils;
+using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
 using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects

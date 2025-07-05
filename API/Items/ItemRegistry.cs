@@ -1,22 +1,11 @@
-﻿using Jint.Native;
-using Microsoft.Xna.Framework.Graphics;
-using System;
+﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Events;
-using TerraJS.Utils;
+using TerraJS.Assets.Managers;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
-using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
 {
@@ -41,51 +30,18 @@ namespace TerraJS.API.Items
         {
             if (isEmpty) return this;
 
-            _texturePath = path;
-            return this;
-        }
-
-        public ItemRegistry SetDefaults(Delegate @delegate)
-        {
-            if (isEmpty) return this;
-
-            _delegates["SetDefaults"] = @delegate;
+            _texture.TexturePath = path;
 
             return this;
         }
 
-        public ItemRegistry UpdateAccessory(Delegate @delegate)
+        public ItemRegistry Texture(TextureType type, int ID)
         {
             if (isEmpty) return this;
 
-            _delegates["UpdateAccessory"] = @delegate;
+            _texture.TextureType = type;
 
-            return this;
-        }
-
-        public ItemRegistry UseItem(Delegate @delegate)
-        {
-            if (isEmpty) return this;
-
-            _delegates["UseItem"] = @delegate;
-
-            return this;
-        }
-
-        public ItemRegistry CanUseItem(Delegate @delegate)
-        {
-            if (isEmpty) return this;
-
-            _delegates["CanUseItem"] = @delegate;
-
-            return this;
-        }
-
-        public ItemRegistry Shoot(Delegate @delegate)
-        {
-            if (isEmpty) return this;
-
-            _delegates["Shoot"] = @delegate;
+            _texture.ID = ID;
 
             return this;
         }
@@ -128,13 +84,10 @@ namespace TerraJS.API.Items
 
             _tjsInstances.Add(JSItem);
 
-            if (_texturePath != "")
+            TerraJS.GlobalAPI.Event.PostSetupContent(() =>
             {
-                TerraJS.GlobalAPI.Event.PostSetupContent(() =>
-                {
-                    TextureAssets.Item[JSItem.Type] = TJSMod.Assets.CreateUntracked<Texture2D>(File.OpenRead(_texturePath), _texturePath);
-                });
-            }
+                TextureAssets.Item[JSItem.Type] = _texture.Get() ?? TextureAssets.Item[JSItem.Type];
+            });
         }
     }
 }

@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using TerraJS.Extensions;
+using TerraJS.Contents.Extensions;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -23,7 +23,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             {
                 var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
 
-                return $"{p.Name}: {Type2ClassName(p.ParameterType, asParameter: true)}{@default}";
+                return $"{SpecialNameCheck(p.Name)}: {Type2ClassName(p.ParameterType, asParameter: true)}{@default}";
             }));
 
             return $"constructor({paramTexts})";

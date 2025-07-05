@@ -11,7 +11,7 @@
 </div>
 
 ## 📖 介绍
-`TerraJS` 是一个类似Minecraft中 `KubeJS` 的mod，它允许创作者们使用JavaScript来注册物品或注册和更改合成表。
+`TerraJS` 是一个类似Minecraft中 `KubeJS` 的mod，它允许创作者们使用JavaScript来注册物品或注册和更改合成表等等。
 
 此mod处于刚刚开始开发的阶段，功能少，bug多都是正常现象，请积极上报来帮助作者开发。
 
@@ -22,6 +22,8 @@
 `> 指令的参数补全及结构化的指令注册`
 
 `> 类似ProbeJS的收集类型信息与函数信息并生成 .d.ts 文件供 VSCode 实现补全的功能`
+
+`> 游戏内重载JS函数`
 
 #### ➕ 正在开发的内容
 

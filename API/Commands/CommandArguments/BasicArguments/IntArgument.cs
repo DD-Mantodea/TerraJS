@@ -1,15 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Dynamic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.Attributes;
-using TerraJS.Utils;
+using TerraJS.Contents.Utils;
 
 namespace TerraJS.API.Commands.CommandArguments.BasicArguments
 {
-    [BindToEngine]
     public class IntArgument(string name, int minValue = int.MinValue, int maxValue = int.MaxValue, bool isOptional = false) : CommandArgument(name, isOptional)
     {
         /// <summary>

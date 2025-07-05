@@ -11,6 +11,7 @@ using TerraJS.API.Commands;
 using TerraJS.API.Tiles;
 using TerraJS.API.Players;
 using TerraJS.API.Reflections;
+using TerraJS.API.NPCs;
 
 namespace TerraJS.API
 {
@@ -31,6 +32,8 @@ namespace TerraJS.API
         public PlayerAPI Player = new();
 
         public ReflectionAPI Reflection = new();
+
+        public NPCAPI NPC = new();
 
         internal static AssemblyName _an = new AssemblyName("TJSContents");
 
