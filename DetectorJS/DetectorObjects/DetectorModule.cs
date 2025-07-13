@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Commands.CommandArguments;
@@ -44,13 +45,16 @@ namespace TerraJS.DetectorJS.DetectorObjects
                         break;
 
                     case MethodInfo method:
-                        AddImport(method.ReturnType);
+                        if (method.GetCustomAttribute<ExtensionAttribute>() == null)
+                        {
+                            AddImport(method.ReturnType);
 
-                        foreach (var p in method.GetParameters())
-                            AddImport(p.ParameterType);
+                            foreach (var p in method.GetParameters())
+                                AddImport(p.ParameterType);
 
-                        if (method.IsGenericMethod)
-                            AddImport(typeof(Type));
+                            if (method.IsGenericMethod)
+                                AddImport(typeof(Type));
+                        }
                         break;
 
                     default:

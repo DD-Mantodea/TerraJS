@@ -14,26 +14,16 @@ namespace TerraJS.Assets
                 .Where(t => t.FieldType == typeof(Dictionary<string, T>))
                 .ToList().ForEach(t =>
                 {
-                    var a = t.GetValue(this) as Dictionary<string, T>;
-                    LoadOne(t.Name, a);
+                    t.SetValue(this, (Dictionary<string, T>)[]);
                 });
-        }
 
-        public virtual void Clear()
-        {
             GetType().GetFields()
                 .Where(t => t.FieldType == typeof(Dictionary<string, T>))
                 .ToList().ForEach(t =>
                 {
-                    t.SetValue(this, (Dictionary<string, T>)[]);
+                    var a = t.GetValue(this) as Dictionary<string, T>;
+                    LoadOne(t.Name, a);
                 });
-        }
-
-        public virtual void Reload()
-        {
-            Clear();
-
-            Load();
         }
 
         public abstract void LoadOne(string dir, Dictionary<string, T> dictronary);

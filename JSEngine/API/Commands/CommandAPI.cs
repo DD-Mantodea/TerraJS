@@ -8,6 +8,7 @@ using Jint.Runtime;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands.CommandArguments;
 using TerraJS.Contents.Extensions;
+using TerraJS.JSEngine.API.Commands;
 using Terraria.Localization;
 using Terraria.ModLoader;
 

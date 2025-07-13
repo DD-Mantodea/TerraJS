@@ -20,8 +20,8 @@ namespace TerraJS.Contents.Extensions
 
         public static List<Vector2> Neighbors(this Vector2 v)
         {
-            return new()
-            {
+            return
+            [
                 new(v.X, v.Y + 1),
                 new(v.X - 1, v.Y + 1),
                 new(v.X - 1, v.Y),
@@ -30,7 +30,7 @@ namespace TerraJS.Contents.Extensions
                 new(v.X + 1, v.Y - 1),
                 new(v.X + 1, v.Y),
                 new(v.X + 1, v.Y + 1),
-            };
+            ];
         }
     }
 }

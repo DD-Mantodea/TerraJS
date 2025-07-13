@@ -1,15 +1,25 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using TerraJS.Contents.Extensions;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
-    public class DetectorClass(Type type) : DetectorObject
+    public class DetectorClass : DetectorObject
     {
-        public Type Type = type;
+        public DetectorClass(Type type)
+        {
+            Type = type;
+
+            foreach (var i in Type.GetMembers())
+                AddMember(i);
+        }
+
+        public Type Type;
 
         public List<DetectorMember> Members = [];
 
@@ -19,13 +29,22 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             ret.AppendLine($"export class {Type2ClassName(Type)}" + (Type.BaseType == null ? "" : $" extends {Type2ClassName(Type.BaseType)}") + " {");
 
-            foreach (var i in Type.GetMembers())
-                AddMember(i);
+            if (Detector.ExtensionMethods.TryGetValue(Type, out var extMethods))
+                Members.TryAddRange([.. extMethods.Select(m => new DetectorMember(m))]);
 
             foreach (var i in Members)
             {
                 if(i.Serialize() != "")
                     ret.AppendLine(i.Serialize());
+            }
+
+            if (typeof(IEnumerable).IsAssignableFrom(Type))
+            {
+                var t = Type.GetInterfaces().Append(Type)
+                    .FirstOrDefault(i => i.IsGenericType && i.GetGenericTypeDefinition() == typeof(IEnumerable<>));
+
+                if (t != null)
+                    ret.AppendLine($"[Symbol.iterator](): Iterator<{Type2ClassName(t.GetGenericArguments()[0])}>");
             }
 
             ret.AppendLine("}");
@@ -41,8 +60,27 @@ namespace TerraJS.DetectorJS.DetectorObjects
             if (info is FieldInfo field && field.FieldType.IsByRef)
                 return;
 
-            if (info is MethodInfo method && method.IsIllegal())
-                return;
+            if (info is MethodInfo method)
+            {
+                if (method.IsIllegal())
+                    return;
+
+                if (method.GetCustomAttribute<ExtensionAttribute>() != null)
+                {
+                    var targetType = method.GetParameters().First().ParameterType;
+
+                    if (Detector.ExtensionMethods.TryGetValue(targetType, out var extMethods))
+                        extMethods.Add(method);
+                    else
+                    {
+                        var exts = new List<MethodInfo> { method };
+
+                        Detector.ExtensionMethods.TryAdd(targetType, exts);
+                    }
+
+                    return;
+                }
+            }
 
             if (Members.Exists(t => t.MemberInfo.Name == info.Name))
             {
@@ -59,5 +97,10 @@ namespace TerraJS.DetectorJS.DetectorObjects
         }
 
         public override bool Equals(object obj) => obj is DetectorClass clazz && clazz.Type == Type;
+
+        public override int GetHashCode()
+        {
+            return base.GetHashCode();
+        }
     }
 }

@@ -1,14 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Ionic.Zlib;
+using TerraJS.API;
+using TerraJS.API.Commands;
 using TerraJS.API.Commands.CommandArguments;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Commands
+namespace TerraJS.JSEngine.API.Commands
 {
     public class CommandRegistry : Registry<TJSCommand>
     {
@@ -26,9 +23,9 @@ namespace TerraJS.API.Commands
 
         private bool _end = false;
 
-        private string _content;
+        private readonly string _content;
 
-        private ArgumentGroup _argumentGroup = new();
+        private readonly ArgumentGroup _argumentGroup = new();
 
         public CommandRegistry NextArgument(CommandArgument argument)
         {

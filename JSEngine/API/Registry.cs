@@ -24,8 +24,6 @@ namespace TerraJS.API
 
         internal static List<T> _tjsInstances = [];
 
-        public Dictionary<string, Delegate> _delegates = [];
-
         public bool isEmpty = false;
 
         public abstract void Register();

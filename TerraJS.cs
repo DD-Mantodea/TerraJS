@@ -1,5 +1,4 @@
 using Terraria.ModLoader;
-using Jint;
 using System;
 using TerraJS.API;
 using System.IO;
@@ -8,29 +7,25 @@ using Terraria.Localization;
 using System.Linq;
 using Terraria;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
-using Terraria.ModLoader.Core;
 using TerraJS.DetectorJS;
-using Jint.Native;
 using TerraJS.Assets.Managers;
-using TerraJS.Contents.Utils;
 using TerraJS.Contents.Attributes;
-using Microsoft.Xna.Framework;
+using TerraJS.JSEngine;
+using Terraria.ID;
+using NetSimplified;
+using TerraJS.Assets.AssetManagers;
 
 namespace TerraJS
 {
 	public class TerraJS : Mod
     {
-        public static Engine Engine;
-
         public static TerraJS Instance;
-
-        public static GlobalAPI GlobalAPI;
-
-        public static TranslationAPI TranslationAPI;
 
         public static FontManager FontManager = new();
 
         public static TextureManager TextureManager = new();
+
+        public static SHAManager SHAManager = new();
 
         public static bool IsLoading => (bool)typeof(ModLoader).GetField("isLoading", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
         public static string ModPath => Path.Combine(Main.SavePath, "Mods", "TerraJS");
@@ -40,11 +35,9 @@ namespace TerraJS
         {
             Instance = this;
 
-            InitializeEngine();
+            TJSEngine.Load();
 
-            LoadAllScripts();
-
-            GlobalAPI.Event.ModLoadEvent?.Invoke();
+            TJSEngine.GlobalAPI.Event.ModLoadEvent?.Invoke();
 
             RegisterCommands();
 
@@ -61,18 +54,28 @@ namespace TerraJS
                 if (mod is not TerraJS) 
                     orig.Invoke(mod, str, cul);
             });
+
+            AddContent<NetModuleLoader>();
         }
 
         [HideToJS]
         public void Reload()
         {
-            FontManager.Reload();
+            if (Main.netMode != NetmodeID.SinglePlayer)
+            {
+                Main.NewText("请在单人模式下重载 TerraJS", 255, 0, 0);
+                return;
+            }
 
-            TextureManager.Reload();
+            FontManager.Load();
 
-            ReloadAllScripts();
+            TextureManager.Load();
 
-            GlobalAPI.Event.InGameReloadEvent?.Invoke();
+            SHAManager.Load();
+
+            TJSEngine.Load();
+
+            TJSEngine.GlobalAPI.Event.InGameReloadEvent?.Invoke();
 
             Main.NewText("重载完成");
         }
@@ -97,12 +100,12 @@ namespace TerraJS
                 .Register();
             */
 
-            GlobalAPI.Command.CreateCommandRegistry("terrajs")
+            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("terrajs")
                 .NextArgument(new ConstantArgument("feature", "reload"))
                 .Execute((_, _) => Reload())
                 .Register();
 
-            GlobalAPI.Command.CreateCommandRegistry("terrajs")
+            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("terrajs")
                 .NextArgument(new ConstantArgument("feature", "detect"))
                 .Execute((_, _) => Detector.Detect())
                 .Register();
@@ -115,119 +118,34 @@ namespace TerraJS
 
             TextureManager.Load();
 
-            GlobalAPI.Event.PostSetupContentEvent?.Invoke();
+            SHAManager.Load();
+
+            TJSEngine.GlobalAPI.Event.PostSetupContentEvent?.Invoke();
         }
 
-        [HideToJS]
-        public void InitializeEngine()
+        public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
-            Assembly[] assemblies = [
-                ..AssemblyManager.GetModAssemblies("TerraJS"), 
-                typeof(ModLoader).Assembly,
-                typeof(Vector2).Assembly
-            ];
-
-            Engine = new Engine(option => {
-                option.AllowClr(assemblies);
-                option.CatchClrExceptions(exception =>
-                {
-                    Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
-                    return true;
-                });
-            });
-
-            GlobalAPI = new();
-
-            TranslationAPI = new();
-
-            BindingUtils.BindInstance("TJS", GlobalAPI);
-
-            BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
-
-            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
-
-            BindInnerMethods();
-        }
-
-        [HideToJS]
-        private void BindInnerMethods()
-        {
-            Engine.SetValue("require", require);
-        }
-
-        [HideToJS]
-        public static void CreateFolderIfNotExist(string path) 
-        {
-            if (!Directory.Exists(path)) Directory.CreateDirectory(path);
-        }
-
-        [HideToJS]
-        public void LoadAllScripts()
-        {
-            CreateFolderIfNotExist(ModPath);
-
-            CreateFolderIfNotExist(Path.Combine(ModPath, "Scripts"));
-
-            CreateFolderIfNotExist(Path.Combine(ModPath, "Textures"));
-
-            var files = Directory.GetFiles(Path.Combine(ModPath, "Scripts"), "*.js", SearchOption.AllDirectories);
-
-            foreach (var file in files)
-            {
-                string script = File.ReadAllText(file);
-
-                Engine.Execute(script);
-            }
-        }
-
-        public void ReloadAllScripts()
-        {
-            Assembly[] assemblies = [
-                ..AssemblyManager.GetModAssemblies("TerraJS"),
-                typeof(ModLoader).Assembly,
-                typeof(Vector2).Assembly
-            ];
-
-            Engine = new Engine(option => {
-                option.AllowClr(assemblies);
-                option.CatchClrExceptions(exception =>
-                {
-                    Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
-                    return true;
-                });
-            });
-
-            BindingUtils.BindInstance("TJS", GlobalAPI);
-
-            BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
-
-            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
-
-            BindInnerMethods();
-
-            GlobalAPI.Unload();
-
-            TranslationAPI.Unload();
-
-            LoadAllScripts();
+            NetModule.ReceiveModule(reader, whoAmI);
         }
 
         [HideToJS]
         public LocalizedText RedirectLocalizedText(Func<LanguageManager, string, Func<string>, LocalizedText> orig, LanguageManager instance, string key, Func<string> makeDefaultValue)
         {
-            if (key.StartsWith("Mods.TerraJS"))
-            {
-                if(!TranslationAPI.LocalizedTexts.TryGetValue(key, out string value))
-                    value = TranslationAPI.DefaultLocalizedTexts[key];
+            if (!TJSEngine.GlobalAPI.Translation.LocalizedTexts.TryGetValue(key, out string value))
+                TJSEngine.GlobalAPI.Translation.DefaultLocalizedTexts.TryGetValue(key, out value);
 
+            if (value != null)
                 return typeof(LocalizedText).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Where(c => !c.IsPublic).First().Invoke([key, value]) as LocalizedText;
-            }
+
             else return orig(instance, key, makeDefaultValue);
         }
 
-        private JsValue require(string path)
+
+        public override object Call(params object[] args)
         {
-            return Engine.Evaluate($"importNamespace(\"{path}\")");
+            if (args.Length == 0) return null;
+
+            return null;
         }
 
         /*
@@ -256,11 +174,10 @@ namespace TerraJS
         }
         */
 
+        [HideToJS]
         public override void Unload()
         {
-            GlobalAPI.Unload();
-
-            TranslationAPI.Unload();
+            TJSEngine.Unload();
 
             base.Unload();
         }

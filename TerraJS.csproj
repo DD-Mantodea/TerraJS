@@ -19,6 +19,9 @@
 	  <Reference Include="FontStashSharp.FNA">
 	    <HintPath>F:\CSharpRepos\FontStashSharp\src\XNA\bin\FNA.Core\Debug\net8.0\FontStashSharp.FNA.dll</HintPath>
 	  </Reference>
+	  <Reference Include="NetSimplified">
+	    <HintPath>lib\NetSimplified.dll</HintPath>
+	  </Reference>
 	</ItemGroup>
 
 	<!-- References -->

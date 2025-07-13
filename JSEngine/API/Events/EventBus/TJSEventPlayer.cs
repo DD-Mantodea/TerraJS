@@ -1,4 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
+using TerraJS.JSEngine;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -9,14 +10,14 @@ namespace TerraJS.API.Events.EventBus
     {
         public override void PostUpdate()
         {
-            TerraJS.GlobalAPI.Event.Player.PostUpdateEvent?.Invoke(this);
+            TJSEngine.GlobalAPI.Event.Player.PostUpdateEvent?.Invoke(this);
         }
 
         public override void ModifyFishingAttempt(ref FishingAttempt attempt)
         {
             fixed (FishingAttempt* pFishingAttempt = &attempt)
             {
-                TerraJS.GlobalAPI.Event.Player.ModifyFishingAttempt?.Invoke(this, new(pFishingAttempt));
+                TJSEngine.GlobalAPI.Event.Player.ModifyFishingAttempt?.Invoke(this, new(pFishingAttempt));
             }
         }
 
@@ -28,7 +29,7 @@ namespace TerraJS.API.Events.EventBus
                 {
                     fixed (Vector2* pSonarPosition = &sonarPosition)
                     {
-                        TerraJS.GlobalAPI.Event.Player.CatchFishEvent.Invoke(this, attempt, new(pItemDrop), new(pNpcSpawn), new(pSonar), new(pSonarPosition));
+                        TJSEngine.GlobalAPI.Event.Player.CatchFishEvent.Invoke(this, attempt, new(pItemDrop), new(pNpcSpawn), new(pSonar), new(pSonarPosition));
                     }
                 }
             }

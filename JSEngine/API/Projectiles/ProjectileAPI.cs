@@ -13,8 +13,6 @@ namespace TerraJS.API.Projectiles
 {
     public class ProjectileAPI : BaseAPI
     {
-        public static Dictionary<string, Dictionary<string, Delegate>> ProjectileDelegates = [];
-
         public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "")
         {
             if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())

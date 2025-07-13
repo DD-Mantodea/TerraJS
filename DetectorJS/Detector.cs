@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
@@ -12,19 +13,28 @@ using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
 using TerraJS.DetectorJS.DetectorObjects;
+using TerraJS.JSEngine;
 using Terraria;
+using Terraria.IO;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace TerraJS.DetectorJS
 {
     public class Detector
     {
+
+        internal static ConcurrentDictionary<string, DetectorModule> Modules = [];
+
+        internal static ConcurrentDictionary<Type, List<MethodInfo>> ExtensionMethods = [];
+
         public static void Detect()
         {
             List<Type> allTypes = [
                 ..typeof(Detector).Assembly.GetTypes(), 
                 ..typeof(Main).Assembly.GetTypes(), 
-                ..typeof(Vector2).Assembly.GetTypes()
+                ..typeof(Vector2).Assembly.GetTypes(),
+                ..TJSEngine.CustomTypes
             ];
 
             BindingUtils.Values.ForEach(i =>
@@ -74,49 +84,58 @@ namespace TerraJS.DetectorJS
                         MaxDegreeOfParallelism = Environment.ProcessorCount
                     }, 
                     group => {
-                        var filePath = Path.Combine(packagePath, $"{group.Key}.d.ts");
-
                         var module = new DetectorModule(group.Key);
+
+                        Modules.TryAdd(group.Key, module);
 
                         foreach (var type in group)
                             module.AddType(type);
+                    });
 
-                        File.WriteAllText(filePath, module.Serialize());
+                    Parallel.ForEach(Modules, new ParallelOptions {
+                        MaxDegreeOfParallelism = Environment.ProcessorCount
+                    },
+                    pair => {
+                        var filePath = Path.Combine(packagePath, $"{pair.Key}.d.ts");
+
+                        File.WriteAllText(filePath, pair.Value.Serialize());
                     });
 
                     File.WriteAllText(Path.Combine(TerraJS.ModPath, "Packages", "global.d.ts"), new DetectorGlobal().Serialize());
 
                     #region jsconfig
-                    var config = new JObject();
-
-                    config["include"] = new JArray
+                    var config = new JObject
                     {
-                        "./**/*.ts",
-                        "./**/*.js"
+                        ["include"] = new JArray
+                        {
+                            "./**/*.ts",
+                            "./**/*.js"
+                        }
                     };
 
-                    var options = new JObject();
-
-                    options["module"] = "commonjs";
-                    options["moduleResolution"] = "classic";
-                    options["isolatedModules"] = true;
-                    options["composite"] = true;
-                    options["incremental"] = true;
-                    options["allowJs"] = true;
-                    options["checkJs"] = false;
-                    options["target"] = "ES2023";
-                    options["rootDir"] = "./Scripts";
-                    options["baseUrl"] = "./Packages";
-                    options["skipLibCheck"] = true;
-                    options["skipDefaultLibCheck"] = true;
-                    options["lib"] = new JArray
+                    var options = new JObject
                     {
-                        "ES6",
-                        "ES2023"
-                    };
-                    options["typeRoots"] = new JArray
-                    {
-                        "./Packages"
+                        ["module"] = "commonjs",
+                        ["moduleResolution"] = "classic",
+                        ["isolatedModules"] = true,
+                        ["composite"] = true,
+                        ["incremental"] = true,
+                        ["allowJs"] = true,
+                        ["checkJs"] = false,
+                        ["target"] = "ES2023",
+                        ["rootDir"] = "./Scripts",
+                        ["baseUrl"] = "./Packages",
+                        ["skipLibCheck"] = true,
+                        ["skipDefaultLibCheck"] = true,
+                        ["lib"] = new JArray
+                        {
+                            "ES6",
+                            "ES2023"
+                        },
+                        ["typeRoots"] = new JArray
+                        {
+                            "./Packages"
+                        }
                     };
 
                     config["compilerOptions"] = options;
@@ -124,6 +143,10 @@ namespace TerraJS.DetectorJS
                     File.WriteAllText(Path.Combine(TerraJS.ModPath, "jsconfig.json"), config.ToString());
 
                     #endregion
+
+                    Modules = [];
+
+                    ExtensionMethods = [];
                 }
             });
         }

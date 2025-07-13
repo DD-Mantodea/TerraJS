@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
 using TerraJS.Assets.Managers;
+using TerraJS.JSEngine;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
@@ -21,9 +22,9 @@ namespace TerraJS.API.Items
         {
             _builder = builder;
 
-            TranslationAPI.AddTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.DisplayName", _builder.Name);
+            TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.DisplayName", _builder.Name);
 
-            TranslationAPI.AddTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.Tooltip", "");
+            TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.Tooltip", "");
         }
 
         public ItemRegistry Texture(string path)
@@ -50,7 +51,7 @@ namespace TerraJS.API.Items
         {
             if (isEmpty) return this;
 
-            TranslationAPI.AddTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
+            TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
 
             return this;
         }
@@ -59,7 +60,7 @@ namespace TerraJS.API.Items
         {
             if (isEmpty) return this;
 
-            TranslationAPI.AddTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.Tooltip", str);
+            TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.Tooltip", str);
 
             return this;
         }
@@ -72,8 +73,6 @@ namespace TerraJS.API.Items
 
             var JSItem = Activator.CreateInstance(itemType) as TJSItem;
 
-            ItemAPI.ItemDelegates.Add(itemType.FullName, _delegates);
-
             var entity = _contentType.GetProperty("Entity", BindingFlags.Public | BindingFlags.Instance);
 
             entity.GetSetMethod(true).Invoke(JSItem, [new Item()]);
@@ -84,7 +83,7 @@ namespace TerraJS.API.Items
 
             _tjsInstances.Add(JSItem);
 
-            TerraJS.GlobalAPI.Event.PostSetupContent(() =>
+            TJSEngine.GlobalAPI.Event.PostSetupContent(() =>
             {
                 TextureAssets.Item[JSItem.Type] = _texture.Get() ?? TextureAssets.Item[JSItem.Type];
             });

@@ -14,9 +14,9 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public override string Serialize()
         {
-            var parameters = Constructor.GetParameters().ToList();
+            var parameters = Constructor.GetParameters();
 
-            if (parameters.Exists(p => p.ParameterType.IsIllegal()))
+            if (parameters.Any(p => p.ParameterType.IsIllegal()))
                 return "";
 
             var paramTexts = string.Join(", ", parameters.Select(p =>

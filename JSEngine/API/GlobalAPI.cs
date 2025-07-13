@@ -33,6 +33,8 @@ namespace TerraJS.API
 
         public ReflectionAPI Reflection = new();
 
+        public TranslationAPI Translation = new();
+
         public NPCAPI NPC = new();
 
         internal static AssemblyName _an = new AssemblyName("TJSContents");
@@ -57,6 +59,7 @@ namespace TerraJS.API
             Tile.Unload();
             Player.Unload();
             Reflection.Unload();
+            Translation.Unload();
         }
     }
 }

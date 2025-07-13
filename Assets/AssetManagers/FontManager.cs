@@ -10,7 +10,7 @@ namespace TerraJS.Assets.Managers
 {
     public class FontManager : AssetManager<FontSystem>
     {
-        public Dictionary<string, FontSystem> Fonts = [];
+        public Dictionary<string, FontSystem> Fonts;
 
         public TerraJS Mod => TerraJS.Instance;
 

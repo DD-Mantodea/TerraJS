@@ -12,7 +12,7 @@ namespace TerraJS.Assets.Managers
 {
     public class TextureManager : AssetManager<Asset<Texture2D>>
     {
-        public Dictionary<string, Asset<Texture2D>> Textures = [];
+        public Dictionary<string, Asset<Texture2D>> Textures;
 
         public Dictionary<TextureType, Asset<Texture2D>[]> VanillaTextures = [];
 
@@ -20,6 +20,9 @@ namespace TerraJS.Assets.Managers
 
         public override void Load()
         {
+            if (Main.netMode is NetmodeID.Server)
+                return;
+
             base.Load();
 
             if (!TerraJS.IsLoading)

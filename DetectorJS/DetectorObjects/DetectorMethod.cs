@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Events;
@@ -20,12 +21,18 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             var eventInfo = Method.GetCustomAttribute<EventInfoAttribute>();
 
-            var paramTexts = string.Join(", ", Method.GetParameters().Select(p =>
+            if (Method.GetCustomAttribute<ExtensionAttribute>() != null)
+                parameters = [..parameters.Skip(1)];
+
+            var paramTexts = string.Join(", ", parameters.Select(p =>
             {
                 var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
 
                 return $"{SpecialNameCheck(p.Name)}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
             }));
+
+            if (Method.GetCustomAttribute<ExtensionAttribute>() != null)
+                return $"\"{Method.Name}\"({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";
 
             if (Method.IsGenericMethod)
             {

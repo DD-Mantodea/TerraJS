@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Jint;
 using Jint.Runtime.Interop;
+using TerraJS.JSEngine;
 
 namespace TerraJS.Contents.Utils
 {
@@ -16,7 +17,7 @@ namespace TerraJS.Contents.Utils
 
         public static void BindInstance(string name, object instance)
         {
-            TerraJS.Engine.SetValue(name, instance);
+            TJSEngine.Engine.SetValue(name, instance);
             Values.Add((name, instance));
         }
 
@@ -28,14 +29,14 @@ namespace TerraJS.Contents.Utils
             foreach (var property in members)
                 expandoDict[property.Name] = property.GetValue(null);
 
-            TerraJS.Engine.SetValue(name, expandoObj);
+            TJSEngine.Engine.SetValue(name, expandoObj);
 
             Values.Add((name, expandoObj));
         }
 
         public static void BindStaticOrEnumOrConst(string name, Type type)
         {
-            TerraJS.Engine.SetValue(name, TypeReference.CreateTypeReference(TerraJS.Engine, type));
+            TJSEngine.Engine.SetValue(name, TypeReference.CreateTypeReference(TJSEngine.Engine, type));
             Values.Add((name, type));
         }
     }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TerraJS.JSEngine;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Events.EventBus
@@ -11,7 +12,7 @@ namespace TerraJS.API.Events.EventBus
     {
         public override void PostAddRecipes()
         {
-            TerraJS.GlobalAPI.Event.Recipe.PostAddRecipesEvent?.Invoke();
+            TJSEngine.GlobalAPI.Event.Recipe.PostAddRecipesEvent?.Invoke();
         }
     }
 }

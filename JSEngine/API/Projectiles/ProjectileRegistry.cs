@@ -1,18 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Graphics;
-using TerraJS.API.Items;
 using TerraJS.Assets.Managers;
+using TerraJS.JSEngine;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
-using Terraria.ModLoader;
 
 namespace TerraJS.API.Projectiles
 {
@@ -55,20 +49,11 @@ namespace TerraJS.API.Projectiles
             return this;
         }
 
-        public ProjectileRegistry SetDefaults(Delegate @delegate)
-        {
-            if (isEmpty) return this;
-
-            _delegates["SetDefaults"] = @delegate;
-
-            return this;
-        }
-
         public ProjectileRegistry Name(GameCulture.CultureName gameCulture, string str)
         {
             if (isEmpty) return this;
 
-            TranslationAPI.AddTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
+            TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
 
             return this;
         }
@@ -81,8 +66,6 @@ namespace TerraJS.API.Projectiles
 
             var JSProj = Activator.CreateInstance(projType) as TJSProjectile;
 
-            ProjectileAPI.ProjectileDelegates.Add(projType.Name, _delegates);
-
             var entity = _contentType.GetProperty("Entity", BindingFlags.Public | BindingFlags.Instance);
 
             entity.GetSetMethod(true).Invoke(JSProj, [new Projectile()]);
@@ -93,7 +76,7 @@ namespace TerraJS.API.Projectiles
 
             _tjsInstances.Add(JSProj);
 
-            TerraJS.GlobalAPI.Event.PostSetupContent(() =>
+            TJSEngine.GlobalAPI.Event.PostSetupContent(() =>
             {
                 TextureAssets.Projectile[JSProj.Type] = _texture.Get() ?? TextureAssets.Projectile[JSProj.Type];
             });
