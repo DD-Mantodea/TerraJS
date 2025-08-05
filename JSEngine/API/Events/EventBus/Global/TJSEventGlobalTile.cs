@@ -5,7 +5,6 @@ using Terraria.ModLoader;
 
 namespace TerraJS.API.Events.EventBus.Global
 {
-    [HideToJS]
     public unsafe class TJSEventGlobalTile : GlobalTile
     {
         public override void PlaceInWorld(int x, int y, int type, Item item)

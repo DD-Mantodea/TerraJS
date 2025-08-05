@@ -14,6 +14,12 @@ using TerraJS.JSEngine;
 using Terraria.ID;
 using NetSimplified;
 using TerraJS.Assets.AssetManagers;
+using MonoMod.RuntimeDetour;
+using System.Reflection.Emit;
+using System.Collections.Generic;
+using MonoMod.Utils;
+using log4net;
+using Jint;
 
 namespace TerraJS
 {
@@ -27,13 +33,24 @@ namespace TerraJS
 
         public static SHAManager SHAManager = new();
 
-        public static bool IsLoading => (bool)typeof(ModLoader).GetField("isLoading", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-        public static string ModPath => Path.Combine(Main.SavePath, "Mods", "TerraJS");
+        public static bool IsLoading = false;
 
         [HideToJS]
         public override void Load()
         {
+            var eventInfo = typeof(DetourManager).GetEvent("DetourApplied");
+
+            var eventField = typeof(DetourManager).GetField("DetourApplied", BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (eventField.GetValue(null) is Action<DetourInfo> action)
+                foreach (var @delegate in action.GetInvocationList())
+                    eventInfo.RemoveEventHandler(null, @delegate);
+
+            DetourManager.DetourApplied += DetourManager_DetourApplied;
+
             Instance = this;
+
+            IsLoading = true;
 
             TJSEngine.Load();
 
@@ -41,7 +58,6 @@ namespace TerraJS
 
             RegisterCommands();
 
-            MonoModHooks.Add(typeof(LanguageManager).GetMethod("GetOrRegister"), RedirectLocalizedText);
             /*
             MonoModHooks.Add(typeof(UserInterface).GetMethod("Update"), ModifyUpdate);
 
@@ -49,17 +65,39 @@ namespace TerraJS
 
             MonoModHooks.Add(typeof(GameInterfaceLayer).GetMethod("Draw"), ModifyDrawLayer);
             */
-            MonoModHooks.Add(typeof(LocalizationLoader).GetMethod("UpdateLocalizationFilesForMod", BindingFlags.Static | BindingFlags.NonPublic), (Action<Mod, string, GameCulture> orig, Mod mod, string str, GameCulture cul) => 
-            {
-                if (mod is not TerraJS) 
-                    orig.Invoke(mod, str, cul);
-            });
 
             AddContent<NetModuleLoader>();
         }
 
+        private static void DetourManager_DetourApplied(DetourInfo info)
+        {
+            var owner = info.Entry.DeclaringType?.Assembly ??
+                (info.Entry is DynamicMethod method
+                ? (typeof(DynamicMethod).GetField("_module", BindingFlags.NonPublic | BindingFlags.Instance).GetValue(method) as Module)?.Assembly
+                : null);
+
+            if (owner == null)
+                return;
+
+            var monoModHooks = typeof(MonoModHooks);
+
+            var list = monoModHooks.GetMethod("GetDetourList", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, [owner]);
+
+            (monoModHooks.GetNestedType("DetourList", BindingFlags.NonPublic).GetField("detours").GetValue(list) as List<DetourInfo>).Add(info);
+
+            var msg = $"Hook {monoModHooks.GetMethod("StringRep", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, [info.Method.Method])} added by {owner.GetName().Name}";
+
+            var targetSig = MethodSignature.ForMethod(info.Method.Method);
+            var detourSig = MethodSignature.ForMethod(info.Entry, ignoreThis: true);
+
+            if (detourSig.ParameterCount != targetSig.ParameterCount + 1 || detourSig.FirstParameter.GetMethod("Invoke") is null)
+                msg += " WARNING! No orig delegate, incompatible with other hook to this method";
+
+            (typeof(Logging).GetProperty("tML", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as ILog).Debug(msg);
+        }
+
         [HideToJS]
-        public void Reload()
+        public static void Reload()
         {
             if (Main.netMode != NetmodeID.SinglePlayer)
             {
@@ -120,24 +158,16 @@ namespace TerraJS
 
             SHAManager.Load();
 
-            TJSEngine.GlobalAPI.Event.PostSetupContentEvent?.Invoke();
+            TJSEngine.GlobalAPI.Event.PostSetupContentEvent?.Invoke(); 
+            
+            IsLoading = false;
+
+            TJSEngine.Load(); //For loading dynamic assemblies
         }
 
         public override void HandlePacket(BinaryReader reader, int whoAmI)
         {
             NetModule.ReceiveModule(reader, whoAmI);
-        }
-
-        [HideToJS]
-        public LocalizedText RedirectLocalizedText(Func<LanguageManager, string, Func<string>, LocalizedText> orig, LanguageManager instance, string key, Func<string> makeDefaultValue)
-        {
-            if (!TJSEngine.GlobalAPI.Translation.LocalizedTexts.TryGetValue(key, out string value))
-                TJSEngine.GlobalAPI.Translation.DefaultLocalizedTexts.TryGetValue(key, out value);
-
-            if (value != null)
-                return typeof(LocalizedText).GetConstructors(BindingFlags.NonPublic | BindingFlags.Instance).Where(c => !c.IsPublic).First().Invoke([key, value]) as LocalizedText;
-
-            else return orig(instance, key, makeDefaultValue);
         }
 
 
@@ -178,6 +208,38 @@ namespace TerraJS
         public override void Unload()
         {
             TJSEngine.Unload();
+
+            var eventInfo = typeof(DetourManager).GetEvent("DetourApplied");
+
+            var eventField = typeof(DetourManager).GetField("DetourApplied", BindingFlags.NonPublic | BindingFlags.Static);
+
+            if (eventField.GetValue(null) is Action<DetourInfo> action)
+                foreach (var @delegate in action.GetInvocationList())
+                    eventInfo.RemoveEventHandler(null, @delegate);
+
+            DetourManager.DetourApplied += (info) =>
+            {
+                var owner = info.Entry.DeclaringType.Assembly;
+
+                if (owner == null)
+                    return;
+
+                var monoModHooks = typeof(MonoModHooks);
+
+                var list = monoModHooks.GetMethod("GetDetourList", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, [owner]);
+
+                (monoModHooks.GetNestedType("DetourList", BindingFlags.NonPublic).GetField("detours").GetValue(list) as List<DetourInfo>).Add(info);
+
+                var msg = $"Hook {monoModHooks.GetMethod("StringRep", BindingFlags.NonPublic | BindingFlags.Static).Invoke(null, [info.Method.Method])} added by {owner.GetName().Name}";
+
+                var targetSig = MethodSignature.ForMethod(info.Method.Method);
+                var detourSig = MethodSignature.ForMethod(info.Entry, ignoreThis: true);
+
+                if (detourSig.ParameterCount != targetSig.ParameterCount + 1 || detourSig.FirstParameter.GetMethod("Invoke") is null)
+                    msg += " WARNING! No orig delegate, incompatible with other hook to this method";
+
+                (typeof(Logging).GetProperty("tML", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as ILog).Debug(msg);
+            };
 
             base.Unload();
         }

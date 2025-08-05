@@ -9,7 +9,7 @@ namespace TerraJS.JSEngine.API.Commands
 {
     public class CommandRegistry : Registry<TJSCommand>
     {
-        public static CommandRegistry Empty => new() { isEmpty = true };
+        public static CommandRegistry Empty => new() { IsEmpty = true };
 
         public CommandRegistry() { }
 
@@ -29,7 +29,7 @@ namespace TerraJS.JSEngine.API.Commands
 
         public CommandRegistry NextArgument(CommandArgument argument)
         {
-            if (isEmpty || _end) return this;
+            if (IsEmpty || _end) return this;
 
             _argumentGroup.Append(argument);
 
@@ -38,7 +38,7 @@ namespace TerraJS.JSEngine.API.Commands
 
         public CommandRegistry Execute(Action<ArgumentInstanceGroup, CommandCaller> action)
         {
-            if (isEmpty || _end) return this;
+            if (IsEmpty || _end) return this;
 
             _action = action;
 
@@ -49,7 +49,7 @@ namespace TerraJS.JSEngine.API.Commands
 
         public override void Register()
         {
-            if (isEmpty || !_end) return;
+            if (IsEmpty || !_end) return;
 
             if (_tjsInstances.Exists(c => CommandAPI.CommandArgumentGroups[c.GetType().FullName] == _argumentGroup && c.Command == _content))
                 return;

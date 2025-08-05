@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
+using Jint.Runtime.Interop;
 using Microsoft.Xna.Framework;
 using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
+using TerraJS.JSEngine.API.Items.DamageClasses;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
@@ -20,11 +23,27 @@ namespace TerraJS.API.Items
                 return ItemRegistry.Empty;
             }
 
-            var itemName = $"TerraJS.Items.{(@namespace == "" ? "" : @namespace + ".")}{name}";
+            var itemName = $"TJSContents.Items.{(@namespace == "" ? "" : @namespace + ".")}{name}";
 
             TypeBuilder builder = GlobalAPI._mb.DefineType(itemName, TypeAttributes.Public, typeof(TJSItem));
 
             var registry = new ItemRegistry(builder);
+
+            return registry;
+        }
+
+        public DamageClassRegistry? CreateDamageClassRegistry(string name, string @namespace = "")
+        {
+            if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
+            {
+                return DamageClassRegistry.Empty;
+            }
+
+            var dmgClzName = $"TJSContents.DamageClasses.{(@namespace == "" ? "" : @namespace + ".")}{name}";
+
+            TypeBuilder builder = GlobalAPI._mb.DefineType(dmgClzName, TypeAttributes.Public, typeof(TJSDamageClass));
+
+            var registry = new DamageClassRegistry(builder);
 
             return registry;
         }
@@ -54,13 +73,32 @@ namespace TerraJS.API.Items
             return (int)itemTypeMethod.MakeGenericMethod(type).Invoke(null, []);
         }
 
+        public int GetModItem(TypeReference type) => GetModItem(type.ReferenceType);
+
         public int GetTJSItem(string fullName)
         {
-            int itemType = -1;
+            if (ItemRegistry._contentTypes.TryGetValue($"TJSContents.Items.{fullName}", out var itemType))
+                return itemType;
 
-            if (!ItemRegistry._contentTypes.TryGetValue($"TerraJS.Items.{fullName}", out itemType)) itemType = -1;
+            return -1;
+        }
 
-            return itemType;
+        public DamageClass GetModDamageClass(Type type)
+        {
+            if (!type.IsSubclassOf(typeof(DamageClass)))
+                return null;
+
+            return ModContentUtils.GetInstance<DamageClass>(type);
+        }
+
+        public DamageClass GetModDamageClass(TypeReference type) => GetModDamageClass(type.ReferenceType);
+
+        public DamageClass GetTJSDamageClass(string fullName)
+        {
+            if (DamageClassRegistry._damageClasses.TryGetValue($"TJSContents.DamageClasses.{fullName}", out var dmgClzType))
+                return ModContentUtils.GetInstance<DamageClass>(dmgClzType);
+
+            return null;
         }
 
         public void NewItem(IEntitySource source, Vector2 pos, int type, Vector2 randomBox = default, int stack = 1, bool noBroadcast = false, int prefixGiven = 0, bool noGrabDelay = false, bool reverseLookup = false)

@@ -17,7 +17,7 @@ using Terraria.DataStructures;
 namespace TerraJS.API.Items
 {
     [Autoload(false)]
-    public class TJSItem : ModItem
+    public abstract class TJSItem : ModItem
     {
         public override string Texture => "TerraJS/Assets/Textures/NULL";
     }

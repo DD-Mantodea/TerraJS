@@ -14,6 +14,15 @@ namespace TerraJS.API.Events.Ref
 
         private readonly int _length = length;
 
+        public int Count => _length;
+
+        public bool IsReadOnly { get; set; }
+
+        public RefBox<T> this[int index] 
+        {
+            get => Get(index);
+        }
+
         public RefBox<T> Get(int index)
         {
             if (index < 0 || index >= _length)

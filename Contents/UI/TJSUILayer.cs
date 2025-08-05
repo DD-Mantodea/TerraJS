@@ -6,6 +6,7 @@ using Terraria.UI;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components;
 using TerraJS.Contents.UI.Components.Containers;
+using System.Linq;
 
 namespace TerraJS.Contents.UI
 {
@@ -15,7 +16,16 @@ namespace TerraJS.Contents.UI
 
         public SizeContainer ScreenContainer;
 
-        public void Register(Component c) => ScreenContainer.RegisterChild(c);
+        public void Register(Container c) => ScreenContainer.RegisterChild(c);
+
+        public List<Container> UIList => [..ScreenContainer.Children.Select(c => c as Container)];
+
+        public bool TryGetUIByID(string ID, out Container c)
+        {
+            c = UIList.FirstOrDefault(c => c.ID == ID, null);
+
+            return c != null;
+        }
 
         protected override bool DrawSelf()
         {

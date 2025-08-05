@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
+using TerraJS.API;
 using Terraria.Localization;
 
-namespace TerraJS.API
+namespace TerraJS.JSEngine.API.Translations
 {
     public class TranslationAPI : BaseAPI
     {
@@ -32,15 +29,17 @@ namespace TerraJS.API
 
         public void SetTranslation(GameCulture gameCultrue, string key, string value)
         {
+            key = key.Replace("TJSContents", "TerraJS");
+
             if (Translations[gameCultrue].ContainsKey(key))
                 Translations[gameCultrue][key] = value;
-
-            Translations[gameCultrue].Add(key, value);
+            else
+                Translations[gameCultrue].Add(key, value);
         }
 
         public string GetTranslation(string key, GameCulture gameCulture = null)
         {
-            if ((gameCulture != null && Translations[gameCulture].TryGetValue(key, out var ret)) || LocalizedTexts.TryGetValue(key, out ret))
+            if (gameCulture != null && Translations[gameCulture].TryGetValue(key, out var ret) || LocalizedTexts.TryGetValue(key, out ret))
                 return ret;
 
             return key;
@@ -48,14 +47,7 @@ namespace TerraJS.API
 
         internal override void Unload()
         {
-            Translations.Clear();
 
-            foreach (int val in Enum.GetValues(typeof(GameCulture.CultureName)))
-            {
-                if (val == 9999) continue;
-
-                Translations.Add(GameCulture.FromLegacyId(val), []);
-            }
         }
     }
 }

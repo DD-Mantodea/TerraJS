@@ -12,7 +12,7 @@ using Terraria.ModLoader;
 namespace TerraJS.API.Projectiles
 {
     [Autoload(false)]
-    public class TJSProjectile : ModProjectile
+    public abstract class TJSProjectile : ModProjectile
     {
         public override string Texture => "TerraJS/Assets/Textures/NULL";
     }

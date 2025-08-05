@@ -94,7 +94,7 @@ namespace TerraJS.Contents.UI.Components.Containers
 
                 DrawChildren(spriteBatch, gameTime);
 
-                spriteBatch.End();
+                spriteBatch.LoadState(state);
             }
             else
                 DrawChildren(spriteBatch, gameTime);
@@ -165,17 +165,6 @@ namespace TerraJS.Contents.UI.Components.Containers
                 _alpha = value;
                 foreach (var components in Children)
                     components.Alpha = value;
-            }
-        }
-
-        public override bool Visible
-        {
-            get => base.Visible;
-            set
-            {
-                base.Visible = value;
-                foreach (var components in Children)
-                    components.Visible = value;
             }
         }
 

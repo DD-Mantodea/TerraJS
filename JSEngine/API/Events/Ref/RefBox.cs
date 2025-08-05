@@ -16,5 +16,10 @@ namespace TerraJS.API.Events.Ref
 
             set => *_ptr = value;
         }
+
+        public override bool Equals(object obj)
+        {
+            return obj is RefBox<T> box && box._ptr == _ptr;
+        }
     }
 }

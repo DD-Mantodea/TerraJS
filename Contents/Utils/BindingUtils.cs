@@ -39,5 +39,16 @@ namespace TerraJS.Contents.Utils
             TJSEngine.Engine.SetValue(name, TypeReference.CreateTypeReference(TJSEngine.Engine, type));
             Values.Add((name, type));
         }
+
+        public static void BindInnerMethod(string name, Delegate @delegate)
+        {
+            TJSEngine.Engine.SetValue(name, @delegate);
+            Values.Add((name, @delegate));
+        }
+
+        public static void Clear()
+        {
+            Values.Clear();
+        }
     }
 }

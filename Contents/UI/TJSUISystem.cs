@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.UI.Components.Containers;
+using TerraJS.JSEngine;
 using Terraria;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
@@ -31,6 +32,8 @@ namespace TerraJS.Contents.UI
                     Layer.Register(container);
                 }
             }
+
+            TJSEngine.GlobalAPI.Event.UI.RegisterUIEvent?.Invoke();
 
             UserInput.Initialize();
         }

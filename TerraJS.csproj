@@ -1,8 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<!-- Import tModLoader mod properties -->
 	<Import Project="..\tModLoader.targets" />
-
+	
 	<!-- General -->
 	<PropertyGroup>
 	  <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -10,9 +9,14 @@
 	<PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
 	  <Optimize>False</Optimize>
 	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)'=='Debug'">
+		<Optimize>false</Optimize>
+		<DebugType>full</DebugType>
+	</PropertyGroup>
 	
 	<ItemGroup>
-	  <PackageReference Include="Jint" Version="4.3.0" />
+	  <PackageReference Include="Jint" Version="4.4.0" />
 	</ItemGroup>
 	
 	<ItemGroup>

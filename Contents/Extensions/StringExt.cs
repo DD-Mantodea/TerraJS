@@ -11,7 +11,9 @@ namespace TerraJS.Contents.Extensions
 {
     public static class StringExt
     {
-        public static string UpperFirst(this string s)  => string.Concat(s[..1].ToUpper(), s[1..]);
+        public static string UpperFirst(this string s) => string.Concat(s[..1].ToUpper(), s[1..]);
+
+        public static string LowerFirst(this string s) => string.Concat(s[..1].ToLower(), s[1..]); 
 
         public static IEnumerable<string> SplitListElements(this string input)
         {

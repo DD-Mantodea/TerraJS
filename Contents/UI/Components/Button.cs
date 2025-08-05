@@ -14,7 +14,7 @@ namespace TerraJS.Contents.UI.Components
 {
     public class Button : Component
     {
-        public Button(string texturePath, Vector2 relativePos = default, EventHandler click = null, string text = "", Color? backgroundColor = null,
+        public Button(string texturePath, Vector2 relativePos = default, Action<Component> click = null, string text = "", Color? backgroundColor = null,
             Action<SpriteBatch, GameTime> drawing = null, string hoverTexturePath = "", string pressTexturePath = "", string fontID = "", int fontSize = 20,
             bool textHorizontalMiddle = true, bool textVerticalMiddle = true, bool drawShadow = true)
         {
@@ -33,7 +33,7 @@ namespace TerraJS.Contents.UI.Components
 
             });
 
-            OnClick += click != null ? click : (obj, args) => { };
+            OnClickEvent.AddListener("click", click != null ? click : _ => { });
 
             Hover = hoverTexturePath == "" ? Texture : ModContent.Request<Texture2D>(hoverTexturePath, AssetRequestMode.ImmediateLoad).Value;
             Press = pressTexturePath == "" ? Texture : ModContent.Request<Texture2D>(pressTexturePath, AssetRequestMode.ImmediateLoad).Value;

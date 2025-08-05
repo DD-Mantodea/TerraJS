@@ -9,6 +9,7 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using TerraJS.API;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
@@ -34,7 +35,8 @@ namespace TerraJS.DetectorJS
                 ..typeof(Detector).Assembly.GetTypes(), 
                 ..typeof(Main).Assembly.GetTypes(), 
                 ..typeof(Vector2).Assembly.GetTypes(),
-                ..TJSEngine.CustomTypes
+                ..GlobalAPI._ab.GetTypes(),
+                ..TJSEngine.CustomTypes,
             ];
 
             BindingUtils.Values.ForEach(i =>
@@ -68,10 +70,11 @@ namespace TerraJS.DetectorJS
                         Main.NewText($"[Detector] 收集完成, 共 {types.Count} 个类型, 共耗时 {stopwatch.ElapsedMilliseconds}ms");
                     else Main.NewText($"[Detector] Collect complete, {types.Count} types in total, consuming {stopwatch.ElapsedMilliseconds}ms");
 
-                    var packagePath = Path.Combine(TerraJS.ModPath, "Packages");
+                    var packagePath = Path.Combine(Pathes.TerraJSPath, "Packages");
 
-                    if (!Directory.Exists(packagePath))
-                        Directory.CreateDirectory(packagePath);
+                    Directory.Delete(packagePath, true);
+
+                    Directory.CreateDirectory(packagePath);
 
                     var namespaceGroups = types
                         .Where(t => t.Name != "")
@@ -101,7 +104,7 @@ namespace TerraJS.DetectorJS
                         File.WriteAllText(filePath, pair.Value.Serialize());
                     });
 
-                    File.WriteAllText(Path.Combine(TerraJS.ModPath, "Packages", "global.d.ts"), new DetectorGlobal().Serialize());
+                    File.WriteAllText(Path.Combine(Pathes.TerraJSPath, "Packages", "global.d.ts"), new DetectorGlobal().Serialize());
 
                     #region jsconfig
                     var config = new JObject
@@ -140,13 +143,15 @@ namespace TerraJS.DetectorJS
 
                     config["compilerOptions"] = options;
 
-                    File.WriteAllText(Path.Combine(TerraJS.ModPath, "jsconfig.json"), config.ToString());
+                    File.WriteAllText(Path.Combine(Pathes.TerraJSPath, "jsconfig.json"), config.ToString());
 
                     #endregion
 
                     Modules = [];
 
                     ExtensionMethods = [];
+
+                    TerraJS.Reload();
                 }
             });
         }

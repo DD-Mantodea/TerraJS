@@ -14,7 +14,7 @@ namespace TerraJS.API.Projectiles
     {
         internal static Dictionary<string, int> _contentTypes = [];
 
-        public static ProjectileRegistry Empty => new() { isEmpty = true };
+        public static ProjectileRegistry Empty => new() { IsEmpty = true };
 
         public ProjectileRegistry() { }
 
@@ -25,7 +25,7 @@ namespace TerraJS.API.Projectiles
 
         public ProjectileRegistry Texture(string path)
         {
-            if (isEmpty) return this;
+            if (IsEmpty) return this;
 
             _texture.TexturePath = path;
 
@@ -38,7 +38,7 @@ namespace TerraJS.API.Projectiles
 
         public ProjectileRegistry Texture(TextureType type, int ID)
         {
-            if (isEmpty) return this;
+            if (IsEmpty) return this;
 
             _texture.TexturePath = "";
 
@@ -51,7 +51,7 @@ namespace TerraJS.API.Projectiles
 
         public ProjectileRegistry Name(GameCulture.CultureName gameCulture, string str)
         {
-            if (isEmpty) return this;
+            if (IsEmpty) return this;
 
             TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.FromCultureName(gameCulture), $"Mods.{_builder.FullName}.DisplayName", str);
 
@@ -60,7 +60,7 @@ namespace TerraJS.API.Projectiles
 
         public override void Register()
         {
-            if (isEmpty) return;
+            if (IsEmpty) return;
 
             var projType = _builder.CreateType();
 

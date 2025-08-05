@@ -1,18 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using TerraJS.Assets.Managers;
-using Terraria.Localization;
+using TerraJS.Contents.Utils;
+using Terraria;
 using Terraria.ModLoader;
 
 namespace TerraJS.API
 {
-    public abstract class Registry<T>
+    public abstract class Registry<T> where T : ModType
     {
         internal TypeBuilder _builder;
 
@@ -24,7 +23,9 @@ namespace TerraJS.API
 
         internal static List<T> _tjsInstances = [];
 
-        public bool isEmpty = false;
+        public bool IsEmpty = false;
+
+        public Action<Type> AfterRegister;
 
         public abstract void Register();
     }

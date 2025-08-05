@@ -13,6 +13,8 @@ using System.IO;
 using TerraJS.JSEngine.Plugins;
 using System.Collections.Generic;
 using System.Linq;
+using Jint.Runtime.Interop;
+using MonoMod.RuntimeDetour;
 
 namespace TerraJS.JSEngine
 {
@@ -22,8 +24,6 @@ namespace TerraJS.JSEngine
         public static Engine Engine;
 
         public static GlobalAPI GlobalAPI = new();
-
-        public static TranslationAPI TranslationAPI = new();
 
         internal static List<Type> CustomTypes = [];
 
@@ -45,47 +45,48 @@ namespace TerraJS.JSEngine
             Engine = new Engine(option => {
                 option.AllowClr(assemblies);
                 option.AddExtensionMethods([..exts]);
+                option.Interop.AllowSystemReflection = true;
+                option.Interop.AllowGetType = true;
+                option.AllowOperatorOverloading();
                 option.CatchClrExceptions(exception =>
                 {
                     Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
                     return true;
                 });
+
+                if (!TerraJS.IsLoading)
+                    option.AllowClr(GlobalAPI._ab);
             });
+
+            BindingUtils.Clear();
 
             BindingUtils.BindInstance("TJS", GlobalAPI);
 
             BindingUtils.BindStaticOrEnumOrConst("Cultures", typeof(GameCulture.CultureName));
 
-            BindingUtils.BindProperties("DamageClass", typeof(DamageClass).GetProperties(BindingFlags.Public | BindingFlags.Static));
-
             BindInnerMethods();
 
             GlobalAPI.Unload();
-
-            TranslationAPI.Unload();
 
             LoadScripts();
         }
 
         public static void BindInnerMethods()
         {
-            Engine.SetValue("require", require);
-        }
+            Engine.SetValue("require", (string path) => Engine.Evaluate($"importNamespace(\"{path}\")"));
 
-        private static JsValue require(string path)
-        {
-            return Engine.Evaluate($"importNamespace(\"{path}\")");
+            BindingUtils.BindInnerMethod("nettypeof", (TypeReference t) => t.ReferenceType);
         }
 
         public static void LoadScripts()
         {
-            FileUtils.CreateFolderIfNotExist(TerraJS.ModPath);
+            FileUtils.CreateDirectoryIfNotExist(Pathes.TerraJSPath);
 
-            FileUtils.CreateFolderIfNotExist(Path.Combine(TerraJS.ModPath, "Scripts"));
+            FileUtils.CreateDirectoryIfNotExist(Path.Combine(Pathes.TerraJSPath, "Scripts"));
 
-            FileUtils.CreateFolderIfNotExist(Path.Combine(TerraJS.ModPath, "Textures"));
+            FileUtils.CreateDirectoryIfNotExist(Path.Combine(Pathes.TerraJSPath, "Textures"));
 
-            var files = Directory.GetFiles(Path.Combine(TerraJS.ModPath, "Scripts"), "*.js", SearchOption.AllDirectories);
+            var files = Directory.GetFiles(Path.Combine(Pathes.TerraJSPath, "Scripts"), "*.js", SearchOption.AllDirectories);
 
             foreach (var file in files)
             {
@@ -99,8 +100,6 @@ namespace TerraJS.JSEngine
         {
             GlobalAPI.Unload();
 
-            TranslationAPI.Unload();
-
             Engine.Dispose();
 
             BindingUtils.Values.Clear();
@@ -108,8 +107,6 @@ namespace TerraJS.JSEngine
             Engine = null;
 
             GlobalAPI = null;
-
-            TranslationAPI = null;
 
             TerraJS.Instance.Logger.Info("[Jint] JSEngine unloaded successfully.");
         }

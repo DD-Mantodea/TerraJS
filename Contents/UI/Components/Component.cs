@@ -7,6 +7,8 @@ using Terraria;
 using TerraJS.Contents.UI;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
+using TerraJS.Contents.DataStructures;
+using TerraJS.Contents.Attributes;
 
 namespace TerraJS.Contents.UI.Components
 {
@@ -58,7 +60,7 @@ namespace TerraJS.Contents.UI.Components
             if (mouseRect.Intersects(Rectangle))
             {
                 Clicked = true;
-                OnClick?.Invoke(this, new EventArgs());
+                OnClickEvent?.Invoke(this);
             }
         }
 
@@ -68,7 +70,7 @@ namespace TerraJS.Contents.UI.Components
 
             if (mouseRect.Intersects(Rectangle))
             {
-                OnRightClick?.Invoke(this, new EventArgs());
+                OnRightClickEvent?.Invoke(this);
             }
         }
 
@@ -84,7 +86,7 @@ namespace TerraJS.Contents.UI.Components
 
         public virtual void Update(GameTime gameTime)
         {
-            OnUpdate?.Invoke(this, new EventArgs());
+            OnUpdateEvent?.Invoke(this);
 
             UpdateMouse(gameTime);
 
@@ -104,7 +106,7 @@ namespace TerraJS.Contents.UI.Components
             if (mouseRect.Intersects(Rectangle))
             {
                 IsHovering = true;
-                OnHover?.Invoke(this, new EventArgs());
+                OnHoverEvent?.Invoke(this);
             }
         }
 
@@ -128,13 +130,13 @@ namespace TerraJS.Contents.UI.Components
 
         public Texture2D Texture;
 
-        public event EventHandler OnClick;
+        public UIEvent OnClickEvent = new();
 
-        public event EventHandler OnHover;
+        public UIEvent OnRightClickEvent = new();
 
-        public event EventHandler OnUpdate;
+        public UIEvent OnHoverEvent = new();
 
-        public event EventHandler OnRightClick;
+        public UIEvent OnUpdateEvent = new();
 
         public float Scale;
 
@@ -193,10 +195,10 @@ namespace TerraJS.Contents.UI.Components
 
         public virtual void Unload()
         {
-            OnClick = null;
-            OnHover = null;
-            OnRightClick = null;
-            OnUpdate = null;
+            OnClickEvent = null;
+            OnHoverEvent = null;
+            OnRightClickEvent = null;
+            OnUpdateEvent = null;
             UserInput.LeftClick -= LeftClick;
             UserInput.RightClick -= RightClick;
             UserInput.KeepPressLeft -= KeepPressLeft;

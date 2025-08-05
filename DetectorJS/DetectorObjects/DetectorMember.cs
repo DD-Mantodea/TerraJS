@@ -49,6 +49,9 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 case ConstructorInfo constructor:
                     return new DetectorConstructor(constructor).Serialize();
 
+                case EventInfo @event:
+                    return new DetectorEvent(@event).Serialize();
+
                 default:
                     return "";
 

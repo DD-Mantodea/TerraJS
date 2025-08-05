@@ -19,6 +19,9 @@ namespace TerraJS.API.Events.SubEvents
         public Action<Item, Player> RightClickEvent;
 
         [HideToJS]
+        public Action<Player, string> UpdateArmorSetEvent;
+
+        [HideToJS]
         public Func<Item, bool> CanRightClickEvent;
 
         [HideToJS]
@@ -29,6 +32,9 @@ namespace TerraJS.API.Events.SubEvents
 
         [HideToJS]
         public Func<Item, Player, bool> ConsumeItemEvent;
+
+        [HideToJS]
+        public Func<Item, Item, Item, string> IsArmorSetEvent;
 
         [EventInfo("item", "player")]
         public void UpdateInventory(Action<Item, Player> @delegate) => UpdateInventoryEvent += @delegate;
@@ -42,6 +48,9 @@ namespace TerraJS.API.Events.SubEvents
         [EventInfo("item", "player")]
         public void RightClick(Action<Item, Player> @delegate) => RightClickEvent += @delegate;
 
+        [EventInfo("player", "set")]
+        public void UpdateArmorSet(Action<Player, string> @delegate) => UpdateArmorSetEvent += @delegate;
+
         [EventInfo("item")]
         public void CanRightClick(Func<Item, bool> @delegate) => CanRightClickEvent += @delegate;
 
@@ -53,5 +62,8 @@ namespace TerraJS.API.Events.SubEvents
 
         [EventInfo("item", "player")]
         public void ConsumeItem(Func<Item, Player, bool> @delegate) => ConsumeItemEvent += @delegate;
+
+        [EventInfo("head", "body", "legs")]
+        public void IsArmorSet(Func<Item, Item, Item, string> @delegate) => IsArmorSetEvent += @delegate;
     }
 }

@@ -20,6 +20,15 @@ namespace TerraJS.API.Events.SubEvents
         [HideToJS]
         public Action<NPC, string, RefBoxArray<Item>> ModifyActiveShopEvent;
 
+        [HideToJS]
+        public Func<NPC, bool> PreAIEvent;
+
+        [HideToJS]
+        public Action<NPC> AIEvent;
+
+        [HideToJS]
+        public Action<NPC> PostAIEvent;
+
         [EventInfo("npc", "npcLoot")]
         public void ModifyNPCLoot(Action<NPC, NPCLoot> @delegate) => ModifyNPCLootEvent += @delegate;
 
@@ -31,5 +40,14 @@ namespace TerraJS.API.Events.SubEvents
 
         [EventInfo("npc", "shopName", "items")]
         public void ModifyActiveShop(Action<NPC, string, RefBoxArray<Item>> @delegate) => ModifyActiveShopEvent += @delegate;
+
+        [EventInfo("npc")]
+        public void PreAI(Func<NPC, bool> @delegate) => PreAIEvent += @delegate;
+
+        [EventInfo("npc")]
+        public void AI(Action<NPC> @delegate) => AIEvent += @delegate;
+
+        [EventInfo("npc")]
+        public void PostAI(Action<NPC> @delegate) => PostAIEvent += @delegate;
     }
 }

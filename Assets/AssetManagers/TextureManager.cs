@@ -37,7 +37,7 @@ namespace TerraJS.Assets.Managers
 
         public override void LoadOne(string dir, Dictionary<string, Asset<Texture2D>> dictronary)
         {
-            var path = Path.Combine(TerraJS.ModPath, dir);
+            var path = Path.Combine(Pathes.TerraJSPath, dir);
 
             foreach (var file in Directory.GetFiles(path, "*.png", SearchOption.AllDirectories))
             {

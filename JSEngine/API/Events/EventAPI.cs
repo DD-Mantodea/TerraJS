@@ -3,6 +3,7 @@ using System.Linq;
 using System.Reflection;
 using TerraJS.API.Events.SubEvents;
 using TerraJS.Contents.Attributes;
+using TerraJS.JSEngine.API.Events.SubEvents;
 
 namespace TerraJS.API.Events
 {
@@ -26,6 +27,8 @@ namespace TerraJS.API.Events
         public NPCEventAPI NPC = new();
 
         public PlayerEventAPI Player = new();
+
+        public UIEventAPI UI = new();
 
         [HideToJS]
         public Action ModLoadEvent;

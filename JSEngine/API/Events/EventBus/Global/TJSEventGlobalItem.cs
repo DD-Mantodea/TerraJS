@@ -1,6 +1,9 @@
-﻿using TerraJS.Contents.Attributes;
+﻿using System.Collections.Generic;
+using Microsoft.Xna.Framework;
+using TerraJS.Contents.Attributes;
 using TerraJS.JSEngine;
 using Terraria;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.API.Events.EventBus.Global
@@ -51,6 +54,16 @@ namespace TerraJS.API.Events.EventBus.Global
         public override bool CanUseItem(Item item, Player player)
         {
             return TJSEngine.GlobalAPI.Event.Item.CanUseItemEvent?.Invoke(item, player) ?? true;
+        }
+
+        public override string IsArmorSet(Item head, Item body, Item legs)
+        {
+            return TJSEngine.GlobalAPI.Event.Item.IsArmorSetEvent?.Invoke(head, body, legs) ?? "";
+        }
+
+        public override void UpdateArmorSet(Player player, string set)
+        {
+            TJSEngine.GlobalAPI.Event.Item.UpdateArmorSetEvent?.Invoke(player, set);
         }
     }
 }

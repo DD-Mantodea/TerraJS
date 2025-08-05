@@ -24,7 +24,7 @@ namespace TerraJS.Assets.AssetManagers
 
             string hashBytes;
 
-            files = Directory.GetFiles(Path.Combine(TerraJS.ModPath, type), type == "Scripts" ? "*.js" : "*.png", SearchOption.AllDirectories);
+            files = Directory.GetFiles(Path.Combine(Pathes.TerraJSPath, type), type == "Scripts" ? "*.js" : "*.png", SearchOption.AllDirectories);
 
             foreach (var file in files)
             {
@@ -32,7 +32,7 @@ namespace TerraJS.Assets.AssetManagers
 
                 hashBytes = BitConverter.ToString(sha256.ComputeHash(stream));
 
-                var key = file.Replace(Path.Combine(TerraJS.ModPath, type), "");
+                var key = file.Replace(Path.Combine(Pathes.TerraJSPath, type), "");
 
                 dictronary.Add(key, hashBytes);
             }

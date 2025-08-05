@@ -2,12 +2,10 @@
 using System.Collections.Generic;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
-using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -56,6 +54,17 @@ namespace TerraJS.DetectorJS.DetectorObjects
             {
                 if (i.Item2 is Type type)
                     AddImport(type);
+                else if (i.Item2 is Delegate @delegate)
+                {
+                    var t = @delegate.GetType();
+
+                    var m = t.GetMethod("Invoke");
+
+                    foreach (var p in m.GetParameters())
+                        AddImport(p.ParameterType);
+
+                    AddImport(m.ReturnType);
+                }
                 else if (i.Item2 is not ExpandoObject)
                     AddImport(i.Item2.GetType());
 
@@ -68,7 +77,8 @@ namespace TerraJS.DetectorJS.DetectorObjects
             ret.AppendLine("declare global {");
 
             foreach (var i in Items)
-                ret.AppendLine(i.Serialize());
+                if(i.Serialize() != "")
+                    ret.AppendLine(i.Serialize());
 
             ret.AppendLine("}");
 
@@ -84,9 +94,16 @@ namespace TerraJS.DetectorJS.DetectorObjects
         {
             if (Object.Item2 is Type type)
                 return $"class {Object.Item1} extends {Type2ClassName(type)} {{}}";
+            else if (Object.Item2 is Delegate @delegate)
+            {
+                var t = @delegate.GetType();
+
+                var m = t.GetMethod("Invoke");
+
+                return new DetectorMethod(m).Serialize().Replace("\"Invoke\"", $"function {Object.Item1}");
+            }
             else if (Object.Item2 is not ExpandoObject)
                 return $"const {Object.Item1}: {Type2ClassName(Object.Item2.GetType())}";
-
             return "";
         }
     }

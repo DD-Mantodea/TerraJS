@@ -8,6 +8,10 @@ using System.Reflection.Emit;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Items;
+using Terraria.ModLoader;
+using Terraria;
+using TerraJS.JSEngine;
+using TerraJS.API;
 
 namespace TerraJS.Contents.Utils
 {
@@ -24,7 +28,7 @@ namespace TerraJS.Contents.Utils
             return types;
         }
 
-        public static MethodBuilder CreateMethodBuilder(Type type, string methodName, TypeBuilder builder)
+        public static MethodBuilder CreateMethodBuilder(TypeBuilder builder, Type type, string methodName)
         {
             var method = type.GetMethod(methodName);
 
@@ -35,6 +39,46 @@ namespace TerraJS.Contents.Utils
                 method.ReturnType,
                 Parameters2Types(method.GetParameters())
             );
+        }
+
+        public static MethodBuilder CreateMethodBuilder(TypeBuilder builder, MethodInfo method)
+        {
+            return builder.DefineMethod(
+                method.Name,
+                method.Attributes,
+                method.CallingConvention,
+                method.ReturnType,
+                Parameters2Types(method.GetParameters())
+            );
+        }
+
+        public static void Override<T>(Registry<T> registry, string methodName, MulticastDelegate @delegate) where T : ModType
+        {
+            var field = registry._builder.DefineField($"{methodName}Delegate", @delegate.GetType(), FieldAttributes.Public | FieldAttributes.Static);
+
+            registry.AfterRegister += (Type type) =>
+            {
+                type.GetField($"{methodName}Delegate").SetValue(null, @delegate);
+            };
+
+            var baseMethod = registry._builder.BaseType.GetMethod(methodName, BindingFlags.Public | BindingFlags.Instance);
+
+            var parameters = baseMethod.GetParameters();
+
+            var method = CreateMethodBuilder(registry._builder, baseMethod);
+
+            var il = method.GetILGenerator();
+
+            il.Emit(OpCodes.Ldsfld, field);
+
+            for (int i = 0; i < parameters.Length; i++)
+                il.Emit(OpCodes.Ldarg, i + 1);
+
+            il.Emit(OpCodes.Callvirt, @delegate.GetType().GetMethod("Invoke"));
+
+            il.Emit(OpCodes.Ret);
+
+            //registry._builder.DefineMethodOverride(method, baseMethod);
         }
     }
 }

@@ -12,6 +12,10 @@ using TerraJS.API.Tiles;
 using TerraJS.API.Players;
 using TerraJS.API.Reflections;
 using TerraJS.API.NPCs;
+using TerraJS.JSEngine.API.UIs;
+using TerraJS.JSEngine.API.Translations;
+using TerraJS.JSEngine.API.Debuggers;
+using TerraJS.JSEngine.API.DotNets;
 
 namespace TerraJS.API
 {
@@ -31,11 +35,17 @@ namespace TerraJS.API
 
         public PlayerAPI Player = new();
 
-        public ReflectionAPI Reflection = new();
+        public HookAPI Hook = new();
 
         public TranslationAPI Translation = new();
 
+        public UIAPI UI = new();
+
         public NPCAPI NPC = new();
+
+        public DebuggerAPI Debugger = new();
+
+        public DotNetAPI DotNet = new();
 
         internal static AssemblyName _an = new AssemblyName("TJSContents");
 
@@ -51,15 +61,11 @@ namespace TerraJS.API
 
         internal override void Unload()
         {
-            Command.Unload();
-            Event.Unload();
-            Item.Unload();
-            Recipe.Unload();
-            Projectile.Unload();
-            Tile.Unload();
-            Player.Unload();
-            Reflection.Unload();
-            Translation.Unload();
+            foreach (var i in GetType().GetFields())
+            {
+                if (i.FieldType.IsSubclassOf(typeof(BaseAPI)))
+                    (i.GetValue(this) as BaseAPI).Unload();
+            }
         }
     }
 }

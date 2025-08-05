@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API.Events;
 using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Extensions;
 using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
@@ -28,7 +29,9 @@ namespace TerraJS.DetectorJS.DetectorObjects
             {
                 var @default = p.IsOptional ? " = " + Default2String(p.DefaultValue) : "";
 
-                return $"{SpecialNameCheck(p.Name)}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
+                var pName = p.Name.IsNullOrWhiteSpaceNotEmpty() ? p.ParameterType.Name.LowerFirst() : p.Name;
+
+                return $"{SpecialNameCheck(pName)}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
             }));
 
             if (Method.GetCustomAttribute<ExtensionAttribute>() != null)
@@ -36,9 +39,11 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             if (Method.IsGenericMethod)
             {
-                paramTexts = "type: Type, " + paramTexts;
+                var genericParams = Method.GetGenericArguments();
 
-                return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"({paramTexts}): Object";
+                var genericTexts = string.Join(", ", genericParams.Select(t => t.Name));
+
+                return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"<{genericTexts}>({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";
             }
 
             return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";

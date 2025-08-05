@@ -49,8 +49,6 @@ namespace TerraJS.Contents.UI.Components.Containers
             }
             else
                 DrawChildren(spriteBatch, gameTime);
-
-            //spriteBatch.DrawRectangle(RectangleUtils.FormVector2(Position, Size), Color.Green);
         }
     }
 }

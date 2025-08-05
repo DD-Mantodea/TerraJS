@@ -6,6 +6,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.DetectorJS.DetectorObjects;
+using Terraria;
 using Terraria.DataStructures;
 
 namespace TerraJS.Contents.Extensions
@@ -25,8 +26,8 @@ namespace TerraJS.Contents.Extensions
 
         public static bool IsDynamicType(this Type type)
         {
-            return typeof(System.Reflection.Emit.TypeBuilder).IsAssignableFrom(type.GetType()) ||
-                   type.Assembly.IsDynamic;
+            return (typeof(System.Reflection.Emit.TypeBuilder).IsAssignableFrom(type.GetType()) ||
+                   type.Assembly.IsDynamic) && !type.Assembly.FullName.Contains("TJSContents");
         }
 
         public static bool IsCompilerGenerated(this Type type)

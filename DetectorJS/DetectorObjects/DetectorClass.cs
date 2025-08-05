@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
 using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
+using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -84,11 +86,24 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             if (Members.Exists(t => t.MemberInfo.Name == info.Name))
             {
-                var target = Members.First(t => t.MemberInfo.Name == info.Name);
-
-                if (target.MemberInfo.DeclaringType != Type)
+                if (info is MethodInfo methodInfo)
                 {
-                    target.MemberInfo = info;
+                    var target = Members.First(t => t.MemberInfo.Name == info.Name).MemberInfo as MethodInfo;
+
+                    var infoParams = RegistryUtils.Parameters2Types(methodInfo.GetParameters());
+
+                    var targetParams = RegistryUtils.Parameters2Types(target.GetParameters());
+
+                    if (infoParams.SequenceEqual(targetParams) && methodInfo.ReturnType == target.ReturnType)
+                        return;
+                }
+                else
+                {
+                    var target = Members.First(t => t.MemberInfo.Name == info.Name);
+
+                    if (target.MemberInfo.DeclaringType != Type)
+                        target.MemberInfo = info;
+
                     return;
                 }
             }
