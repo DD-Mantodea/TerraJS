@@ -17,8 +17,9 @@ namespace TerraJS.Hooks
 
         private int AddEquipTexture(Func<Mod, string, EquipType, ModItem, string, EquipTexture, int> orig, Mod mod, string texture, EquipType type, ModItem item, string name, EquipTexture equipTexture)
         {
-            if (Mod is TerraJS)
+            if (mod is TerraJS)
                 return orig(mod, $"TerraJS/Assets/Textures/Item/Default{Enum.GetName(typeof(EquipType), type)}", type, item, name, equipTexture);
+
             else return orig(mod, texture, type, item, name, equipTexture);
         }
     }
