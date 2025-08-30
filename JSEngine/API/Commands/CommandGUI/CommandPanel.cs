@@ -12,6 +12,7 @@ using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.UI.Components;
+using TerraJS.Contents.Commands;
 
 namespace TerraJS.API.Commands.CommandGUI
 {
@@ -39,7 +40,7 @@ namespace TerraJS.API.Commands.CommandGUI
 
         public List<ModCommand> MatchingCommands = [];
 
-        public List<SizeContainer> CommandLines => Column.Children.Cast<SizeContainer>().ToList();
+        public List<SizeContainer> CommandLines => [.. Column.Children.Cast<SizeContainer>()];
 
         public int selectedCommandIndex = 0;
 

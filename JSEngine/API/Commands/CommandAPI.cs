@@ -7,6 +7,7 @@ using System.Reflection.Emit;
 using Jint.Runtime;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands.CommandArguments;
+using TerraJS.Contents.Commands;
 using TerraJS.Contents.Extensions;
 using TerraJS.JSEngine.API.Commands;
 using Terraria.Localization;
@@ -22,25 +23,7 @@ namespace TerraJS.API.Commands
 
         public static Dictionary<string, Action<ArgumentInstanceGroup, CommandCaller>> CommandActions = [];
 
-        public CommandRegistry CreateCommandRegistry(string content, string name = "", string @namespace = "")
-        {
-            //只允许拉丁字母?
-
-            if (string.IsNullOrWhiteSpace(content) || name.IsNullOrWhiteSpaceNotEmpty() || @namespace.IsNullOrWhiteSpaceNotEmpty())
-            {
-                return CommandRegistry.Empty;
-            }
-
-            var num = CommandRegistry._tjsInstances.Where(c => c.Command == content).Count();
-
-            var commandName = $"TerraJS.Commands.{(@namespace == "" ? "" : @namespace + ".")}{(name == "" ? content + num : name)}";
-
-            TypeBuilder builder = GlobalAPI._mb.DefineType(commandName, TypeAttributes.Public, typeof(TJSCommand));
-
-            var registry = new CommandRegistry(builder, content);
-
-            return registry;
-        }
+        public CommandRegistry CreateCommandRegistry(string content, string name = "", string @namespace = "") => new(content, name, @namespace);
 
         internal override void Unload()
         {

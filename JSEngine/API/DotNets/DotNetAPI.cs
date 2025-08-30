@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
 using TerraJS.API;
-using TerraJS.API.Items;
 using TerraJS.Contents.Extensions;
 using TerraJS.JSEngine.API.DotNets.Enums;
 
@@ -14,11 +8,12 @@ namespace TerraJS.JSEngine.API.DotNets
 {
     public class DotNetAPI : BaseAPI
     {
+        /*
         public EnumRegistry CreateEnumRegistry(string name, string @namespace = "")
         {
             if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
             {
-                return EnumRegistry.Empty;
+                return Enums.EnumRegistry.Empty;
             }
 
             var enumName = $"TJSContents.Enums.{(@namespace == "" ? "" : @namespace + ".")}{name}";
@@ -29,6 +24,7 @@ namespace TerraJS.JSEngine.API.DotNets
 
             return registry;
         }
+        */
 
         internal override void Unload()
         {

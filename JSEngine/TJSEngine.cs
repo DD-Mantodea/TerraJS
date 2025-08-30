@@ -8,13 +8,12 @@ using TerraJS.API;
 using TerraJS.Contents.Utils;
 using Terraria.Localization;
 using TerraJS.Contents.Attributes;
-using Jint.Native;
 using System.IO;
-using TerraJS.JSEngine.Plugins;
 using System.Collections.Generic;
 using System.Linq;
 using Jint.Runtime.Interop;
-using MonoMod.RuntimeDetour;
+using System.Collections;
+using TerraJS.JSEngine.Plugins;
 
 namespace TerraJS.JSEngine
 {
@@ -25,22 +24,19 @@ namespace TerraJS.JSEngine
 
         public static GlobalAPI GlobalAPI = new();
 
-        internal static List<Type> CustomTypes = [];
+        public static List<TJSPlugin> Plugins = new();
 
         public static void Load()
         {
-            var plugins = (Dictionary<string, TJSPlugin>)typeof(ModTypeLookup<>).MakeGenericType([typeof(TJSPlugin)]).GetField("dict", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null);
-
-            var pluginAssemblies = plugins.Values.Select(p => p.GetType().Assembly).Distinct();
-
             Assembly[] assemblies = [
                 ..AssemblyManager.GetModAssemblies("TerraJS"),
                 typeof(ModLoader).Assembly,
                 typeof(Vector2).Assembly,
-                ..pluginAssemblies
+                ..ModLoader.Mods.Select(m => m.Code),
+                GlobalAPI._ab
             ];
 
-            var exts = AssemblyUtils.GetExtensionTypes(assemblies);
+            var exts = AssemblyUtils.GetExtensionTypes([.. assemblies.Distinct()]);
 
             Engine = new Engine(option => {
                 option.AllowClr(assemblies);
@@ -53,9 +49,6 @@ namespace TerraJS.JSEngine
                     Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
                     return true;
                 });
-
-                if (!TerraJS.IsLoading)
-                    option.AllowClr(GlobalAPI._ab);
             });
 
             BindingUtils.Clear();
@@ -93,6 +86,20 @@ namespace TerraJS.JSEngine
                 string script = File.ReadAllText(file);
 
                 Engine.Execute($"(function() {{ {script} }})()", file);
+            }
+        }
+
+        public static void LoadPlugins()
+        {
+            var plugins = AssemblyUtils.GetPluginTypes([.. ModLoader.Mods.Select(m => m.Code)]);
+
+            foreach (var plugin in plugins)
+            {
+                var instance = Activator.CreateInstance(plugin) as TJSPlugin;
+
+                Plugins.Add(instance);
+
+                instance.Load();
             }
         }
 

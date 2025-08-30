@@ -3,12 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TerraJS.API.Commands;
+using TerraJS.API.Commands.CommandArguments;
+using TerraJS.JSEngine.API.Commands;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Commands
+namespace TerraJS.Contents.Commands
 {
     [Autoload(false)]
-    public class TJSCommand : ModCommand
+    public abstract class TJSCommand : ModCommand
     {
         public override string Command { get => CommandAPI.CommandContents[GetType().FullName]; }
 

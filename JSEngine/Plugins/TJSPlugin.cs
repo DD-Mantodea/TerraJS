@@ -9,15 +9,9 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.Plugins
 {
+    [Autoload(false)]
     public abstract class TJSPlugin : ModType
     {
-        protected sealed override void Register()
-        {
-            ModTypeLookup<TJSPlugin>.Register(this);
-
-            AddCustomType(GetType());
-        }
-
-        public static void AddCustomType(Type type) => TJSEngine.CustomTypes.TryAdd(type);
+        protected sealed override void Register() { }
     }
 }

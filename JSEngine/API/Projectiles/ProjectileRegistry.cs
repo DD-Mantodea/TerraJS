@@ -4,24 +4,21 @@ using System.Reflection;
 using System.Reflection.Emit;
 using TerraJS.Assets.Managers;
 using TerraJS.JSEngine;
+using TerraJS.JSEngine.API;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
+using Terraria.ModLoader;
 
 namespace TerraJS.API.Projectiles
 {
-    public class ProjectileRegistry : Registry<TJSProjectile>
+    public class ProjectileRegistry : ModTypeRegistry<TJSProjectile>
     {
         internal static Dictionary<string, int> _contentTypes = [];
 
-        public static ProjectileRegistry Empty => new() { IsEmpty = true };
+        public override string Namespace => "Projectiles";
 
-        public ProjectileRegistry() { }
-
-        public ProjectileRegistry(TypeBuilder builder) 
-        {
-            _builder = builder;
-        }
+        public ProjectileRegistry(string name, string @namespace) : base(name, @namespace) { }
 
         public ProjectileRegistry Texture(string path)
         {
@@ -58,7 +55,7 @@ namespace TerraJS.API.Projectiles
             return this;
         }
 
-        public override void Register()
+        public override void Register(Mod mod)
         {
             if (IsEmpty) return;
 
@@ -70,7 +67,7 @@ namespace TerraJS.API.Projectiles
 
             entity.GetSetMethod(true).Invoke(JSProj, [new Projectile()]);
 
-            TJSMod.AddContent(JSProj);
+            mod.AddContent(JSProj);
 
             _contentTypes.Add(_builder.FullName, JSProj.Type);
 

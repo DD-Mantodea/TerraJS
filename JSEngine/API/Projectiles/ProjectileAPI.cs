@@ -13,21 +13,7 @@ namespace TerraJS.API.Projectiles
 {
     public class ProjectileAPI : BaseAPI
     {
-        public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "")
-        {
-            if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
-            {
-                return ProjectileRegistry.Empty;
-            }
-
-            var projName = $"TJSContents.Projectiles.{(@namespace == "" ? "" : @namespace + ".")}{name}";
-
-            TypeBuilder builder = GlobalAPI._mb.DefineType(projName, TypeAttributes.Public, typeof(TJSProjectile));
-
-            var registry = new ProjectileRegistry(builder);
-
-            return registry;
-        }
+        public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "") => new(name, @namespace);
 
         public int GetModProjectile(string modName, string projName)
         {

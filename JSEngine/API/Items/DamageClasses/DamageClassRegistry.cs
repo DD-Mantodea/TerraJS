@@ -7,6 +7,7 @@ using System.Text;
 using System.Threading.Tasks;
 using TerraJS.API;
 using TerraJS.API.Items;
+using TerraJS.API.Projectiles;
 using TerraJS.Contents.Utils;
 using Terraria;
 using Terraria.Localization;
@@ -14,18 +15,15 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Items.DamageClasses
 {
-    public class DamageClassRegistry : Registry<DamageClass>
+    public class DamageClassRegistry : ModTypeRegistry<TJSDamageClass>
     {
-        public static DamageClassRegistry Empty => new() { IsEmpty = true };
 
         internal static Dictionary<string, Type> _damageClasses = [];
 
-        public DamageClassRegistry() { }
+        public override string Namespace => "DamageClasses";
 
-        public DamageClassRegistry(TypeBuilder builder)
+        public DamageClassRegistry(string name, string @namespace = "") : base(name, @namespace)
         {
-            _builder = builder;
-
             TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.DisplayName", _builder.Name);
         }
 
@@ -108,7 +106,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public override void Register()
+        public override void Register(Mod mod)
         {
             if (IsEmpty) return;
 
@@ -116,7 +114,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
 
             var JSDmgClz = Activator.CreateInstance(dmgClzType) as TJSDamageClass;
 
-            TJSMod.AddContent(JSDmgClz);
+            mod.AddContent(JSDmgClz);
 
             _damageClasses.Add(_builder.FullName, dmgClzType);
 

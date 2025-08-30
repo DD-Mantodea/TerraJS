@@ -1,21 +1,21 @@
 ﻿using System;
+using System.Linq;
 using System.Reflection.Emit;
 using TerraJS.API;
 using TerraJS.API.Commands;
 using TerraJS.API.Commands.CommandArguments;
+using TerraJS.API.Projectiles;
+using TerraJS.Contents.Commands;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands
 {
-    public class CommandRegistry : Registry<TJSCommand>
+    public class CommandRegistry : ModTypeRegistry<TJSCommand>
     {
-        public static CommandRegistry Empty => new() { IsEmpty = true };
+        public override string Namespace => "Commands";
 
-        public CommandRegistry() { }
-
-        public CommandRegistry(TypeBuilder builder, string content)
+        public CommandRegistry(string content, string name, string @namespace = "") : base(name == "" ? content + _tjsInstances.Where(c => c.Command == content).Count() : name, @namespace)
         {
-            _builder = builder;
             _content = content;
         }
 
@@ -47,7 +47,7 @@ namespace TerraJS.JSEngine.API.Commands
             return this;
         }
 
-        public override void Register()
+        public override void Register(Mod mod)
         {
             if (IsEmpty || !_end) return;
 
@@ -64,7 +64,7 @@ namespace TerraJS.JSEngine.API.Commands
 
             CommandAPI.CommandActions.Add(cmdType.FullName, _action);
 
-            TJSMod.AddContent(JSCommand);
+            mod.AddContent(JSCommand);
 
             _tjsInstances.Add(JSCommand);
         }

@@ -5,6 +5,7 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands;
 using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Commands;
 using Terraria.Localization;
 using Terraria.ModLoader;
 

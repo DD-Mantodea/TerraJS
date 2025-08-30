@@ -20,6 +20,10 @@ using System.Collections.Generic;
 using MonoMod.Utils;
 using log4net;
 using Jint;
+using Acornima;
+using System.Threading.Tasks;
+using TerraJS.JSEngine.Plugins;
+using System.Threading;
 
 namespace TerraJS
 {
@@ -51,6 +55,10 @@ namespace TerraJS
             Instance = this;
 
             IsLoading = true;
+
+            TJSEngine.LoadPlugins();
+
+            PluginRegistryInfos.RegisterAll();
 
             TJSEngine.Load();
 
@@ -145,7 +153,12 @@ namespace TerraJS
 
             TJSEngine.GlobalAPI.Command.CreateCommandRegistry("terrajs")
                 .NextArgument(new ConstantArgument("feature", "detect"))
-                .Execute((_, _) => Detector.Detect())
+                .Execute((_, _) =>
+                {
+                    var thread = new Thread(Detector.Detect);
+
+                    thread.Start();
+                })
                 .Register();
         }
 
@@ -161,8 +174,6 @@ namespace TerraJS
             TJSEngine.GlobalAPI.Event.PostSetupContentEvent?.Invoke(); 
             
             IsLoading = false;
-
-            TJSEngine.Load(); //For loading dynamic assemblies
         }
 
         public override void HandlePacket(BinaryReader reader, int whoAmI)

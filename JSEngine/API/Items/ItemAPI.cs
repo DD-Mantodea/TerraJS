@@ -7,6 +7,7 @@ using Jint.Runtime.Interop;
 using Microsoft.Xna.Framework;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
+using TerraJS.JSEngine.API;
 using TerraJS.JSEngine.API.Items.DamageClasses;
 using Terraria;
 using Terraria.DataStructures;
@@ -16,37 +17,9 @@ namespace TerraJS.API.Items
 {
     public class ItemAPI : BaseAPI
     {
-        public ItemRegistry? CreateItemRegistry(string name, string @namespace = "")
-        {
-            if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
-            {
-                return ItemRegistry.Empty;
-            }
+        public ItemRegistry? CreateItemRegistry(string name, string @namespace = "") => new(name, @namespace);
 
-            var itemName = $"TJSContents.Items.{(@namespace == "" ? "" : @namespace + ".")}{name}";
-
-            TypeBuilder builder = GlobalAPI._mb.DefineType(itemName, TypeAttributes.Public, typeof(TJSItem));
-
-            var registry = new ItemRegistry(builder);
-
-            return registry;
-        }
-
-        public DamageClassRegistry? CreateDamageClassRegistry(string name, string @namespace = "")
-        {
-            if (string.IsNullOrWhiteSpace(name) || @namespace.IsNullOrWhiteSpaceNotEmpty())
-            {
-                return DamageClassRegistry.Empty;
-            }
-
-            var dmgClzName = $"TJSContents.DamageClasses.{(@namespace == "" ? "" : @namespace + ".")}{name}";
-
-            TypeBuilder builder = GlobalAPI._mb.DefineType(dmgClzName, TypeAttributes.Public, typeof(TJSDamageClass));
-
-            var registry = new DamageClassRegistry(builder);
-
-            return registry;
-        }
+        public DamageClassRegistry? CreateDamageClassRegistry(string name, string @namespace = "") => new(name, @namespace);
 
         public int GetModItem(string modName, string itemName)
         {

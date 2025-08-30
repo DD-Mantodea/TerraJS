@@ -26,7 +26,7 @@ namespace TerraJS.ModPacks
     {
         public override void OnInitialize()
         {
-            var constructor = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.UILoaderAnimatedImage").GetConstructor(BindingFlags.Public | BindingFlags.Instance, [typeof(float), typeof(float), typeof(float)]);
+            var constructor = TypeUtils.UILoaderAnimatedImage.GetConstructor(BindingFlags.Public | BindingFlags.Instance, [typeof(float), typeof(float), typeof(float)]);
 
             _uiLoader = constructor.Invoke([0.5f, 0.5f, 1f]) as UIElement;
 
@@ -167,8 +167,6 @@ namespace TerraJS.ModPacks
 
         private void BackClick(UIMouseEvent evt, UIElement listeningElement)
         {
-            SoundEngine.PlaySound(SoundID.MenuOpen);
-
             var favorites = new JObject();
 
             foreach (var item in Items)
@@ -241,7 +239,7 @@ namespace TerraJS.ModPacks
 
             var modFileInfo = typeof(Mod).GetProperty("File", BindingFlags.NonPublic | BindingFlags.Instance);
 
-            var modOrganizer = typeof(Mod).Assembly.GetType("Terraria.ModLoader.Core.ModOrganizer");
+            var modOrganizer = TypeUtils.ModOrganizer;
 
             var tryReadManifest = modOrganizer.GetMethod("TryReadManifest", BindingFlags.NonPublic | BindingFlags.Static);
 

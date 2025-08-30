@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using TerraJS.Contents.Utils;
 using TerraJS.JSEngine;
 using TerraJS.ModPacks;
 using Terraria;
@@ -16,7 +17,7 @@ namespace TerraJS.Hooks
     {
         public override void Load()
         {
-            var method = typeof(Mod).Assembly.GetType("Terraria.ModLoader.UI.Interface").GetMethod("ModLoaderMenus", BindingFlags.NonPublic | BindingFlags.Static);
+            var method = TypeUtils.Interface.GetMethod("ModLoaderMenus", BindingFlags.NonPublic | BindingFlags.Static);
 
             MonoModHooks.Add(method, ModLoaderMenus);
 

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TerraJS.API.Events.Ref
+﻿namespace TerraJS.API.Events.Ref
 {
     public unsafe class RefBox<T>(T* ptr)
     {

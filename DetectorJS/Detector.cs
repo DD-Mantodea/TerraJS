@@ -19,6 +19,7 @@ using Terraria;
 using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
+using Terraria.ModLoader.Core;
 
 namespace TerraJS.DetectorJS
 {
@@ -31,13 +32,19 @@ namespace TerraJS.DetectorJS
 
         public static void Detect()
         {
+            List<Assembly> assemblies = [
+                ..AssemblyManager.GetModAssemblies("TerraJS"),
+                ..ModLoader.Mods.Select(m => m.Code),
+                GlobalAPI._ab
+            ];
+
             List<Type> allTypes = [
                 ..typeof(Detector).Assembly.GetTypes(), 
-                ..typeof(Main).Assembly.GetTypes(), 
-                ..typeof(Vector2).Assembly.GetTypes(),
-                ..GlobalAPI._ab.GetTypes(),
-                ..TJSEngine.CustomTypes,
+                ..typeof(ModLoader).Assembly.GetTypes(), 
+                ..typeof(Vector2).Assembly.GetTypes()
             ];
+
+            assemblies.ForEach(a => allTypes.AddRange(a.GetTypes()));
 
             BindingUtils.Values.ForEach(i =>
             {

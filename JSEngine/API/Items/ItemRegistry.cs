@@ -7,6 +7,7 @@ using ReLogic.Content;
 using TerraJS.Assets.Managers;
 using TerraJS.Contents.Extensions;
 using TerraJS.JSEngine;
+using TerraJS.JSEngine.API;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
@@ -14,20 +15,16 @@ using Terraria.ModLoader;
 
 namespace TerraJS.API.Items
 {
-    public class ItemRegistry : Registry<TJSItem>
+    public class ItemRegistry : ModTypeRegistry<TJSItem>
     {
-        public static ItemRegistry Empty => new() { IsEmpty = true };
-
         internal static Dictionary<string, int> _contentTypes = [];
 
         private Dictionary<EquipType, TextureGetter> _equipTexture = [];
 
-        public ItemRegistry() { }
+        public override string Namespace => "Items";
 
-        public ItemRegistry(TypeBuilder builder)
+        public ItemRegistry(string name, string @namespace = "") : base(name, @namespace)
         {
-            _builder = builder;
-
             TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.DisplayName", _builder.Name);
 
             TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.DefaultCulture, $"Mods.{_builder.FullName}.Tooltip", "");
@@ -97,7 +94,12 @@ namespace TerraJS.API.Items
             return this;
         }
 
-        public override void Register()
+        private static Asset<Texture2D>[] GetTextureArray(EquipType type)
+        {
+            return typeof(EquipLoader).GetMethod("GetTextureArray", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, [ type ]) as Asset<Texture2D>[];
+        }
+
+        public override void Register(Mod mod)
         {
             if (IsEmpty) return;
 
@@ -109,7 +111,7 @@ namespace TerraJS.API.Items
 
             entity.GetSetMethod(true).Invoke(JSItem, [new Item()]);
 
-            TJSMod.AddContent(JSItem);
+            mod.AddContent(JSItem);
 
             _contentTypes.Add(_builder.FullName, JSItem.Type);
 
@@ -128,7 +130,7 @@ namespace TerraJS.API.Items
                 {
                     if (_equipTexture.TryGetValue(type, out var getter))
                     {
-                        var id = EquipLoader.GetEquipSlot(TJSMod, _builder.Name, type);
+                        var id = EquipLoader.GetEquipSlot(TerraJS.Instance, _builder.Name, type);
 
                         var array = GetTextureArray(type);
 
@@ -136,11 +138,6 @@ namespace TerraJS.API.Items
                     }
                 }
             });
-        }
-
-        private static Asset<Texture2D>[] GetTextureArray(EquipType type)
-        {
-            return typeof(EquipLoader).GetMethod("GetTextureArray", BindingFlags.Static | BindingFlags.NonPublic).Invoke(null, [ type ]) as Asset<Texture2D>[];
         }
     }
 }

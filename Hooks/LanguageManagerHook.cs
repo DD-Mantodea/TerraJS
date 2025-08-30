@@ -89,11 +89,6 @@ namespace TerraJS.Hooks
 
         private bool TryGetTJSTranslation(string key, out LocalizedText text)
         {
-            if (key.Contains("DisplayName") && key.Contains("JS"))
-            {
-                var a = 1;
-            }
-
             text = null;
 
             if (!TJSEngine.GlobalAPI.Translation.LocalizedTexts.TryGetValue(key, out string value))

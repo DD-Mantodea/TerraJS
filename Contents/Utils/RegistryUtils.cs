@@ -12,6 +12,7 @@ using Terraria.ModLoader;
 using Terraria;
 using TerraJS.JSEngine;
 using TerraJS.API;
+using TerraJS.JSEngine.API;
 
 namespace TerraJS.Contents.Utils
 {
@@ -52,7 +53,7 @@ namespace TerraJS.Contents.Utils
             );
         }
 
-        public static void Override<T>(Registry<T> registry, string methodName, MulticastDelegate @delegate) where T : ModType
+        public static void Override<T>(ModTypeRegistry<T> registry, string methodName, MulticastDelegate @delegate) where T : ModType
         {
             var field = registry._builder.DefineField($"{methodName}Delegate", @delegate.GetType(), FieldAttributes.Public | FieldAttributes.Static);
 
@@ -77,8 +78,6 @@ namespace TerraJS.Contents.Utils
             il.Emit(OpCodes.Callvirt, @delegate.GetType().GetMethod("Invoke"));
 
             il.Emit(OpCodes.Ret);
-
-            //registry._builder.DefineMethodOverride(method, baseMethod);
         }
     }
 }

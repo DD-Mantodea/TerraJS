@@ -188,13 +188,13 @@ namespace TerraJS.ModPacks
 
             _iconTexture = File.Exists(Path.Combine(tjsPath, "icon.png")) ?
                 TerraJS.Instance.Assets.CreateUntracked<Texture2D>(File.OpenRead(Path.Combine(tjsPath, "icon.png")), "icon") :
-                ModContent.Request<Texture2D>("TerraJS/Assets/Textures/UI/ModPacks/defaultModPack", AssetRequestMode.ImmediateLoad);
+                ModContent.Request<Texture2D>("TerraJS/Assets/Textures/UI/ModPacks/DefaultModPack", AssetRequestMode.ImmediateLoad);
 
-            _buttonFavoriteActiveTexture = Main.Assets.Request<Texture2D>("Images/UI/ButtonFavoriteActive");
+            _buttonFavoriteActiveTexture = Main.Assets.Request<Texture2D>("Images/UI/ButtonFavoriteActive", AssetRequestMode.ImmediateLoad);
 
-            _buttonFavoriteInactiveTexture = Main.Assets.Request<Texture2D>("Images/UI/ButtonFavoriteInactive");
+            _buttonFavoriteInactiveTexture = Main.Assets.Request<Texture2D>("Images/UI/ButtonFavoriteInactive", AssetRequestMode.ImmediateLoad);
 
-            _buttonRenameTexture = Main.Assets.Request<Texture2D>("Images/UI/ButtonRename");
+            _buttonRenameTexture = Main.Assets.Request<Texture2D>("Images/UI/ButtonRename", AssetRequestMode.ImmediateLoad);
         }
 
         public bool Favorite => _favorite;

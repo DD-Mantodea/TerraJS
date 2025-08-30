@@ -5,7 +5,7 @@ using TerraJS.API;
 
 namespace TerraJS.JSEngine.API.DotNets.Enums
 {
-    public class EnumRegistry
+    public class EnumRegistry : IRegistry<Enum>
     {
         internal EnumBuilder _builder;
 
@@ -33,6 +33,9 @@ namespace TerraJS.JSEngine.API.DotNets.Enums
 
         public void Register()
         {
+            if (IsEmpty)
+                return;
+
             var enumType = _builder.CreateType();
 
             _tjsEnums.Add(_builder.Name, enumType);

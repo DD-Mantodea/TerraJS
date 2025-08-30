@@ -11,12 +11,14 @@ namespace TerraJS.API.Commands.CommandArguments
 
         public ReadOnlyCollection<CommandArgument> Arguments => _arguments.AsReadOnly();
 
-        public void Append(CommandArgument argument)
+        public ArgumentGroup Append(CommandArgument argument)
         {
             if (_arguments.Exists(arg => arg.Name == argument.Name))
-                return;
+                return this;
 
             _arguments.Add(argument);
+
+            return this;
         }
 
         public bool Deserialize(string[] args, out ArgumentInstanceGroup group)
