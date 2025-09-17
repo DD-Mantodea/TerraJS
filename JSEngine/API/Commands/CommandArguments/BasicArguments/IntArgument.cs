@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TerraJS.Contents.Utils;
 
 namespace TerraJS.API.Commands.CommandArguments.BasicArguments
@@ -68,6 +69,8 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
 
             return IsOptional ? $"[{ret}]" : ret;
         }
+
+        public override List<string> GetCompletions() => [];
 
         public override Type InstanceType => typeof(int);
 

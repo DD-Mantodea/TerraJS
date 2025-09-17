@@ -12,7 +12,12 @@ using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.UI.Components;
-using TerraJS.Contents.Commands;
+using System.Text.RegularExpressions;
+using static System.Net.Mime.MediaTypeNames;
+using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands;
+using TerraJS.Contents.UI.Chat;
+using TerraJS.Contents.Utils;
 
 namespace TerraJS.API.Commands.CommandGUI
 {
@@ -21,151 +26,125 @@ namespace TerraJS.API.Commands.CommandGUI
     {
         public CommandPanel()
         {
-            Instance = this;
-
             RelativePosition = new(78, 0);
 
-            Column = new ColumnContainer().Join(this);
+            CompletionsContainer = new CompletionsContainer().Join(this);
         }
 
-        public static CommandPanel Instance;
+        public static CommandPanel Instance => UISystem.GetUIInstance<CommandPanel>("CommandPanel");
 
         public string LastChatText = "";
 
         public string CurrentChatText = "";
 
-        public string CurrentInput => Main.chatText.StartsWith('/') ? Main.chatText.Substring(1) : "";
+        private Regex argsRegex = new Regex("/[ ]*");
 
-        public string[] Args => CurrentInput.Split(" ", StringSplitOptions.RemoveEmptyEntries);
+        public string ChatText => ChatBox.Instance.TextBox.Text;
 
-        public List<ModCommand> MatchingCommands = [];
+        public string CurrentInput => ChatText.StartsWith("/") ? argsRegex.Replace(ChatText, "") : "";
 
-        public List<SizeContainer> CommandLines => [.. Column.Children.Cast<SizeContainer>()];
+        public string[] Args => CurrentInput.Split(" ");
 
-        public int selectedCommandIndex = 0;
+        public CompletionsContainer CompletionsContainer;
 
-        public ColumnContainer Column;
-
-        public bool isCommandInputActive => Main.chatText.StartsWith('/');
-
-        public void UpdateMatchingCommands()
-        {
-            var allCommands = GetAvailableCommands();
-
-            if (Args.Count() <= 1)
-                MatchingCommands = [.. allCommands
-                    .Where(cmd => cmd.Command.StartsWith(Args.Length == 0 ? "" : Args[0], StringComparison.OrdinalIgnoreCase))
-                    .OrderBy(cmd => cmd.Command)];
-            else
-                MatchingCommands = [.. allCommands
-                    .Where(cmd => {
-                        if(cmd is TJSCommand tjscmd)
-                            return tjscmd.TryGetArgumentsText(Args[1..], out var _) && tjscmd.Command.StartsWith(Args[0], StringComparison.OrdinalIgnoreCase);
-                        return false;
-                    })
-                    .OrderBy(cmd => cmd.Command)];
-
-            MatchingCommands = MatchingCommands.Count > 7 ? MatchingCommands[0..6] : MatchingCommands;
-
-            selectedCommandIndex = 0;
-        }
-
-        public List<ModCommand> GetAvailableCommands()
-        {
-            List<ModCommand> commands = [];
-
-            var allCommands = typeof(CommandLoader).GetField("Commands", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null) as IDictionary<string, List<ModCommand>>;
-
-            foreach (var list in allCommands.Values)
-            {
-                foreach (var command in list)
-                {
-                    if (CommandLoader.Matches(command.Type, CommandType.Chat))
-                        commands.Add(command);
-                }
-            }
-
-            return commands;
-        }
+        public bool isCommandInputActive => ChatText.StartsWith('/') && ChatBox.Instance.TextBox.Active;
 
         public override void Update(GameTime gameTime)
         {
-            CurrentChatText = Main.chatText;
+            CurrentChatText = ChatText;
 
-            int maxWidth = 0;
+            var container = CompletionsContainer;
 
-            if (Main.drawingPlayerChat && PlayerInput.WritingText && (LastChatText != CurrentChatText))
+            var completions = container.Completions;
+
+            if (ChatBox.Instance.TextBox.Active && (LastChatText != CurrentChatText) && ChatText.StartsWith("/"))
             {
-                UpdateMatchingCommands();
-
-                Column.RemoveAllChild();
-
-                foreach (var command in MatchingCommands)
+                if (Args.Length <= 1 && !CurrentInput.EndsWith(" "))
                 {
-                    var text = "";
+                    var matchingCommands = container.GetMatchingCommands();
 
-                    var key = command.Command;
+                    container.RemoveAllChild();
 
-                    var match = Args.Length == 0 ? "" : Args[0];
-
-                    var dismatch = key.Substring(match.Length);
-
-                    if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText(Args.Length <= 1 ? [] : Args[1..], out var argsText))
-                        text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + argsText;
-                    else
-                        text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
-
-                    var cmdLine = new SizeContainer(0, 36)
+                    container.RebuildCompletions([.. matchingCommands.Select(command =>
                     {
-                        BackgroundColor = Color.Gray * 0.7f
-                    }.Join(Column);
+                        var text = "";
 
-                    var content = new UIText("MouseText", text: text, fontSize: 22).Join(cmdLine);
+                        var key = command.Command;
 
-                    content.RelativePosition = new(8, 0);
+                        var match = Args.Length == 0 ? "" : Args[0];
 
-                    content.TextVerticalMiddle = true;
+                        var dismatch = key[match.Length..];
 
-                    content.VerticalMiddle = true;
+                        if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText(Args.Length <= 1 ? [] : Args[1..], out var args))
+                            text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + args;
+                        else
+                            text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
 
-                    maxWidth = Math.Max(maxWidth, Math.Clamp(content.Width + 8, 300, int.MaxValue));
+                        return text;
+                    })]);
                 }
+                else
+                {
+                    var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(Args[0])).Select(c => c as TJSCommand).ToList();
 
-                foreach (var i in Column.Children)
-                    i.SetSize(maxWidth, 36);
+                    var values = new List<string>();
+
+                    var match = Args[^1];
+
+                    container.RemoveAllChild();
+
+                    foreach (var command in commands)
+                    {
+                        var argsGroup = CommandAPI.CommandArgumentGroups[command.GetType().FullName];
+
+                        if (argsGroup.Arguments.Count < Args.Length - 1)
+                            continue;
+
+                        var arg = argsGroup.Arguments[Args.Length - 2];
+
+                        var argCompletions = arg.GetCompletions();
+
+                        if (argCompletions.Count > 0)
+                            values.TryAddRange(argCompletions);
+                        else
+                            values.Add(arg.ToString());
+                    }
+
+                    container.RebuildCompletions(values.Where(t => t.StartsWith(match)).Select(t => (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + t[match.Length..]));
+                }
 
                 LastChatText = CurrentChatText;
             }
 
-            if (isCommandInputActive && MatchingCommands.Count > 0)
+            if (isCommandInputActive)
             {
-                if (UserInput.IsJustPress(Keys.Tab))
+                if (completions.Count > 0)
                 {
-                    string selectedCommand = MatchingCommands[selectedCommandIndex].Command;
+                    var index = container.SelectedCompletionIndex;
 
-                    if ((Args.Length == 0 ? "" : Args[0]) != selectedCommand)
-                        Main.chatText = "/" + selectedCommand + " ";
+                    if (UserInput.IsJustPress(Keys.Tab))
+                    {
+                        var selected = SnippetUtils.GetPlainText(completions[index]);
+
+                        if (selected.Contains(' '))
+                            selected = selected.Split(" ")[0];
+
+                        if ((Args.Length == 0 ? "" : Args[^1]) != selected)
+                            ChatBox.Instance.TextBox.AppendString(selected[Args[^1].Length..] + " ");
+                    }
+
+                    if (UserInput.IsJustPress(Keys.Down))
+                        container.SelectedCompletionIndex = (index + 1) % completions.Count;
+                    else if (UserInput.IsJustPress(Keys.Up))
+                        container.SelectedCompletionIndex = (index - 1 + completions.Count) % completions.Count;
                 }
-
-                if (UserInput.IsJustPress(Keys.Down))
-                    selectedCommandIndex = (selectedCommandIndex + 1) % MatchingCommands.Count;
-                else if (UserInput.IsJustPress(Keys.Up))
-                    selectedCommandIndex = (selectedCommandIndex - 1 + MatchingCommands.Count) % MatchingCommands.Count;
             }
 
-            RelativePosition.Y = Main.screenHeight - (50 + Column.Height);
-
-            for (int i = 0; i < CommandLines.Count; i++)
-            {
-                if (selectedCommandIndex == i)
-                    CommandLines[i].BackgroundColor = Color.LightGray * 0.7f;
-                else
-                    CommandLines[i].BackgroundColor = Color.Gray * 0.7f;
-            }
+            RelativePosition.Y = Main.screenHeight - (50 + CompletionsContainer.Height);
 
             base.Update(gameTime);
         }
 
-        public override bool Visible => Main.chatText.StartsWith('/') && Main.drawingPlayerChat;
+        public override bool Visible => ChatText.StartsWith('/') && Main.drawingPlayerChat;
     }
 }

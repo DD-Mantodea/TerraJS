@@ -14,6 +14,5 @@ namespace TerraJS
 
         public static string TerraJSPath => Path.Combine(ModsPath, "TerraJS");
 
-        public static string ModPacksPath => Path.Combine(ModsPath, "TjsModPacks");
-    }
+        public static string ModPacksPath => Path.Combine(ModsPath, "TjsModPacks");    }
 }

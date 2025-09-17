@@ -89,5 +89,26 @@ namespace TerraJS.Contents.Utils
             if (Directory.Exists(from))
                 Directory.Move(from, to);
         }
+
+        public static void CopyModFile(string path, string to)
+        {
+            if (!File.Exists(to))
+            {
+                try
+                {
+                    var target = TerraJS.Instance.GetFileBytes(path);
+
+                    var file = File.Create(to);
+
+                    file.Write(target, 0, target.Length);
+
+                    file.Close();
+                }
+                catch
+                {
+                    return;
+                }
+            }
+        }
     }
 }

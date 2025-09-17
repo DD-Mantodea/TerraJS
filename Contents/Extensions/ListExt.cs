@@ -18,7 +18,7 @@ namespace TerraJS.Contents.Extensions
             return true;
         }
 
-        public static void TryAddRange<T>(this List<T> list, T[] items)
+        public static void TryAddRange<T>(this List<T> list, IEnumerable<T> items)
         {
             foreach (var item in items)
                 list.TryAdd(item);

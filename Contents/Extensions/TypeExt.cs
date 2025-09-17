@@ -42,6 +42,11 @@ namespace TerraJS.Contents.Extensions
             return (type.FullName?.Contains("<PrivateImplementationDetails>")) ?? false;
         }
 
+        public static bool IsInlineArray(this Type type)
+        {
+            return (type.FullName?.Contains("<>y__InlineArray")) ?? false;
+        }
+
         public static bool IsIllegal(this Type type)
         {
             if (type.IsPointer ||
@@ -50,6 +55,7 @@ namespace TerraJS.Contents.Extensions
                 type.IsCompilerGenerated() ||
                 type.IsDynamicType() ||
                 type.IsPrivateImplementationDetails() ||
+                type.IsInlineArray() ||
                 DetectorObject.Type2ClassName(type) == ""
                 )
             {

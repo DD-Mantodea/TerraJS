@@ -2,8 +2,11 @@
 using Microsoft.Xna.Framework.Input;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices;
 using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
+using Terraria;
 
 namespace TerraJS.Contents.UI
 {
@@ -86,7 +89,13 @@ namespace TerraJS.Contents.UI
             {
                 if (IsJustPress(key))
                 {
-                    KeyJustPress?.Invoke(null, new KeyEventArgs(key));
+                    var args = new KeyEventArgs(key);
+
+                    foreach (var handler in KeyJustPress?.GetInvocationList().Cast<KeyEventHandler>())
+                    {
+                        if (!args.Cancel)
+                            handler.Invoke(null, args);
+                    }
                 }
                 if (IsKeyDown(key))
                 {
@@ -151,18 +160,24 @@ namespace TerraJS.Contents.UI
 
         public static int GetDeltaWheelValue() => CurrentMouseState.ScrollWheelValue - PreviousMouseState.ScrollWheelValue;
 
-        public static Rectangle GetMouseRectangle() => new Rectangle(CurrentMouseState.X, CurrentMouseState.Y, 1, 1);
+        public static Vector2 GetMousePos() => new Vector2(CurrentMouseState.X, CurrentMouseState.Y) * (1 / Main.UIScale);
+
+        public static Rectangle GetMouseRectangle() => RectangleUtils.FromVector2(GetMousePos(), new(1, 1));
 
         public static bool Shift => IsKeyDown(Keys.LeftShift) || IsKeyDown(Keys.RightShift);
 
         public static bool Ctrl => IsKeyDown(Keys.LeftControl) || IsKeyDown(Keys.RightControl);
 
         public static bool Alt => IsKeyDown(Keys.LeftAlt) || IsKeyDown(Keys.RightAlt);
+
+        public static bool Esc => IsKeyDown(Keys.Escape);
     }
 
     public class KeyEventArgs : EventArgs
     {
         public Keys KeyCode { get; private set; }
+
+        public bool Cancel = false;
 
         public KeyEventArgs(Keys keyCode)
         {
@@ -182,13 +197,17 @@ namespace TerraJS.Contents.UI
 
     public class Clipboard
     {
+        private static uint CF_TEXT = 1;
+
+        private static uint CF_BITMAP = 2;
+
         public static void SetClipboardText(string text)
         {
             OpenClipboard(nint.Zero);
 
             EmptyClipboard();
 
-            SetClipboardData(1, Marshal.StringToCoTaskMemUTF8(text));
+            SetClipboardData(CF_TEXT, Marshal.StringToCoTaskMemUTF8(text));
 
             CloseClipboard();
         }
@@ -197,13 +216,24 @@ namespace TerraJS.Contents.UI
         {
             OpenClipboard(nint.Zero);
 
-            var data = GetClipboardData(1);
+            var data = GetClipboardData(CF_TEXT);
 
             var text = Marshal.PtrToStringUTF8(data);
 
             CloseClipboard();
 
             return text;
+        }
+
+        public static ClipboardDataFormat GetDataFormat()
+        {
+            if (IsClipboardFormatAvailable(CF_TEXT))
+                return ClipboardDataFormat.Text;
+
+            if (IsClipboardFormatAvailable(CF_BITMAP))
+                return ClipboardDataFormat.Bitmap;
+
+            return ClipboardDataFormat.Unsupport;
         }
 
         [DllImport("user32.dll")]
@@ -220,5 +250,17 @@ namespace TerraJS.Contents.UI
 
         [DllImport("user32.dll")]
         private extern static nint SetClipboardData(uint uFormat, nint hMem);
+
+        [DllImport("user32.dll")]
+        private extern static bool IsClipboardFormatAvailable(uint uFormat);
+    }
+
+    public enum ClipboardDataFormat
+    {
+        Text,
+
+        Bitmap,
+
+        Unsupport
     }
 }

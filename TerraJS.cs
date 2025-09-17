@@ -1,10 +1,7 @@
 using Terraria.ModLoader;
 using System;
-using TerraJS.API;
 using System.IO;
 using System.Reflection;
-using Terraria.Localization;
-using System.Linq;
 using Terraria;
 using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.DetectorJS;
@@ -19,11 +16,11 @@ using System.Reflection.Emit;
 using System.Collections.Generic;
 using MonoMod.Utils;
 using log4net;
-using Jint;
-using Acornima;
-using System.Threading.Tasks;
 using TerraJS.JSEngine.Plugins;
 using System.Threading;
+using TerraJS.Contents.Utils;
+using LibRimeDemo;
+using LibRimeDemo.Data;
 
 namespace TerraJS
 {
@@ -36,6 +33,8 @@ namespace TerraJS
         public static TextureManager TextureManager = new();
 
         public static SHAManager SHAManager = new();
+
+        public static RimeApi IME;
 
         public static bool IsLoading = false;
 
@@ -54,7 +53,9 @@ namespace TerraJS
 
             Instance = this;
 
-            IsLoading = true;
+            IsLoading = true; 
+            
+            FileUtils.CopyModFile("lib/rime.dll", "Libraries/Native/Windows/rime.dll");
 
             TJSEngine.LoadPlugins();
 
@@ -75,6 +76,8 @@ namespace TerraJS
             */
 
             AddContent<NetModuleLoader>();
+
+            SetupIME();
         }
 
         private static void DetourManager_DetourApplied(DetourInfo info)
@@ -119,11 +122,52 @@ namespace TerraJS
 
             SHAManager.Load();
 
+            TJSEngine.GlobalAPI.Unload();
+
             TJSEngine.Load();
 
             TJSEngine.GlobalAPI.Event.InGameReloadEvent?.Invoke();
 
             Main.NewText("重载完成");
+        }
+
+        public void SetupIME()
+        {
+            IME = RimeApi.Instance;
+
+            var IMEPath = Path.Combine(Pathes.TerraJSPath, "IME");
+
+            var userPath = Path.Combine(IMEPath, "User");
+
+            var sharePath = Path.Combine(IMEPath, "Share");
+
+            var traits = new RimeTraits()
+            {
+                SharedDataDir = sharePath,
+                UserDataDir = userPath
+            };
+
+            IME.Setup(traits);
+
+            IME.Initialize(traits);
+
+            FileUtils.CreateDirectoryIfNotExist(IMEPath);
+
+            FileUtils.CreateDirectoryIfNotExist(userPath);
+
+            FileUtils.CreateDirectoryIfNotExist(sharePath);
+
+            FileUtils.CreateDirectoryIfNotExist(Path.Combine(userPath, "build"));
+
+            FileUtils.CreateDirectoryIfNotExist(Path.Combine(userPath, "cangjie5.userdb"));
+
+            FileUtils.CreateDirectoryIfNotExist(Path.Combine(userPath, "luna_pinyin.userdb"));
+
+            FileUtils.CreateDirectoryIfNotExist(Path.Combine(sharePath, "opencc"));
+
+            foreach (var file in GetFileNames())
+                if (file.Contains("Assets/IME"))
+                    FileUtils.CopyModFile(file, Path.Combine(Pathes.TerraJSPath, file.Replace("Assets/", "")));
         }
 
         [HideToJS]
@@ -158,6 +202,16 @@ namespace TerraJS
                     var thread = new Thread(Detector.Detect);
 
                     thread.Start();
+                })
+                .Register();
+
+            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("test")
+                .NextArgument(new StringArgument("str"))
+                .Execute((group, _) =>
+                {
+                    var result = SnippetUtils.ParseMessage(group.GetString("str"));
+
+                    var a = 1;
                 })
                 .Register();
         }

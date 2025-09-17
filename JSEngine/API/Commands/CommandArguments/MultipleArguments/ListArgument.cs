@@ -102,6 +102,8 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
             return value is List<object> list && list.Count >= _minLength && list.Count <= _maxLength;
         }
 
+        public override List<string> GetCompletions() => [];
+
         public override Type InstanceType => typeof(List<>);
 
         private static Regex Pattern => new("\\[(.*)\\]");

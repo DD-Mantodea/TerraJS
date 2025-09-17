@@ -20,6 +20,8 @@ namespace TerraJS.API.Commands.CommandArguments
 
         public abstract override string ToString();
 
+        public abstract List<string> GetCompletions();
+
         public override int GetHashCode() => Name.GetHashCode();
 
         public virtual bool InScope(object value, object last) => true;

@@ -59,7 +59,7 @@ namespace TerraJS.JSEngine
 
             BindInnerMethods();
 
-            GlobalAPI.Unload();
+            Plugins.ForEach(p => p.AddBindings());
 
             LoadScripts();
         }
@@ -105,17 +105,17 @@ namespace TerraJS.JSEngine
 
         public static void Unload()
         {
-            GlobalAPI.Unload();
+            GlobalAPI?.Unload();
 
-            Engine.Dispose();
+            Engine?.Dispose();
 
-            BindingUtils.Values.Clear();
+            BindingUtils.Values?.Clear();
 
             Engine = null;
 
             GlobalAPI = null;
 
-            TerraJS.Instance.Logger.Info("[Jint] JSEngine unloaded successfully.");
+            TerraJS.Instance?.Logger.Info("[Jint] JSEngine unloaded successfully.");
         }
     }
 }

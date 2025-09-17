@@ -84,9 +84,9 @@ namespace TerraJS.Contents.Extensions
 
         public static string NoColored(this string str)
         {
-            var snippets = StringUtils.ParseMessage(str, Color.White);
+            var snippets = SnippetUtils.ParseMessage(str);
 
-            return string.Join(" ", snippets.ConvertAll(s => s.Text));
+            return string.Join(" ", snippets.ConvertAll(s => s.OriginalText));
         }
     }
 }

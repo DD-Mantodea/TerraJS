@@ -5,7 +5,8 @@ using System.Reflection;
 using Microsoft.Xna.Framework;
 using TerraJS.API.Commands;
 using TerraJS.Contents.Attributes;
-using TerraJS.Contents.Commands;
+using TerraJS.JSEngine.API.Commands;
+using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
@@ -19,7 +20,7 @@ namespace TerraJS.Hooks
             MonoModHooks.Add(typeof(CommandLoader).GetMethod("HandleCommand", BindingFlags.Static | BindingFlags.NonPublic), HandleCommandHook);
         }
 
-        private bool HandleCommandHook(Func<string, CommandCaller, bool> orig, string input, CommandCaller caller)
+        internal static bool HandleCommandHook(Func<string, CommandCaller, bool> orig, string input, CommandCaller caller)
         {
             int sep = input.IndexOf(" ");
             string name = (sep >= 0 ? input.Substring(0, sep) : input).ToLower();
@@ -62,7 +63,7 @@ namespace TerraJS.Hooks
             return true;
         }
 
-        private bool GetCommand(CommandCaller caller, string name, string[] args, out ModCommand mc)
+        private static bool GetCommand(CommandCaller caller, string name, string[] args, out ModCommand mc)
         {
             string modName = null;
             if (name.Contains(':'))
@@ -138,6 +139,21 @@ namespace TerraJS.Hooks
             }
 
             return true;
+        }
+    }
+
+    public class ChatCommandCaller : CommandCaller
+    {
+        public CommandType CommandType => CommandType.Chat;
+
+        public Player Player => Main.player[Main.myPlayer];
+
+        public void Reply(string text, Color color = default)
+        {
+            if (color == default)
+                color = Color.White;
+            foreach (var line in text.Split('\n'))
+                Main.NewText(line, color.R, color.G, color.B);
         }
     }
 }

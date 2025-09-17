@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TerraJS.Contents.Utils;
 
@@ -41,6 +42,8 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
         public override Type InstanceType => typeof(string);
 
         public override string ToString() => IsOptional ? $"[<{Name} = {_content}>]" : $"<{Name} = {_content}>";
+
+        public override List<string> GetCompletions() => [_content];
 
         public override bool InScope(object value, object last) => value is string str && str == _content;
 

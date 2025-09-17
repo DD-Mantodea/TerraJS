@@ -1,29 +1,35 @@
-﻿using TerraJS.API;
+﻿using System;
+using TerraJS.API;
 using TerraJS.Contents.UI;
-using TerraJS.Contents.UI.Components.Containers;
+using TerraJS.JSEngine.API.UIs.Components.Containers;
 
 namespace TerraJS.JSEngine.API.UIs
 {
     public class UIAPI : BaseAPI
     {
-        public TJSUIContainer RegisterUI(string ID)
+        public JsContainer RegisterUI(string ID, string layer)
         {
-            if (TJSUISystem.Layer.TryGetUIByID(ID, out _))
+            if (UISystem.UIInstances.TryGetValue(ID, out _))
                 return null;
 
-            var container = new TJSUIContainer { ID = ID };
+            var container = new JsContainer { ID = ID };
 
-            TJSUISystem.Layer.Register(container);
+            if (UISystem.TJSUILayers.TryGetValue(layer, out var uiLayer))
+            {
+                uiLayer.Register(container);
 
-            return container;
+                return container;
+            }
+
+            return null;
         }
 
-        public TJSUIContainer GetUI(string ID)
+        public JsContainer GetUI(string ID)
         {
-            if (!TJSUISystem.Layer.TryGetUIByID(ID, out var ret))
+            if (!UISystem.UIInstances.TryGetValue(ID, out var ret))
                 return null;
 
-            if (ret is TJSUIContainer c)
+            if (ret is JsContainer c)
                 return c;
 
             return null;
@@ -33,5 +39,10 @@ namespace TerraJS.JSEngine.API.UIs
         {
             
         }
+    }
+
+    public class LayerID
+    {
+        public const string PlayerChat = "TerraJS: Player Chat";
     }
 }

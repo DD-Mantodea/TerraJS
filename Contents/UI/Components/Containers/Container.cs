@@ -8,6 +8,7 @@ using Microsoft.Xna.Framework;
 using TerraJS.Contents.Utils;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components;
+using TerraJS.Contents.Attributes;
 
 namespace TerraJS.Contents.UI.Components.Containers
 {
@@ -16,6 +17,8 @@ namespace TerraJS.Contents.UI.Components.Containers
         public List<Component> Children = new List<Component>();
 
         public bool Scissor = false;
+
+        public int Priority;
 
         public virtual void RegisterChild(Component component)
         {
@@ -69,15 +72,6 @@ namespace TerraJS.Contents.UI.Components.Containers
 
                 child.Update(gameTime);
             }
-
-            for (int i = 0; i < Children.Count; i++)
-            {
-                if (Children[i].shouldCollect)
-                {
-                    Children.RemoveAt(i);
-                    i--;
-                }
-            }
         }
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -90,7 +84,7 @@ namespace TerraJS.Contents.UI.Components.Containers
 
                 spriteBatch.EnableScissor();
 
-                spriteBatch.GraphicsDevice.ScissorRectangle = RectangleUtils.FormVector2(Position, Size);
+                spriteBatch.GraphicsDevice.ScissorRectangle = RectangleUtils.FromVector2(Position, Size);
 
                 DrawChildren(spriteBatch, gameTime);
 

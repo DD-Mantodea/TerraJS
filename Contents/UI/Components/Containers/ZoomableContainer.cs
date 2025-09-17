@@ -48,7 +48,7 @@ namespace TerraJS.Contents.UI.Components.Containers
                 component.DrawSelf(spriteBatch, gameTime);
 
             spriteBatch.Rebegin(samplerState: SamplerState.PointClamp, rasterizerState: RasterizerState.CullNone);
-            spriteBatch.GraphicsDevice.ScissorRectangle = RectangleUtils.FormPoint(Point.Zero, Main.ScreenSize);
+            spriteBatch.GraphicsDevice.ScissorRectangle = RectangleUtils.FromPoint(Point.Zero, Main.ScreenSize);
         }
 
         public override void Update(GameTime gameTime)
@@ -85,15 +85,6 @@ namespace TerraJS.Contents.UI.Components.Containers
             {
                 child.Position = child.RelativePosition + Position;
                 child.Update(gameTime);
-            }
-
-            for (int i = 0; i < Children.Count; i++)
-            {
-                if (Children[i].shouldCollect)
-                {
-                    Children.RemoveAt(i);
-                    i--;
-                }
             }
 
             var mouseRect = UserInput.GetMouseRectangle();

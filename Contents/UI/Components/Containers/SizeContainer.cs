@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.Contents.DataStructures;
 using TerraJS.Contents.Extensions;
+using Terraria;
 
 namespace TerraJS.Contents.UI.Components.Containers
 {
@@ -41,7 +42,7 @@ namespace TerraJS.Contents.UI.Components.Containers
 
                 spriteBatch.EnableScissor();
 
-                spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle;
+                spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Transform(Main.UIScaleMatrix);
 
                 DrawChildren(spriteBatch, gameTime);
 

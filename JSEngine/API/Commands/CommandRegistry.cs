@@ -5,7 +5,6 @@ using TerraJS.API;
 using TerraJS.API.Commands;
 using TerraJS.API.Commands.CommandArguments;
 using TerraJS.API.Projectiles;
-using TerraJS.Contents.Commands;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands

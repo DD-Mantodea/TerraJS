@@ -5,109 +5,110 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TerraJS.Contents.Extensions;
+using TerraJS.Contents.UI.Chat;
 using TerraJS.Contents.Utils;
-using Terraria.UI.Chat;
 using static System.Net.Mime.MediaTypeNames;
 
 namespace TerraJS.Contents.UI.Components
 {
     public class UIText : Component
     {
-        public UIText(string fontID, Vector2 size = default, string text = "", int fontSize = 20, int newLineNum = int.MaxValue,
-            bool textHorizontalMiddle = false, bool textVerticalMiddle = false, Color? fontColor = null, string splitCharacter = "",
-            Vector2 relativePos = default)
+        public UIText(string fontID, string text = "", int fontSize = 20, Color? fontColor = null)
         {
             Font = TerraJS.FontManager[fontID, fontSize];
 
-            Text = text;
-
-            NewLineNum = newLineNum;
-
-            TextHorizontalMiddle = textHorizontalMiddle;
-
-            TextVerticalMiddle = textVerticalMiddle;
-
-            SplitCharacter = splitCharacter;
+            Snippets = SnippetUtils.ParseMessage(text);
 
             FontColor = fontColor == null ? Color.White : (Color)fontColor;
 
-            var noColorText = Text.NoColored();
-
-            if (size == default)
-                size = Font.MeasureString(noColorText);
+            var size = SnippetUtils.GetSize(Snippets, Font).Add(4, 4);
 
             _width = (int)size.X;
 
             _height = (int)size.Y;
-
-            if (!string.IsNullOrEmpty(noColorText))
-            {
-                var texts = new List<string>();
-                if (NewLineNum != int.MaxValue)
-                    texts = noColorText.SplitWithCount(NewLineNum);
-                if (SplitCharacter != null)
-                    texts = noColorText.Split(SplitCharacter).ToList();
-
-                if (_width == 0 || _height == 0)
-                {
-                    foreach (var txt in texts)
-                        _width = Math.Max(_width, (int)Font.MeasureString(txt).X);
-                    _height = (int)Font.MeasureString(texts[0]).Y * texts.Count;
-                }
-            }
-
-            RelativePosition = relativePos == default ? new(0, 0) : relativePos;
         }
-        internal int _width;
 
-        internal int _height;
+        public UIText(TerraJSFont font, string text = "", Color? fontColor = null)
+        {
+            Font = font;
+
+            Snippets = SnippetUtils.ParseMessage(text);
+
+            FontColor = fontColor == null ? Color.White : (Color)fontColor;
+
+            var size = SnippetUtils.GetSize(Snippets, Font).Add(4, 4);
+
+            _width = (int)size.X;
+
+            _height = (int)size.Y;
+        }
+
+        public UIText(string fontID, List<TextSnippet> snippets, int fontSize = 20, Color? fontColor = null)
+        {
+            Font = TerraJS.FontManager[fontID, fontSize];
+
+            Snippets = snippets;
+
+            FontColor = fontColor == null ? Color.White : (Color)fontColor;
+
+            var size = SnippetUtils.GetSize(Snippets, Font).Add(4, 4);
+
+            _width = (int)size.X;
+
+            _height = (int)size.Y;
+        }
+
+        public UIText(TerraJSFont font, List<TextSnippet> snippets, Color? fontColor = null)
+        {
+            Font = font;
+
+            Snippets = snippets;
+
+            FontColor = fontColor == null ? Color.White : (Color)fontColor;
+
+            var size = SnippetUtils.GetSize(Snippets, Font).Add(4, 4);
+
+            _width = (int)size.X;
+
+            _height = (int)size.Y;
+        }
 
         public override int Width => _width;
 
         public override int Height => _height;
 
-        public int NewLineNum;
-        public string SplitCharacter;
-
-        public bool TextHorizontalMiddle;
-        public bool TextVerticalMiddle;
+        public bool TextHorizontalMiddle = false;
+        public bool TextVerticalMiddle = false;
 
         public Color FontColor;
+
+        public List<TextSnippet> Snippets = [];
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
             if (BackgroundColor != default)
                 spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * Alpha);
 
-            if (!string.IsNullOrEmpty(Text))
-            {
-                int x, y = 0;
+            int x, y = 0;
 
-                if (TextVerticalMiddle)
-                    y = (Height - (int)Font.MeasureString(Text).Y) / 2;
+            if (TextVerticalMiddle)
+                y = (Height - (int)Font.MeasureString(SnippetUtils.GetPlainText(Snippets)).Y) / 2;
 
-                var size = Font.MeasureString(Text);
+            var size = Font.MeasureString(SnippetUtils.GetPlainText(Snippets));
 
-                x = (int)Position.X;
+            x = (int)Position.X;
 
-                var snippets = StringUtils.ParseMessage(Text, Color.White);
+            if (TextHorizontalMiddle)
+                x += Width / 2 - (int)size.X / 2;
 
-                if (TextHorizontalMiddle)
-                    x += Width / 2 - (int)size.X / 2;
+            spriteBatch.DrawSnippets(Font, Snippets, new(x, y + Position.Y));
+        }
 
-                spriteBatch.DrawColorCodedString(Font, snippets, new(x + 2, y + Position.Y), Color.Black * Alpha, 0f, Vector2.Zero, Vector2.One, out _, -1f, true);
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
 
-                spriteBatch.DrawColorCodedString(Font, snippets, new(x, y + Position.Y + 2), Color.Black * Alpha, 0f, Vector2.Zero, Vector2.One, out _, -1f, true);
-
-                spriteBatch.DrawColorCodedString(Font, snippets, new(x - 2, y + Position.Y), Color.Black * Alpha, 0f, Vector2.Zero, Vector2.One, out _, -1f, true);
-
-                spriteBatch.DrawColorCodedString(Font, snippets, new(x, y + Position.Y - 2), Color.Black * Alpha, 0f, Vector2.Zero, Vector2.One, out _, -1f, true);
-
-                spriteBatch.DrawColorCodedString(Font, snippets, new(x, y + Position.Y), FontColor * Alpha, 0f, Vector2.Zero, Vector2.One, out _, -1f);
-                
-                y += (int)size.Y;
-            }
-
+            //Resize();
         }
 
         public void Resize()
@@ -115,6 +116,11 @@ namespace TerraJS.Contents.UI.Components
             var size = Font.MeasureString(Text);
             _width = (int)size.X;
             _height = (int)size.Y;
+        }
+
+        public void SetText(string text)
+        {
+            Snippets = SnippetUtils.ParseMessage(text);
         }
     }
 }

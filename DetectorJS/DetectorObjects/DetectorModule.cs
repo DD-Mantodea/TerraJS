@@ -68,7 +68,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             if (type.IsArray || (type.IsGenericType && !type.IsGenericTypeDefinition) || type.IsGenericTypeParameter)
                 return;
 
-            Classes.TryAdd(new(type));
+            Classes.TryAdd(new(type, this));
         }
 
         public void AddImport(Type type)
@@ -101,6 +101,12 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             if (import.ModuleName != ModuleName)
                 Imports.TryAdd(import);
+        }
+
+        public void AddExtensions()
+        {
+            foreach (var clazz in Classes)
+                clazz.AddExtensionMethods();
         }
 
         public override string Serialize()

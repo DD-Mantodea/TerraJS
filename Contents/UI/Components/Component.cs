@@ -12,7 +12,7 @@ using TerraJS.Contents.Attributes;
 
 namespace TerraJS.Contents.UI.Components
 {
-    public class Component : ITJSUserInterface
+    public class Component : IUserInterface
     {
         public Component()
         {
@@ -20,9 +20,9 @@ namespace TerraJS.Contents.UI.Components
 
             UserInput.RightClick += RightClick;
 
-            UserInput.KeepPressLeft += KeepPressLeft;
+            UserInput.KeepPressLeft += KeepMouseLeft;
 
-            UserInput.KeepPressRight += KeepPressRight;
+            UserInput.KeepPressRight += KeepMouseRight;
         }
 
         public virtual void PreDraw(SpriteBatch spriteBatch, GameTime gameTime) { }
@@ -74,12 +74,12 @@ namespace TerraJS.Contents.UI.Components
             }
         }
 
-        public virtual void KeepPressLeft(object sender, int pressTime, Vector2 mouseStart)
+        public virtual void KeepMouseLeft(object sender, int pressTime, Vector2 mouseStart)
         {
 
         }
 
-        public virtual void KeepPressRight(object sender, int pressTime, Vector2 mouseStart)
+        public virtual void KeepMouseRight(object sender, int pressTime, Vector2 mouseStart)
         {
 
         }
@@ -124,7 +124,7 @@ namespace TerraJS.Contents.UI.Components
 
         public virtual float Alpha { get => _alpha; set => _alpha = value; }
 
-        public SpriteFontBase Font;
+        public TerraJSFont Font;
 
         public bool IsHovering;
 
@@ -156,8 +156,6 @@ namespace TerraJS.Contents.UI.Components
 
         public float Rotation;
 
-        public bool shouldCollect = false;
-
         public Vector2 DrawOffset = new(0, 0);
 
         public float DrawScale = 1f;
@@ -179,11 +177,7 @@ namespace TerraJS.Contents.UI.Components
         {
             get
             {
-                var screenPos = ScreenToWorld(Position);
-
-                var realSize = ScreenToWorld(Size);
-
-                return new Rectangle((int)screenPos.X, (int)screenPos.Y, (int)realSize.X, (int)realSize.Y);
+                return new Rectangle((int)Position.X, (int)Position.Y, Width, Height);
             }
         }
 
@@ -201,8 +195,8 @@ namespace TerraJS.Contents.UI.Components
             OnUpdateEvent = null;
             UserInput.LeftClick -= LeftClick;
             UserInput.RightClick -= RightClick;
-            UserInput.KeepPressLeft -= KeepPressLeft;
-            UserInput.KeepPressRight -= KeepPressRight;
+            UserInput.KeepPressLeft -= KeepMouseLeft;
+            UserInput.KeepPressRight -= KeepMouseRight;
         }
 
         public void SetSize(int width, int height)

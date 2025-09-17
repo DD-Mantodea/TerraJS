@@ -14,7 +14,6 @@ using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
 using TerraJS.DetectorJS.DetectorObjects;
-using TerraJS.JSEngine;
 using Terraria;
 using Terraria.IO;
 using Terraria.Localization;
@@ -52,7 +51,6 @@ namespace TerraJS.DetectorJS
                     allTypes.TryAdd(type);
                 else if (i.Item2 is not ExpandoObject)
                     allTypes.TryAdd(i.Item2.GetType());
-                else allTypes.TryAddRange([.. ((IDictionary<string, object>)i.Item2).Select(o => o.GetType())]);
             });
 
             allTypes = [..allTypes.Where(t => !t.IsIllegal())];
@@ -79,7 +77,8 @@ namespace TerraJS.DetectorJS
 
                     var packagePath = Path.Combine(Pathes.TerraJSPath, "Packages");
 
-                    Directory.Delete(packagePath, true);
+                    if(Directory.Exists(packagePath))
+                        Directory.Delete(packagePath, true);
 
                     Directory.CreateDirectory(packagePath);
 
@@ -107,6 +106,8 @@ namespace TerraJS.DetectorJS
                     },
                     pair => {
                         var filePath = Path.Combine(packagePath, $"{pair.Key}.d.ts");
+
+                        pair.Value.AddExtensions();
 
                         File.WriteAllText(filePath, pair.Value.Serialize());
                     });

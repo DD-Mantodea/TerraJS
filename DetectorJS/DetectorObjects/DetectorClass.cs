@@ -13,9 +13,13 @@ namespace TerraJS.DetectorJS.DetectorObjects
 {
     public class DetectorClass : DetectorObject
     {
-        public DetectorClass(Type type)
+        public DetectorModule Module;
+
+        public DetectorClass(Type type, DetectorModule module)
         {
             Type = type;
+
+            Module = module;
 
             foreach (var i in Type.GetMembers())
                 AddMember(i);
@@ -30,9 +34,6 @@ namespace TerraJS.DetectorJS.DetectorObjects
             var ret = new StringBuilder();
 
             ret.AppendLine($"export class {Type2ClassName(Type)}" + (Type.BaseType == null ? "" : $" extends {Type2ClassName(Type.BaseType)}") + " {");
-
-            if (Detector.ExtensionMethods.TryGetValue(Type, out var extMethods))
-                Members.TryAddRange([.. extMethods.Select(m => new DetectorMember(m))]);
 
             foreach (var i in Members)
             {
@@ -109,6 +110,25 @@ namespace TerraJS.DetectorJS.DetectorObjects
             }
 
             Members.TryAdd(new(info));
+        }
+
+        public void AddExtensionMethods()
+        {
+            if (Detector.ExtensionMethods.TryGetValue(Type, out var extMethods))
+            {
+                foreach (var method in extMethods)
+                {
+                    Members.TryAdd(new(method));
+
+                    Module.AddImport(method.ReturnType);
+
+                    foreach (var p in method.GetParameters())
+                        Module.AddImport(p.ParameterType);
+
+                    if (method.IsGenericMethod)
+                        Module.AddImport(typeof(Type));
+                }
+            }
         }
 
         public override bool Equals(object obj) => obj is DetectorClass clazz && clazz.Type == Type;

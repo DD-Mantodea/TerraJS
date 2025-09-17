@@ -4,9 +4,8 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Terraria;
 using System.Reflection;
-using System.Text.RegularExpressions;
-using Terraria.UI.Chat;
-using FontStashSharp;
+using TerraJS.Contents.UI.Chat;
+using TerraJS.Contents.UI;
 
 namespace TerraJS.Contents.Extensions
 {
@@ -26,6 +25,37 @@ namespace TerraJS.Contents.Extensions
 
                 return _pixel;
             }
+        }
+
+        public static void DrawString(this SpriteBatch spriteBatch, TerraJSFont font, string text, Vector2 postion, Color color, float characterSpacing = 0)
+        {
+            font.DrawString(spriteBatch, text, postion, color, characterSpacing);
+        }
+
+        public static void DrawBorderedString(this SpriteBatch spriteBatch, TerraJSFont font, string text, Vector2 position, Color textColor, Color borderColor, int borderWidth)
+        {
+            spriteBatch.DrawString(font, text, position.Add(borderWidth, 0), borderColor);
+
+            spriteBatch.DrawString(font, text, position.Add(0, borderWidth), borderColor);
+
+            spriteBatch.DrawString(font, text, position.Sub(borderWidth, 0), borderColor);
+
+            spriteBatch.DrawString(font, text, position.Sub(0, borderWidth), borderColor);
+
+            spriteBatch.DrawString(font, text, position, textColor);
+        }
+
+        public static void DrawBorderedStringWithSpace(this SpriteBatch spriteBatch, TerraJSFont font, string text, Vector2 position, Color textColor, Color borderColor, int borderWidth, float charSpace)
+        {
+            spriteBatch.DrawString(font, text, position.Add(borderWidth, 0), borderColor, charSpace);
+
+            spriteBatch.DrawString(font, text, position.Add(0, borderWidth), borderColor, charSpace);
+
+            spriteBatch.DrawString(font, text, position.Sub(borderWidth, 0), borderColor, charSpace);
+
+            spriteBatch.DrawString(font, text, position.Sub(0, borderWidth), borderColor, charSpace);
+
+            spriteBatch.DrawString(font, text, position, textColor, charSpace);
         }
 
         public static void Rebegin(this SpriteBatch spriteBatch, SpriteSortMode? sortMode = null, BlendState blendState = null, SamplerState samplerState = null, DepthStencilState depthStencilState = null, RasterizerState rasterizerState = null, Effect effect = null, Matrix? transformMatrix = null)
@@ -121,97 +151,12 @@ namespace TerraJS.Contents.Extensions
             batch.Draw(Pixel, rect, null, color, rotation, origin, effects, layerDepth);
         }
 
-        public static Vector2 DrawColorCodedString(this SpriteBatch spriteBatch, SpriteFontBase font, List<TextSnippet> snippets, Vector2 position, Color baseColor, float rotation, Vector2 origin, Vector2 baseScale, out int hoveredSnippet, float maxWidth, bool ignoreColors = false)
+        public static void DrawSnippets(this SpriteBatch spriteBatch, TerraJSFont font, List<TextSnippet> snippets, Vector2 position)
         {
-            if (baseColor == Color.Transparent)
+            foreach (var snippet in snippets)
             {
-                hoveredSnippet = -1;
-                return Vector2.Zero;
+                snippet.Draw(spriteBatch, font, ref position);
             }
-
-            var num1 = -1;
-            var vec = new Vector2(Main.mouseX, Main.mouseY);
-            var vector2_1 = position;
-            var vector2_2 = vector2_1;
-            var x = font.MeasureString(" ").X;
-            var color = baseColor;
-            var num2 = 0.0f;
-            for (var index1 = 0; index1 < snippets.Count; ++index1)
-            {
-                var snippet = snippets[index1];
-                snippet.Update();
-                if (!ignoreColors)
-                    color = snippet.GetVisibleColor();
-                var scale = snippet.Scale;
-                if (snippet.UniqueDraw(false, out var size, spriteBatch, vector2_1, color, baseScale.X * scale))
-                {
-                    if (vec.Between(vector2_1, vector2_1 + size))
-                        num1 = index1;
-                    vector2_1.X += size.X;
-                    vector2_2.X = Math.Max(vector2_2.X, vector2_1.X);
-                }
-                else
-                {
-                    snippet.Text.Split('\n');
-                    string[] strArray1 = Regex.Split(snippet.Text, "(\n)");
-                    bool flag = true;
-                    foreach (string input in strArray1)
-                    {
-                        Regex.Split(input, "( )");
-                        string[] strArray2 = input.Split(' ');
-                        if (input == "\n")
-                        {
-                            vector2_1.Y += font.LineHeight * num2 * baseScale.Y;
-                            vector2_1.X = position.X;
-                            vector2_2.Y = Math.Max(vector2_2.Y, vector2_1.Y);
-                            num2 = 0.0f;
-                            flag = false;
-                        }
-                        else
-                        {
-                            for (int index2 = 0; index2 < strArray2.Length; ++index2)
-                            {
-                                if (index2 != 0)
-                                    vector2_1.X += x * baseScale.X * scale;
-                                if ((double)maxWidth > 0.0)
-                                {
-                                    float num3 = font.MeasureString(strArray2[index2]).X * baseScale.X * scale;
-                                    if (vector2_1.X - (double)position.X + (double)num3 > (double)maxWidth)
-                                    {
-                                        vector2_1.X = position.X;
-                                        vector2_1.Y += font.LineHeight * num2 * baseScale.Y;
-                                        vector2_2.Y = Math.Max(vector2_2.Y, vector2_1.Y);
-                                        num2 = 0.0f;
-                                    }
-                                }
-
-                                if ((double)num2 < (double)scale)
-                                    num2 = scale;
-                                spriteBatch.DrawString(font, strArray2[index2], vector2_1, color, rotation, origin,
-                                    baseScale * snippet.Scale * scale);
-                                Vector2 vector2_3 = font.MeasureString(strArray2[index2]);
-                                if (vec.Between(vector2_1, vector2_1 + vector2_3))
-                                    num1 = index1;
-                                vector2_1.X += vector2_3.X * baseScale.X * scale;
-                                vector2_2.X = Math.Max(vector2_2.X, vector2_1.X);
-                            }
-
-                            if (strArray1.Length > 1 & flag)
-                            {
-                                vector2_1.Y += font.LineHeight * num2 * baseScale.Y;
-                                vector2_1.X = position.X;
-                                vector2_2.Y = Math.Max(vector2_2.Y, vector2_1.Y);
-                                num2 = 0.0f;
-                            }
-
-                            flag = true;
-                        }
-                    }
-                }
-            }
-
-            hoveredSnippet = num1;
-            return vector2_2;
         }
     }
 

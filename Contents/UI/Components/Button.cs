@@ -23,7 +23,7 @@ namespace TerraJS.Contents.UI.Components
             CanClick = true;
             BackgroundColor = backgroundColor ?? Color.Transparent;
             Text = text;
-            Font = fontID == "" ? TerraJS.FontManager["MouseText", fontSize] : TerraJS.FontManager[fontID, fontSize];
+            Font = fontID == "" ? TerraJS.FontManager["YaHei", fontSize] : TerraJS.FontManager[fontID, fontSize];
             TextHorizontalMiddle = textHorizontalMiddle;
             TextVerticalMiddle = textVerticalMiddle;
             DrawShadow = drawShadow;
@@ -62,17 +62,17 @@ namespace TerraJS.Contents.UI.Components
             if (BackgroundColor != default)
                 spriteBatch.DrawRectangle(new((int)Position.X, (int)Position.Y, Width, Height), BackgroundColor * Alpha);
 
-            var destination = RectangleUtils.FormPoint(Position.ToPoint() + (Size / 2).ToPoint(), Size.ToPoint());
+            var destination = RectangleUtils.FromPoint(Position.ToPoint() + (Size / 2).ToPoint(), Size.ToPoint());
             
             if (IsHovering)
             {
                 if (UserInput.CurrentMouseState.LeftButton == ButtonState.Pressed)
-                    spriteBatch.Draw(Press, destination, RectangleUtils.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
+                    spriteBatch.Draw(Press, destination, RectangleUtils.FromPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
                 else
-                    spriteBatch.Draw(Hover, destination, RectangleUtils.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
+                    spriteBatch.Draw(Hover, destination, RectangleUtils.FromPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
             }
             else
-                spriteBatch.Draw(Texture, destination, RectangleUtils.FormPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
+                spriteBatch.Draw(Texture, destination, RectangleUtils.FromPoint(new(0, 0), Size.ToPoint()), Color.White * Alpha, Rotation, Size / 2, SpriteEffects.None, 0);
 
             if (!string.IsNullOrEmpty(Text))
             {

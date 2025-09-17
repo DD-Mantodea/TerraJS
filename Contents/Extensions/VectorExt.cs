@@ -8,6 +8,10 @@ namespace TerraJS.Contents.Extensions
     {
         public static float GetRadian(this Vector2 v) => MathF.Atan2(v.Y, v.X);
 
+        public static Vector2 Add(this Vector2 vec, float x, float y) => new(vec.X + x, vec.Y + y);
+
+        public static Vector2 Sub(this Vector2 vec, float x, float y) => new(vec.X - x, vec.Y - y);
+
         public static Vector2 GetAngle(this float rad)
         {
             return new Vector2((float)Math.Cos((double)rad), (float)Math.Sin((double)rad));

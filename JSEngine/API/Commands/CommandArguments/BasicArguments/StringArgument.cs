@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using TerraJS.Contents.Utils;
 
@@ -30,6 +31,8 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
         public override Type InstanceType => typeof(string);
 
         public override string ToString() => IsOptional ? $"[<{Name} : string>]" : $"<{Name} : string>";
+
+        public override List<string> GetCompletions() => [];
 
         public override bool InScope(object value, object last) => value is string;
 

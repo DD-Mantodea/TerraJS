@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using TerraJS.Contents.Utils;
 
 namespace TerraJS.API.Commands.CommandArguments.BasicArguments
@@ -30,6 +31,8 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
         public override Type InstanceType => typeof(bool);
 
         public override string ToString() => IsOptional ? $"[<{Name} : bool>]" : $"<{Name} : bool>";
+
+        public override List<string> GetCompletions() => ["true", "false"];
 
         public override bool InScope(object value, object last) => value is string;
     }

@@ -21,19 +21,6 @@ namespace TerraJS.Contents.Utils
             Values.Add((name, instance));
         }
 
-        public static void BindProperties(string name, PropertyInfo[] members)
-        {
-            dynamic expandoObj = new ExpandoObject();
-            var expandoDict = (IDictionary<string, object>)expandoObj;
-
-            foreach (var property in members)
-                expandoDict[property.Name] = property.GetValue(null);
-
-            TJSEngine.Engine.SetValue(name, expandoObj);
-
-            Values.Add((name, expandoObj));
-        }
-
         public static void BindStaticOrEnumOrConst(string name, Type type)
         {
             TJSEngine.Engine.SetValue(name, TypeReference.CreateTypeReference(TJSEngine.Engine, type));
