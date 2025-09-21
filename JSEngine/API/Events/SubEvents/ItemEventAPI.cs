@@ -1,6 +1,8 @@
 ﻿using System;
+using TerraJS.API.Events.Ref;
 using TerraJS.Contents.Attributes;
 using Terraria;
+using Terraria.ModLoader.IO;
 
 namespace TerraJS.API.Events.SubEvents
 {
@@ -22,10 +24,16 @@ namespace TerraJS.API.Events.SubEvents
         public Action<Player, string> UpdateArmorSetEvent;
 
         [HideToJS]
+        public Action<Item, TagCompound> LoadDataEvent;
+
+        [HideToJS]
+        public Action<Item, TagCompound> SaveDataEvent;
+
+        [HideToJS]
         public Func<Item, bool> CanRightClickEvent;
 
         [HideToJS]
-        public Func<Item, Player, bool?> UseItemEvent;
+        public Func<Item, Player, RefBox<bool>, bool> UseItemEvent;
 
         [HideToJS]
         public Func<Item, Player, bool> CanUseItemEvent;
@@ -48,14 +56,20 @@ namespace TerraJS.API.Events.SubEvents
         [EventInfo("item", "player")]
         public void RightClick(Action<Item, Player> @delegate) => RightClickEvent += @delegate;
 
-        [EventInfo("player", "set")]
+        [EventInfo("player", "setName")]
         public void UpdateArmorSet(Action<Player, string> @delegate) => UpdateArmorSetEvent += @delegate;
+
+        [EventInfo("item", "tag")]
+        public void LoadData(Action<Item, TagCompound> @delegate) => SaveDataEvent += @delegate;
+
+        [EventInfo("item", "tag")]
+        public void SaveData(Action<Item, TagCompound> @delegate) => SaveDataEvent += @delegate;
 
         [EventInfo("item")]
         public void CanRightClick(Func<Item, bool> @delegate) => CanRightClickEvent += @delegate;
 
-        [EventInfo("item", "player")]
-        public void UseItem(Func<Item, Player, bool?> @delegate) => UseItemEvent += @delegate;
+        [EventInfo("item", "player", "useVanilla")]
+        public void UseItem(Func<Item, Player, RefBox<bool>, bool> @delegate) => UseItemEvent += @delegate;
 
         [EventInfo("item", "player")]
         public void CanUseItem(Func<Item, Player, bool> @delegate) => CanUseItemEvent += @delegate;

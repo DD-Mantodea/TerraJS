@@ -121,9 +121,10 @@ namespace TerraJS.Contents.UI
 
             PlayerHook.ShouldDisableOpenInventory = false;
 
-            TextBox.HasActiveInstance = false;
+            if (TextBox.HasActiveInstance)
+                IMEUtils.DisableIME();
 
-            IMEUtils.DisableIME();
+            TextBox.HasActiveInstance = false;
 
             foreach (var layer in TJSUILayers.Values)
                 layer.Update(gameTime);

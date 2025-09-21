@@ -52,13 +52,13 @@ namespace TerraJS.Contents.UI.Chat
 
                 if (InnerPos.Y + Height < totalHeight)
                 {
-                    if (deltaWheel < 0)
+                    if (deltaWheel > 0)
                         InnerPos.Y += totalHeight / 20;
                 }
 
                 if (InnerPos.Y > 0)
                 {
-                    if (deltaWheel > 0)
+                    if (deltaWheel < 0)
                         InnerPos.Y -= totalHeight / 20;
                 }
 

@@ -37,13 +37,9 @@ namespace TerraJS.API.Commands.CommandGUI
 
         public string CurrentChatText = "";
 
-        private Regex argsRegex = new Regex("/[ ]*");
-
         public string ChatText => ChatBox.Instance.TextBox.Text;
 
-        public string CurrentInput => ChatText.StartsWith("/") ? argsRegex.Replace(ChatText, "") : "";
-
-        public string[] Args => CurrentInput.Split(" ");
+        public CommandInfo CommandInfo => CommandInfo.Parse(ChatText, ChatBox.Instance.TextBox.Cursor.CursorIndex);
 
         public CompletionsContainer CompletionsContainer;
 
@@ -59,7 +55,7 @@ namespace TerraJS.API.Commands.CommandGUI
 
             if (ChatBox.Instance.TextBox.Active && (LastChatText != CurrentChatText) && ChatText.StartsWith("/"))
             {
-                if (Args.Length <= 1 && !CurrentInput.EndsWith(" "))
+                if (CommandInfo.State == InputState.Command)
                 {
                     var matchingCommands = container.GetMatchingCommands();
 
@@ -71,11 +67,11 @@ namespace TerraJS.API.Commands.CommandGUI
 
                         var key = command.Command;
 
-                        var match = Args.Length == 0 ? "" : Args[0];
+                        var match = CommandInfo.Command;
 
                         var dismatch = key[match.Length..];
 
-                        if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText(Args.Length <= 1 ? [] : Args[1..], out var args))
+                        if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText([], out var args))
                             text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + args;
                         else
                             text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
@@ -85,11 +81,11 @@ namespace TerraJS.API.Commands.CommandGUI
                 }
                 else
                 {
-                    var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(Args[0])).Select(c => c as TJSCommand).ToList();
+                    var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(CommandInfo.Command)).Select(c => c as TJSCommand).ToList();
 
                     var values = new List<string>();
 
-                    var match = Args[^1];
+                    var match = CommandInfo.CurrentParameter;
 
                     container.RemoveAllChild();
 
@@ -97,10 +93,10 @@ namespace TerraJS.API.Commands.CommandGUI
                     {
                         var argsGroup = CommandAPI.CommandArgumentGroups[command.GetType().FullName];
 
-                        if (argsGroup.Arguments.Count < Args.Length - 1)
+                        if (argsGroup.Arguments.Count <= CommandInfo.ParameterIndex)
                             continue;
 
-                        var arg = argsGroup.Arguments[Args.Length - 2];
+                        var arg = argsGroup.Arguments[CommandInfo.ParameterIndex];
 
                         var argCompletions = arg.GetCompletions();
 
@@ -129,8 +125,10 @@ namespace TerraJS.API.Commands.CommandGUI
                         if (selected.Contains(' '))
                             selected = selected.Split(" ")[0];
 
-                        if ((Args.Length == 0 ? "" : Args[^1]) != selected)
-                            ChatBox.Instance.TextBox.AppendString(selected[Args[^1].Length..] + " ");
+                        var currentInput = CommandInfo.State == InputState.Command ? CommandInfo.Command : CommandInfo.CurrentParameter;
+
+                        if (currentInput != selected)
+                            ChatBox.Instance.TextBox.AppendString(selected[currentInput.Length..] + " ");
                     }
 
                     if (UserInput.IsJustPress(Keys.Down))

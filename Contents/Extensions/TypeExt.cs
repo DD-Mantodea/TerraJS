@@ -34,7 +34,7 @@ namespace TerraJS.Contents.Extensions
         {
             return type.GetCustomAttribute<CompilerGeneratedAttribute>() != null || 
                 (type.FullName?.Contains("<>c__DisplayClass") ?? false) ||
-                (type.FullName?.Contains("<>z__ReadOnlyArray") ?? false);
+                (type.FullName?.Contains("<>z__ReadOnly") ?? false);
         }
 
         public static bool IsPrivateImplementationDetails(this Type type)
@@ -47,6 +47,16 @@ namespace TerraJS.Contents.Extensions
             return (type.FullName?.Contains("<>y__InlineArray")) ?? false;
         }
 
+        public static bool IsExtension(this Type type)
+        {
+            return (type.FullName?.Contains("<>E__")) ?? false;
+        }
+
+        public static bool IsRegexGenerator(this Type type)
+        {
+            return (type.FullName?.Contains("<RegexGenerator_g>")) ?? false;
+        }
+
         public static bool IsIllegal(this Type type)
         {
             if (type.IsPointer ||
@@ -56,6 +66,8 @@ namespace TerraJS.Contents.Extensions
                 type.IsDynamicType() ||
                 type.IsPrivateImplementationDetails() ||
                 type.IsInlineArray() ||
+                type.IsExtension() ||
+                type.IsRegexGenerator() ||
                 DetectorObject.Type2ClassName(type) == ""
                 )
             {
