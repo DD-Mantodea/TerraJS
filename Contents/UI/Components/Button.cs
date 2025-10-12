@@ -23,7 +23,7 @@ namespace TerraJS.Contents.UI.Components
             CanClick = true;
             BackgroundColor = backgroundColor ?? Color.Transparent;
             Text = text;
-            Font = fontID == "" ? TerraJS.FontManager["YaHei", fontSize] : TerraJS.FontManager[fontID, fontSize];
+            Font = fontID == "" ? TerraJS.FontManager["Andy-Bold", fontSize] : TerraJS.FontManager[fontID, fontSize];
             TextHorizontalMiddle = textHorizontalMiddle;
             TextVerticalMiddle = textVerticalMiddle;
             DrawShadow = drawShadow;

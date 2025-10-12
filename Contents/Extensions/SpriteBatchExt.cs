@@ -6,6 +6,7 @@ using Terraria;
 using System.Reflection;
 using TerraJS.Contents.UI.Chat;
 using TerraJS.Contents.UI;
+using FontStashSharp;
 
 namespace TerraJS.Contents.Extensions
 {
@@ -27,12 +28,7 @@ namespace TerraJS.Contents.Extensions
             }
         }
 
-        public static void DrawString(this SpriteBatch spriteBatch, TerraJSFont font, string text, Vector2 postion, Color color, float characterSpacing = 0)
-        {
-            font.DrawString(spriteBatch, text, postion, color, characterSpacing);
-        }
-
-        public static void DrawBorderedString(this SpriteBatch spriteBatch, TerraJSFont font, string text, Vector2 position, Color textColor, Color borderColor, int borderWidth)
+        public static void DrawBorderedString(this SpriteBatch spriteBatch, SpriteFontBase font, string text, Vector2 position, Color textColor, Color borderColor, int borderWidth)
         {
             spriteBatch.DrawString(font, text, position.Add(borderWidth, 0), borderColor);
 
@@ -45,17 +41,17 @@ namespace TerraJS.Contents.Extensions
             spriteBatch.DrawString(font, text, position, textColor);
         }
 
-        public static void DrawBorderedStringWithSpace(this SpriteBatch spriteBatch, TerraJSFont font, string text, Vector2 position, Color textColor, Color borderColor, int borderWidth, float charSpace)
+        public static void DrawBorderedStringWithSpace(this SpriteBatch spriteBatch, SpriteFontBase font, string text, Vector2 position, Color textColor, Color borderColor, int borderWidth, float charSpace)
         {
-            spriteBatch.DrawString(font, text, position.Add(borderWidth, 0), borderColor, charSpace);
+            spriteBatch.DrawString(font, text, position.Add(borderWidth, 0), borderColor, characterSpacing: charSpace);
 
-            spriteBatch.DrawString(font, text, position.Add(0, borderWidth), borderColor, charSpace);
+            spriteBatch.DrawString(font, text, position.Add(0, borderWidth), borderColor, characterSpacing: charSpace);
 
-            spriteBatch.DrawString(font, text, position.Sub(borderWidth, 0), borderColor, charSpace);
+            spriteBatch.DrawString(font, text, position.Sub(borderWidth, 0), borderColor, characterSpacing: charSpace);
 
-            spriteBatch.DrawString(font, text, position.Sub(0, borderWidth), borderColor, charSpace);
+            spriteBatch.DrawString(font, text, position.Sub(0, borderWidth), borderColor, characterSpacing: charSpace);
 
-            spriteBatch.DrawString(font, text, position, textColor, charSpace);
+            spriteBatch.DrawString(font, text, position, textColor, characterSpacing: charSpace);
         }
 
         public static void Rebegin(this SpriteBatch spriteBatch, SpriteSortMode? sortMode = null, BlendState blendState = null, SamplerState samplerState = null, DepthStencilState depthStencilState = null, RasterizerState rasterizerState = null, Effect effect = null, Matrix? transformMatrix = null)
@@ -151,7 +147,7 @@ namespace TerraJS.Contents.Extensions
             batch.Draw(Pixel, rect, null, color, rotation, origin, effects, layerDepth);
         }
 
-        public static void DrawSnippets(this SpriteBatch spriteBatch, TerraJSFont font, List<TextSnippet> snippets, Vector2 position)
+        public static void DrawSnippets(this SpriteBatch spriteBatch, SpriteFontBase font, List<TextSnippet> snippets, Vector2 position)
         {
             foreach (var snippet in snippets)
             {

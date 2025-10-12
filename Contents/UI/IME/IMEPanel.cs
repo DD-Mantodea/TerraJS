@@ -37,7 +37,7 @@ namespace TerraJS.Contents.UI.IME
 
             _width = 300;
 
-            Font = TerraJS.FontManager["YaHei", 22];
+            Font = TerraJS.FontManager["Andy-Bold", 22];
 
             Visible = false;
         }

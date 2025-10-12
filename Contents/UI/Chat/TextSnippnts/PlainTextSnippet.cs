@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.Contents.Extensions;
-using TerraJS.Contents.Utils;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace TerraJS.Contents.UI.Chat.TextSnippnts
 {
@@ -18,7 +12,7 @@ namespace TerraJS.Contents.UI.Chat.TextSnippnts
 
         public override string[] Identifiers => [];
 
-        public override List<TextSnippet> SplitByWidth(TerraJSFont font, int width)
+        public override List<TextSnippet> SplitByWidth(SpriteFontBase font, int width)
         {
             var result = new List<TextSnippet>();
 
@@ -45,12 +39,12 @@ namespace TerraJS.Contents.UI.Chat.TextSnippnts
             return result;
         }
 
-        public override Vector2 GetSize(TerraJSFont font)
+        public override Vector2 GetSize(SpriteFontBase font)
         {
             return font.MeasureString(OriginalText);
         }
 
-        public override void Draw(SpriteBatch spriteBatch, TerraJSFont font, ref Vector2 position)
+        public override void Draw(SpriteBatch spriteBatch, SpriteFontBase font, ref Vector2 position)
         {
             spriteBatch.DrawBorderedString(font, OriginalText, position, Color.White, Color.Black, 2);
 

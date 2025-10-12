@@ -18,7 +18,7 @@ namespace TerraJS.Contents.UI.Chat
     {
         public ChatMessage(string message, string player, Color color, bool local)
         {
-            Font = TerraJS.FontManager["YaHei", 22];
+            Font = TerraJS.FontManager["Andy-Bold", 22];
 
             SetMessage(message, player, color, local);
 

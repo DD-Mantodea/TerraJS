@@ -1,16 +1,9 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Content;
-using ReLogic.Graphics;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Unicode;
-using TerraJS.Contents.UI;
-using Terraria;
 using Terraria.GameContent;
-using Terraria.ModLoader;
 
 namespace TerraJS.Assets.Managers
 {
@@ -18,9 +11,7 @@ namespace TerraJS.Assets.Managers
     {
         public Dictionary<string, FontSystem> Fonts;
 
-        public Dictionary<string, ReLogic.Graphics.DynamicSpriteFont> VanillaFonts = [];
-
-        public TerraJS Mod => TerraJS.Instance;
+        public static TerraJS Mod => TerraJS.Instance;
 
         public override void Load()
         {
@@ -28,8 +19,6 @@ namespace TerraJS.Assets.Managers
 
             if (!TerraJS.IsLoading)
                 return;
-
-            VanillaFonts.Add("Vanilla:MouseText", FontAssets.MouseText.Value);
         }
 
         public override void LoadOne(string dir, Dictionary<string, FontSystem> dictronary)
@@ -42,14 +31,10 @@ namespace TerraJS.Assets.Managers
 
                     font.AddFont(Mod.GetFileBytes(file));
 
-                    if (!file.Contains("YaHei"))
-                        font.AddFont(Mod.GetFileBytes("Assets/Fonts/YaHei.ttf"));
-
                     dictronary.Add(Path.GetFileNameWithoutExtension(file), font);
                 }
             }
         }
-
 
         public static StaticSpriteFont FromVanilla(string name)
         {
@@ -92,13 +77,10 @@ namespace TerraJS.Assets.Managers
             return result;
         }
 
-        public TerraJSFont this[string index, float size]
+        public SpriteFontBase this[string index, float size]
         {
             get {
-                if (index.StartsWith("Vanilla:"))
-                    return new(VanillaFonts[index]);
-
-                return new(Fonts[index].GetFont(size));
+                return Fonts[index].GetFont(size);
             }
         }
     }

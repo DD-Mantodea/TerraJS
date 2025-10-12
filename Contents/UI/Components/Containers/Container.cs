@@ -14,7 +14,7 @@ namespace TerraJS.Contents.UI.Components.Containers
 {
     public abstract class Container : Component
     {
-        public List<Component> Children = new List<Component>();
+        public List<Component> Children = [];
 
         public bool Scissor = false;
 

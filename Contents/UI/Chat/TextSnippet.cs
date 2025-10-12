@@ -19,13 +19,13 @@ namespace TerraJS.Contents.UI.Chat
                 SnippetUtils.Parsers.TryAdd(i, Parse);
         }
 
-        public abstract Vector2 GetSize(TerraJSFont font);
+        public abstract Vector2 GetSize(SpriteFontBase font);
 
         public abstract override string ToString();
 
-        public abstract List<TextSnippet> SplitByWidth(TerraJSFont font, int width);
+        public abstract List<TextSnippet> SplitByWidth(SpriteFontBase font, int width);
 
-        public abstract void Draw(SpriteBatch spriteBatch, TerraJSFont font, ref Vector2 position);
+        public abstract void Draw(SpriteBatch spriteBatch, SpriteFontBase font, ref Vector2 position);
 
         public abstract TextSnippet Parse(string str);
 

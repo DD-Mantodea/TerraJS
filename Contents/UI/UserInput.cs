@@ -91,7 +91,7 @@ namespace TerraJS.Contents.UI
                 {
                     var args = new KeyEventArgs(key);
 
-                    foreach (var handler in KeyJustPress?.GetInvocationList().Cast<KeyEventHandler>())
+                    foreach (var handler in KeyJustPress?.GetInvocationList().Cast<KeyEventHandler>() ?? [])
                     {
                         if (!args.Cancel)
                             handler.Invoke(null, args);

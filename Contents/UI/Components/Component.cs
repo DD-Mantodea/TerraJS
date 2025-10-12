@@ -124,7 +124,7 @@ namespace TerraJS.Contents.UI.Components
 
         public virtual float Alpha { get => _alpha; set => _alpha = value; }
 
-        public TerraJSFont Font;
+        public SpriteFontBase Font;
 
         public bool IsHovering;
 

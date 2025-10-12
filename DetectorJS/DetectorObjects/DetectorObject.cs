@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Utils;
 
 namespace TerraJS.DetectorJS.DetectorObjects
@@ -17,7 +19,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             var name = type.Name;
 
             if (type.IsGenericType)
-                name = name.Split("`")[0] + type.GetGenericArguments().Length;
+                name = name.Split("`")[0];
 
             if (type.IsNested && !type.IsGenericTypeParameter)
                 name = $"{Type2ImportName(type.DeclaringType)}${name}";
@@ -36,7 +38,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             var name = type.Name;
 
             if (type.IsGenericType)
-                name = name.Split("`")[0] + type.GetGenericArguments().Length;
+                name = name.Split("`")[0];
 
             if (type.IsNested && !type.IsGenericTypeParameter)
                 name = $"{Type2ImportName(type.DeclaringType)}${name}";
@@ -97,7 +99,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 {
                     var args = string.Join(", ", [.. type.GetGenericArguments().ToList().Select(type => Type2ClassName(type))]);
 
-                    name = $"{name}{type.GetGenericArguments().Length}<{args}>";
+                    name = $"{name}<{args}>";
                 }
             }
 
@@ -165,6 +167,20 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 return "$enum";
 
             return name;
+        }
+
+        public static bool TryGetMethodComment(MethodInfo method, out string comment)
+        {
+            comment = "";
+
+            if (method.GetCustomAttribute<CommentAttribute>() is { } attribute)
+            {
+                comment = $"/** {attribute.Comment} */";
+
+                return true;
+            }
+
+            return false;
         }
     }
 }

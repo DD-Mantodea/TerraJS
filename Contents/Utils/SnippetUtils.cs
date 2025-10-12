@@ -93,7 +93,7 @@ namespace TerraJS.Contents.Utils
             return string.Join("", snippets.Select(s => s.OriginalText));
         }
 
-        public static Vector2 GetSize(List<TextSnippet> snippets, TerraJSFont font)
+        public static Vector2 GetSize(List<TextSnippet> snippets, SpriteFontBase font)
         {
             var size = new Vector2();
 
@@ -109,7 +109,7 @@ namespace TerraJS.Contents.Utils
             return size;
         }
 
-        public static Vector2 GetSize(string originalText, TerraJSFont font)
+        public static Vector2 GetSize(string originalText, SpriteFontBase font)
         {
             return GetSize(ParseMessage(originalText), font);
         }

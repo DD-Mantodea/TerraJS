@@ -20,12 +20,12 @@ namespace TerraJS.Contents.UI.Chat.TextSnippnts
 
         public Regex Regex = new("(c|color)/([0-9A-F]{6}):(.*)");
 
-        public override Vector2 GetSize(TerraJSFont font)
+        public override Vector2 GetSize(SpriteFontBase font)
         {
             return font.MeasureString(Text);
         }
 
-        public override List<TextSnippet> SplitByWidth(TerraJSFont font, int width)
+        public override List<TextSnippet> SplitByWidth(SpriteFontBase font, int width)
         {
             var result = new List<TextSnippet>();
 
@@ -52,7 +52,7 @@ namespace TerraJS.Contents.UI.Chat.TextSnippnts
             return result;
         }
 
-        public override void Draw(SpriteBatch spriteBatch, TerraJSFont font, ref Vector2 position)
+        public override void Draw(SpriteBatch spriteBatch, SpriteFontBase font, ref Vector2 position)
         {
             spriteBatch.DrawBorderedString(font, Text, position, Color, Color.Black, 2);
 

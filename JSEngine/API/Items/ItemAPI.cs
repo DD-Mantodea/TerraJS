@@ -37,6 +37,16 @@ namespace TerraJS.API.Items
             return -1;
         }
 
+        public int GetModItem(string fullName)
+        {
+            var data = fullName.Split(":");
+            
+            if (data.Length < 2)
+                return -1;
+
+            return GetModItem(data[0], data[1]);
+        }
+
         public int GetModItem(Type type)
         {
             if (!type.IsSubclassOf(typeof(ModItem))) return -1;

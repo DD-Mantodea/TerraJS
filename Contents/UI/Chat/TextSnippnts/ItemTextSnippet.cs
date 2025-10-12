@@ -26,17 +26,17 @@ namespace TerraJS.Contents.UI.Chat.TextSnippnts
 
         public Regex Option = new("([a-z]+)([0-9]+)");
 
-        public override Vector2 GetSize(TerraJSFont font)
+        public override Vector2 GetSize(SpriteFontBase font)
         {
             return new(24, 24);
         }
 
-        public override List<TextSnippet> SplitByWidth(TerraJSFont font, int width)
+        public override List<TextSnippet> SplitByWidth(SpriteFontBase font, int width)
         {
             return [this];
         }
 
-        public override void Draw(SpriteBatch spriteBatch, TerraJSFont font, ref Vector2 position)
+        public override void Draw(SpriteBatch spriteBatch, SpriteFontBase font, ref Vector2 position)
         {
             ItemSlot.Draw(spriteBatch, ref _item, 14, position - new Vector2(5f), Color.White);
 

@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
 
@@ -36,7 +37,14 @@ namespace TerraJS.DetectorJS.DetectorObjects
                         if (p.ParameterType.IsIllegal())
                             return "";
 
-                    return new DetectorMethod(method).Serialize();
+                    var sb = new StringBuilder();
+
+                    if (TryGetMethodComment(method, out var comment))
+                        sb.AppendLine(comment);
+
+                    sb.AppendLine(new DetectorMethod(method).Serialize());
+
+                    return sb.ToString();
 
                 case ConstructorInfo constructor:
                     return new DetectorConstructor(constructor).Serialize();

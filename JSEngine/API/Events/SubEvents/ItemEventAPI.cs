@@ -53,6 +53,14 @@ namespace TerraJS.API.Events.SubEvents
         [EventInfo("item")]
         public void SetDefaults(Action<Item> @delegate) => SetDefaultsEvent += @delegate;
 
+        [EventInfo("item")]
+        [Comment("仅用于原版物品 即ItemID.XXX")]
+        public void SetDefaults(int itemType, Action<Item> @delegate) => SetDefaultsEvent += item =>
+        {
+            if (item.type == itemType)
+                @delegate?.Invoke(item);
+        };
+
         [EventInfo("item", "player")]
         public void RightClick(Action<Item, Player> @delegate) => RightClickEvent += @delegate;
 
@@ -60,7 +68,7 @@ namespace TerraJS.API.Events.SubEvents
         public void UpdateArmorSet(Action<Player, string> @delegate) => UpdateArmorSetEvent += @delegate;
 
         [EventInfo("item", "tag")]
-        public void LoadData(Action<Item, TagCompound> @delegate) => SaveDataEvent += @delegate;
+        public void LoadData(Action<Item, TagCompound> @delegate) => LoadDataEvent += @delegate;
 
         [EventInfo("item", "tag")]
         public void SaveData(Action<Item, TagCompound> @delegate) => SaveDataEvent += @delegate;

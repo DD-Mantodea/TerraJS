@@ -53,15 +53,17 @@ namespace TerraJS.API.Commands.CommandGUI
 
             var completions = container.Completions;
 
-            if (ChatBox.Instance.TextBox.Active && (LastChatText != CurrentChatText) && ChatText.StartsWith("/"))
+            if (ChatBox.Instance.TextBox.Active && (LastChatText != CurrentChatText))
             {
-                if (CommandInfo.State == InputState.Command)
+                if (ChatText.StartsWith("/"))
                 {
-                    var matchingCommands = container.GetMatchingCommands();
+                    if (CommandInfo.State == InputState.Command)
+                    {
+                        var matchingCommands = container.GetMatchingCommands();
 
-                    container.RemoveAllChild();
+                        container.RemoveAllChild();
 
-                    container.RebuildCompletions([.. matchingCommands.Select(command =>
+                        container.RebuildCompletions([.. matchingCommands.Select(command =>
                     {
                         var text = "";
 
@@ -78,38 +80,41 @@ namespace TerraJS.API.Commands.CommandGUI
 
                         return text;
                     })]);
-                }
-                else
-                {
-                    var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(CommandInfo.Command)).Select(c => c as TJSCommand).ToList();
-
-                    var values = new List<string>();
-
-                    var match = CommandInfo.CurrentParameter;
-
-                    container.RemoveAllChild();
-
-                    foreach (var command in commands)
+                    }
+                    else
                     {
-                        var argsGroup = CommandAPI.CommandArgumentGroups[command.GetType().FullName];
+                        var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(CommandInfo.Command)).Select(c => c as TJSCommand).ToList();
 
-                        if (argsGroup.Arguments.Count <= CommandInfo.ParameterIndex)
-                            continue;
+                        var values = new List<string>();
 
-                        var arg = argsGroup.Arguments[CommandInfo.ParameterIndex];
+                        var match = CommandInfo.CurrentParameter;
 
-                        var argCompletions = arg.GetCompletions();
+                        container.RemoveAllChild();
 
-                        if (argCompletions.Count > 0)
-                            values.TryAddRange(argCompletions);
-                        else
-                            values.Add(arg.ToString());
+                        foreach (var command in commands)
+                        {
+                            var argsGroup = CommandAPI.CommandArgumentGroups[command.GetType().FullName];
+
+                            if (argsGroup.Arguments.Count <= CommandInfo.ParameterIndex)
+                                continue;
+
+                            var arg = argsGroup.Arguments[CommandInfo.ParameterIndex];
+
+                            var argCompletions = arg.GetCompletions();
+
+                            if (argCompletions.Count > 0)
+                                values.TryAddRange(argCompletions);
+                            else
+                                values.Add(arg.ToString());
+                        }
+
+                        container.RebuildCompletions(values.Where(t => t.StartsWith(match)).Select(t => (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + t[match.Length..]));
                     }
 
-                    container.RebuildCompletions(values.Where(t => t.StartsWith(match)).Select(t => (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + t[match.Length..]));
+                    LastChatText = CurrentChatText;
                 }
-
-                LastChatText = CurrentChatText;
+                else
+                    container.RemoveAllChild();
             }
 
             if (isCommandInputActive)

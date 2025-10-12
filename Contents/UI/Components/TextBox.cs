@@ -4,10 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
-using FontStashSharp;
 using TerraJS.Contents.Utils;
-using Terraria.GameInput;
-using ReLogic.Graphics;
 using LibRimeDemo;
 using LibRimeDemo.Data;
 using TerraJS.Contents.UI.IME;
@@ -20,7 +17,7 @@ namespace TerraJS.Contents.UI.Components
         {
             Text = "";
 
-            Font = TerraJS.FontManager["YaHei", fontSize];
+            Font = TerraJS.FontManager["Andy-Bold", fontSize];
 
             BorderWidth.Set(1);
 
@@ -523,7 +520,7 @@ namespace TerraJS.Contents.UI.Components
             if (text.Length == 0)
                 return Vector2.Zero;
 
-            return Font.MeasureString(text, CharSpacing);
+            return Font.MeasureString(text, characterSpacing: CharSpacing);
         }
 
         public int GetCursorIndex(Vector2 mousePos)

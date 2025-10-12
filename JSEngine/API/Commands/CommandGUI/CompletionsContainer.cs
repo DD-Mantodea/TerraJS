@@ -43,7 +43,7 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                     BackgroundColor = Color.Gray * 0.7f
                 }.Join(this);
 
-                var content = new UIText("YaHei", text: text, fontSize: 22).Join(cmdLine);
+                var content = new UIText("Andy-Bold", text: text, fontSize: 22).Join(cmdLine);
 
                 content.RelativePosition = new(8, 0);
 

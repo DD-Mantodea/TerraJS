@@ -28,7 +28,7 @@ namespace TerraJS.Contents.UI.Components
             _height = (int)size.Y;
         }
 
-        public UIText(TerraJSFont font, string text = "", Color? fontColor = null)
+        public UIText(SpriteFontBase font, string text = "", Color? fontColor = null)
         {
             Font = font;
 
@@ -58,7 +58,7 @@ namespace TerraJS.Contents.UI.Components
             _height = (int)size.Y;
         }
 
-        public UIText(TerraJSFont font, List<TextSnippet> snippets, Color? fontColor = null)
+        public UIText(SpriteFontBase font, List<TextSnippet> snippets, Color? fontColor = null)
         {
             Font = font;
 

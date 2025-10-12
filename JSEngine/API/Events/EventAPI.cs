@@ -28,6 +28,8 @@ namespace TerraJS.API.Events
 
         public PlayerEventAPI Player = new();
 
+        public ProjectileEventAPI Projectile = new();
+
         public UIEventAPI UI = new();
 
         [HideToJS]

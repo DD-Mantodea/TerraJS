@@ -163,13 +163,5 @@ namespace TerraJS.DetectorJS
                 }
             });
         }
-
-        public static string GetMethodComment(MethodInfo method)
-        {
-            if (method.GetCustomAttribute<CommentAttribute>() is { } attribute)
-                return attribute.Comment;
-
-            return "";
-        }
     }
 }
