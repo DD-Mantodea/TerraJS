@@ -1,10 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using TerraJS.API;
-using TerraJS.API.Items;
+using TerraJS.JSEngine.API;
 using TerraJS.JSEngine.API.DotNets.Extensions;
+using TerraJS.JSEngine.API.Items;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.Plugins

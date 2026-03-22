@@ -146,25 +146,25 @@ namespace TerraJS.DetectorJS.DetectorObjects
             return type.Name;
         }
 
+        public static List<string> SpecialNames = [
+            "function",
+            "continue",
+            "debugger",
+            "default",
+            "finally",
+            "import",
+            "switch",
+            "break",
+            "super",
+            "enum",
+            "with",
+            "var"
+        ];
+
         public static string SpecialNameCheck(string name)
         {
-            if (name == "function")
-                return "$function";
-
-            if (name == "continue")
-                return "$continue";
-
-            if (name == "default")
-                return "$default";
-
-            if (name == "finally")
-                return "$finally";
-
-            if (name == "break")
-                return "$break";
-
-            if (name == "enum")
-                return "$enum";
+            if (SpecialNames.Contains(name))
+                return $"${name}";
 
             return name;
         }

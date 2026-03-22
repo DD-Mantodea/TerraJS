@@ -1,20 +1,6 @@
-﻿using Microsoft.Xna.Framework.Graphics;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria.GameContent;
-using Terraria;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using ReLogic.Graphics;
-using System.IO;
-using Jint.Native;
-using Jint;
-using Terraria.DataStructures;
+﻿using Terraria.ModLoader;
 
-namespace TerraJS.API.Items
+namespace TerraJS.JSEngine.API.Items
 {
     [Autoload(false)]
     public abstract class TJSItem : ModItem

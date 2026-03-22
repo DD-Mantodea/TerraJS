@@ -9,13 +9,11 @@ using System.Numerics;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
-using TerraJS.API;
-using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
 using TerraJS.DetectorJS.DetectorObjects;
+using TerraJS.JSEngine.API;
 using Terraria;
-using Terraria.IO;
 using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
@@ -67,13 +65,7 @@ namespace TerraJS.DetectorJS
             {
                 if (task.IsCompletedSuccessfully)
                 {
-                    stopwatch.Stop();
-
                     var types = task.Result;
-
-                    if (Language.ActiveCulture.LegacyId == 7)
-                        Main.NewText($"[Detector] 收集完成, 共 {types.Count} 个类型, 共耗时 {stopwatch.ElapsedMilliseconds}ms");
-                    else Main.NewText($"[Detector] Collect complete, {types.Count} types in total, consuming {stopwatch.ElapsedMilliseconds}ms");
 
                     var packagePath = Path.Combine(Pathes.TerraJSPath, "Packages");
 
@@ -113,6 +105,12 @@ namespace TerraJS.DetectorJS
                     });
 
                     File.WriteAllText(Path.Combine(Pathes.TerraJSPath, "Packages", "global.d.ts"), new DetectorGlobal().Serialize());
+
+                    stopwatch.Stop();
+
+                    if (Language.ActiveCulture.LegacyId == 7)
+                        Main.NewText($"[Detector] 写入完成, 共 {types.Count} 个类型, 共耗时 {stopwatch.ElapsedMilliseconds}ms");
+                    else Main.NewText($"[Detector] Write complete, {types.Count} types in total, consuming {stopwatch.ElapsedMilliseconds}ms");
 
                     #region jsconfig
                     var config = new JObject

@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Terraria;
+﻿using Terraria;
 
-namespace TerraJS.API.Players
+namespace TerraJS.JSEngine.API.Players
 {
     public class PlayerAPI : BaseAPI
     {

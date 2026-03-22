@@ -1,25 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using Terraria.ModLoader;
 using Terraria;
-using System.Reflection;
 using Microsoft.Xna.Framework.Input;
-using Terraria.GameInput;
 using TerraJS.Contents.UI;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Attributes;
-using TerraJS.Contents.UI.Components;
 using System.Text.RegularExpressions;
-using static System.Net.Mime.MediaTypeNames;
-using TerraJS.JSEngine.API.Commands.CommandGUI;
-using TerraJS.JSEngine.API.Commands;
 using TerraJS.Contents.UI.Chat;
 using TerraJS.Contents.Utils;
 
-namespace TerraJS.API.Commands.CommandGUI
+namespace TerraJS.JSEngine.API.Commands.CommandGUI
 {
     [RegisterUI("CommandPanel")]
     public class CommandPanel : SizeContainer
@@ -37,9 +29,11 @@ namespace TerraJS.API.Commands.CommandGUI
 
         public string CurrentChatText = "";
 
-        public string ChatText => ChatBox.Instance.TextBox.Text;
+        public int LastIndex = 0;
 
-        public CommandInfo CommandInfo => CommandInfo.Parse(ChatText, ChatBox.Instance.TextBox.Cursor.CursorIndex);
+        public int CurrentIndex = 0;
+
+        public string ChatText => ChatBox.Instance.TextBox.Text;
 
         public CompletionsContainer CompletionsContainer;
 
@@ -49,45 +43,49 @@ namespace TerraJS.API.Commands.CommandGUI
         {
             CurrentChatText = ChatText;
 
+            CurrentIndex = ChatBox.Instance.TextBox.Cursor.CursorIndex;
+
             var container = CompletionsContainer;
 
             var completions = container.Completions;
 
-            if (ChatBox.Instance.TextBox.Active && (LastChatText != CurrentChatText))
+            var commandInfo = CommandInfo.Parse(ChatText, ChatBox.Instance.TextBox.Cursor.CursorIndex);
+
+            if (ChatBox.Instance.TextBox.Active && (LastChatText != CurrentChatText || LastIndex != CurrentIndex))
             {
-                if (ChatText.StartsWith("/"))
+                if (ChatText.StartsWith('/'))
                 {
-                    if (CommandInfo.State == InputState.Command)
+                    if (commandInfo.State == InputState.Command)
                     {
                         var matchingCommands = container.GetMatchingCommands();
 
                         container.RemoveAllChild();
 
                         container.RebuildCompletions([.. matchingCommands.Select(command =>
-                    {
-                        var text = "";
+                        {
+                            var text = "";
 
-                        var key = command.Command;
+                            var key = command.Command;
 
-                        var match = CommandInfo.Command;
+                            var match = commandInfo.Command;
 
-                        var dismatch = key[match.Length..];
+                            var dismatch = key[match.Length..];
 
-                        if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText([], out var args))
-                            text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + args;
-                        else
-                            text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
+                            if (command is TJSCommand tjscmd && tjscmd.TryGetArgumentsText([], out var args))
+                                text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch + args;
+                            else
+                                text = (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + dismatch;
 
-                        return text;
-                    })]);
+                            return text;
+                        })]);
                     }
                     else
                     {
-                        var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(CommandInfo.Command)).Select(c => c as TJSCommand).ToList();
+                        var commands = container.GetAvailableCommands().Where(c => c is TJSCommand && c.Command.StartsWith(commandInfo.Command)).Select(c => c as TJSCommand).ToList();
 
                         var values = new List<string>();
 
-                        var match = CommandInfo.CurrentParameter;
+                        var match = commandInfo.CurrentParameter;
 
                         container.RemoveAllChild();
 
@@ -95,12 +93,12 @@ namespace TerraJS.API.Commands.CommandGUI
                         {
                             var argsGroup = CommandAPI.CommandArgumentGroups[command.GetType().FullName];
 
-                            if (argsGroup.Arguments.Count <= CommandInfo.ParameterIndex)
+                            if (argsGroup.Arguments.Count <= commandInfo.ParameterIndex)
                                 continue;
 
-                            var arg = argsGroup.Arguments[CommandInfo.ParameterIndex];
+                            var arg = argsGroup.Arguments[commandInfo.ParameterIndex];
 
-                            var argCompletions = arg.GetCompletions();
+                            var argCompletions = arg.GetCompletions(commandInfo);
 
                             if (argCompletions.Count > 0)
                                 values.TryAddRange(argCompletions);
@@ -108,10 +106,12 @@ namespace TerraJS.API.Commands.CommandGUI
                                 values.Add(arg.ToString());
                         }
 
-                        container.RebuildCompletions(values.Where(t => t.StartsWith(match)).Select(t => (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + t[match.Length..]));
+                        container.RebuildCompletions(values);
                     }
 
                     LastChatText = CurrentChatText;
+
+                    LastIndex = CurrentIndex;
                 }
                 else
                     container.RemoveAllChild();
@@ -130,10 +130,42 @@ namespace TerraJS.API.Commands.CommandGUI
                         if (selected.Contains(' '))
                             selected = selected.Split(" ")[0];
 
-                        var currentInput = CommandInfo.State == InputState.Command ? CommandInfo.Command : CommandInfo.CurrentParameter;
+                        if (!selected.StartsWith('<'))
+                        {
+                            var state = commandInfo.State;
 
-                        if (currentInput != selected)
-                            ChatBox.Instance.TextBox.AppendString(selected[currentInput.Length..] + " ");
+                            var currentInput = state == InputState.Command ? commandInfo.Command : commandInfo.CurrentParameter;
+
+                            if (state == InputState.Selector)
+                            {
+                                var match = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?").Match(currentInput);
+
+                                var parts = match.Groups[2].Value.Split(',');
+
+                                var cursorPos = commandInfo.RelativeCursorPosition;
+
+                                var length = match.Groups[1].Length + 1;
+
+                                foreach (var part in parts)
+                                {
+                                    if (cursorPos > length)
+                                        length += part.Length;
+
+                                    if (cursorPos <= length)
+                                    {
+                                        currentInput = part;
+
+                                        break;
+                                    }
+
+                                    length++;
+                                }
+
+                                ChatBox.Instance.TextBox.AppendAt(selected[currentInput.Length..], length + commandInfo.CursorPosition - commandInfo.RelativeCursorPosition - 1);
+                            }
+                            else if (currentInput != selected)
+                                ChatBox.Instance.TextBox.AppendString(selected[currentInput.Length..]);
+                        }
                     }
 
                     if (UserInput.IsJustPress(Keys.Down))

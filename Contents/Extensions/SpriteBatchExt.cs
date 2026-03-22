@@ -1,11 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using Terraria;
 using System.Reflection;
 using TerraJS.Contents.UI.Chat;
-using TerraJS.Contents.UI;
 using FontStashSharp;
 
 namespace TerraJS.Contents.Extensions

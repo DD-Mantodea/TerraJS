@@ -7,7 +7,6 @@ using Terraria.ModLoader;
 using Microsoft.Xna.Framework.Input;
 using ReLogic.Content;
 using TerraJS.Contents.Utils;
-using TerraJS.Contents.UI;
 using TerraJS.Contents.Extensions;
 
 namespace TerraJS.Contents.UI.Components

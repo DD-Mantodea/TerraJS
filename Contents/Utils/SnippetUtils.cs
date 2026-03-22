@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
-using TerraJS.Contents.UI;
 using TerraJS.Contents.UI.Chat;
 using TerraJS.Contents.UI.Chat.TextSnippnts;
 

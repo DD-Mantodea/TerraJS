@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TerraJS.Contents.Extensions
+﻿namespace TerraJS.Contents.Extensions
 {
     public static class IntExt
     {

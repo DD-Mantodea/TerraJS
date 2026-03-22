@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Linq;
 using System.Reflection;
-using TerraJS.API.Events.SubEvents;
 using TerraJS.Contents.Attributes;
 using TerraJS.JSEngine.API.Events.SubEvents;
 
-namespace TerraJS.API.Events
+namespace TerraJS.JSEngine.API.Events
 {
     public class BaseEventAPI : BaseAPI
     {
@@ -31,6 +30,8 @@ namespace TerraJS.API.Events
         public ProjectileEventAPI Projectile = new();
 
         public UIEventAPI UI = new();
+
+        public WorldEventAPI World = new();
 
         [HideToJS]
         public Action ModLoadEvent;

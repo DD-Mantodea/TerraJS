@@ -89,6 +89,9 @@ namespace TerraJS.Contents.UI.Components
                             }
                             break;
                         case Keys.V:
+                            if (Clipboard.GetDataFormat() != ClipboardDataFormat.Text)
+                                return;
+
                             Cursor.DeleteSelection();
 
                             var clip = Clipboard.GetClipboardText();
@@ -549,16 +552,21 @@ namespace TerraJS.Contents.UI.Components
 
         public void AppendString(string str)
         {
-            if (str == "")
-                return;
-
             Cursor.DeleteSelection();
 
-            Text = Text.Insert(Cursor.CursorIndex, str);
+            AppendAt(str, Cursor.CursorIndex);
 
             Cursor.CursorIndex += str.Length;
 
             Cursor.SelectBegin = Cursor.CursorIndex;
+        }
+
+        public void AppendAt(string str, int index)
+        {
+            if (str == "")
+                return;
+
+            Text = Text.Insert(index, str);
 
             OnTextChanged?.Invoke(null, Text);
         }

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using Microsoft.Xna.Framework;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.Xna.Framework;
-using TerraJS.API.Commands;
+using System.Text;
 using TerraJS.Contents.Attributes;
 using TerraJS.JSEngine.API.Commands;
 using Terraria;
@@ -33,10 +33,9 @@ namespace TerraJS.Hooks
                 name = name.Substring(1);
             }
 
-            var args = input.TrimEnd().Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            args = args.Skip(1).ToArray();
+            var args = ParseArguments(input.TrimEnd()).Skip(1);
 
-            if (!GetCommand(caller, name, args, out ModCommand mc))
+            if (!GetCommand(caller, name, [.. args], out ModCommand mc))
                 return false;
 
             if (mc == null)//error in command name (multiple commands or missing mod etc)
@@ -47,20 +46,83 @@ namespace TerraJS.Hooks
 
             try
             {
-                mc.Action(caller, input, args);
+                mc.Action(caller, input, [.. args]);
             }
-            catch (Exception e)
+            catch (UsageException e)
             {
-                var ue = e as UsageException;
+                var color = typeof(UsageException).GetField("color", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(e);
 
-                var color = typeof(UsageException).GetField("color", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ue);
-
-                if (typeof(UsageException).GetField("msg", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(ue) is string msg)
+                if (typeof(UsageException).GetField("msg", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(e) is string msg)
                     caller.Reply(msg, (Color)color);
                 else
                     caller.Reply("Usage: " + mc.Usage, Color.Red);
             }
             return true;
+        }
+
+        private static List<string> ParseArguments(string input)
+        {
+            var args = new List<string>();
+            var currentArg = new StringBuilder();
+            bool inQuotes = false;
+            char quoteChar = '\0';
+            bool escapeNext = false;
+
+            for (int i = 0; i < input.Length; i++)
+            {
+                char c = input[i];
+
+                if (escapeNext)
+                {
+                    switch (c)
+                    {
+                        case 'n': currentArg.Append('\n'); break;
+                        case 'r': currentArg.Append('\r'); break;
+                        case 't': currentArg.Append('\t'); break;
+                        case '0': currentArg.Append('\0'); break;
+                        case '\\': currentArg.Append('\\'); break;
+                        case '"': currentArg.Append('"'); break;
+                        case '\'': currentArg.Append('\''); break;
+                        default: currentArg.Append('\\').Append(c); break;
+                    }
+                    escapeNext = false;
+                }
+                else if (c == '\\')
+                    escapeNext = true;
+                else if ((c == '"' || c == '\'') && !escapeNext)
+                {
+                    if (!inQuotes)
+                    {
+                        inQuotes = true;
+                        quoteChar = c;
+                    }
+                    else if (c == quoteChar)
+                    {
+                        inQuotes = false;
+                        quoteChar = '\0';
+                    }
+                    else
+                        currentArg.Append(c);
+                }
+                else if (char.IsWhiteSpace(c) && !inQuotes)
+                {
+                    if (currentArg.Length > 0)
+                    {
+                        args.Add(currentArg.ToString());
+                        currentArg.Clear();
+                    }
+                }
+                else
+                    currentArg.Append(c);
+            }
+
+            if (escapeNext)
+                currentArg.Append('\\');
+
+            if (currentArg.Length > 0)
+                args.Add(currentArg.ToString());
+
+            return args;
         }
 
         private static bool GetCommand(CommandCaller caller, string name, string[] args, out ModCommand mc)

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using TerraJS.Contents.Utils;
+using TerraJS.JSEngine.API.Commands.CommandGUI;
 
-namespace TerraJS.API.Commands.CommandArguments.BasicArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 {
     public class IntArgument(string name, int minValue = int.MinValue, int maxValue = int.MaxValue, bool isOptional = false) : CommandArgument(name, isOptional)
     {
@@ -70,7 +71,7 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
             return IsOptional ? $"[{ret}]" : ret;
         }
 
-        public override List<string> GetCompletions() => [];
+        public override List<string> GetCompletions(CommandInfo commandInfo) => [];
 
         public override Type InstanceType => typeof(int);
 

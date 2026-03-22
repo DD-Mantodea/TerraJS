@@ -1,12 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Events;
-using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
-using TerraJS.DetectorJS;
+using TerraJS.JSEngine.API.Events;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.Plugins

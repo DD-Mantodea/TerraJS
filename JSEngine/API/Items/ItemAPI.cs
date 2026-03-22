@@ -1,25 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
 using Jint.Runtime.Interop;
 using Microsoft.Xna.Framework;
-using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
-using TerraJS.JSEngine.API;
 using TerraJS.JSEngine.API.Items.DamageClasses;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Items
+namespace TerraJS.JSEngine.API.Items
 {
     public class ItemAPI : BaseAPI
     {
-        public ItemRegistry? CreateItemRegistry(string name, string @namespace = "") => new(name, @namespace);
+        public ItemRegistry CreateItemRegistry(string name, string @namespace = "") => new(name, @namespace);
 
-        public DamageClassRegistry? CreateDamageClassRegistry(string name, string @namespace = "") => new(name, @namespace);
+        public DamageClassRegistry CreateDamageClassRegistry(string name, string @namespace = "") => new(name, @namespace);
 
         public int GetModItem(string modName, string itemName)
         {

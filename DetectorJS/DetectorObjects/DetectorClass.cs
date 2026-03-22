@@ -7,7 +7,6 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
-using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -33,7 +32,12 @@ namespace TerraJS.DetectorJS.DetectorObjects
         {
             var ret = new StringBuilder();
 
-            ret.AppendLine($"export class {Type2ClassName(Type)}" + (Type.BaseType == null ? "" : $" extends {Type2ClassName(Type.BaseType)}") + " {");
+            var typeDef = Type.IsInterface ? "interface" : "class";
+
+            if (Type.IsAbstract)
+                typeDef = "abstract " + typeDef;
+
+            ret.AppendLine($"export {typeDef} {Type2ClassName(Type)}" + (Type.BaseType == null ? "" : $" extends {Type2ClassName(Type.BaseType)}") + " {");
 
             foreach (var i in Members)
             {

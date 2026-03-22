@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using TerraJS.JSEngine.API.Commands.CommandGUI;
 
-namespace TerraJS.API.Commands.CommandArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments
 {
     public abstract class CommandArgument(string name, bool isOptional = false)
     {
@@ -20,7 +19,7 @@ namespace TerraJS.API.Commands.CommandArguments
 
         public abstract override string ToString();
 
-        public abstract List<string> GetCompletions();
+        public abstract List<string> GetCompletions(CommandInfo commandInfo);
 
         public override int GetHashCode() => Name.GetHashCode();
 
@@ -33,6 +32,11 @@ namespace TerraJS.API.Commands.CommandArguments
         public static bool operator ==(CommandArgument c1, CommandArgument c2) => c1.Name == c2.Name;
 
         public static bool operator !=(CommandArgument c1, CommandArgument c2) => !(c1 == c2);
+
+        public static List<string> DealStartWith(List<string> values, string match)
+        {
+            return [.. values.Where(t => t.StartsWith(match)).Select(t => (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + t[match.Length..])];
+        }
 
         public virtual Type InstanceType => typeof(object);
 

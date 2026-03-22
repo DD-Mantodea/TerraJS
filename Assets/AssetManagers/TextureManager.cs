@@ -6,9 +6,9 @@ using ReLogic.Content;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.ID;
-using static TerraJS.Assets.Managers.TextureType;
+using static TerraJS.Assets.AssetManagers.TextureType;
 
-namespace TerraJS.Assets.Managers
+namespace TerraJS.Assets.AssetManagers
 {
     public class TextureManager : AssetManager<Asset<Texture2D>>
     {

@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using System.Reflection.Emit;
-using TerraJS.Assets.Managers;
-using TerraJS.JSEngine;
-using TerraJS.JSEngine.API;
+using TerraJS.Assets.AssetManagers;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Projectiles
+namespace TerraJS.JSEngine.API.Projectiles
 {
     public class ProjectileRegistry : ModTypeRegistry<TJSProjectile>
     {

@@ -1,8 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using TerraJS.Contents.Utils;
+using TerraJS.JSEngine.API.Commands.CommandGUI;
 
-namespace TerraJS.API.Commands.CommandArguments.BasicArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 {
     public class BoolArgument(string name, bool isOptional = false) : CommandArgument(name, isOptional)
     {
@@ -32,7 +33,7 @@ namespace TerraJS.API.Commands.CommandArguments.BasicArguments
 
         public override string ToString() => IsOptional ? $"[<{Name} : bool>]" : $"<{Name} : bool>";
 
-        public override List<string> GetCompletions() => ["true", "false"];
+        public override List<string> GetCompletions(CommandInfo commandInfo) => DealStartWith(["true", "false"], commandInfo.CurrentParameter);
 
         public override bool InScope(object value, object last) => value is string;
     }

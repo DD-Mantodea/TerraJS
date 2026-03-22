@@ -2,7 +2,6 @@
 using Microsoft.Xna.Framework.Graphics;
 using System;
 using TerraJS.Contents.Extensions;
-using TerraJS.Contents.UI;
 using TerraJS.Contents.Utils;
 using Terraria;
 

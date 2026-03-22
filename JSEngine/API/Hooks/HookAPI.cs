@@ -1,25 +1,15 @@
-﻿using System;
+﻿using Jint.Native;
+using MonoMod.Cil;
+using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Globalization;
-using System.Linq;
-using System.Linq.Expressions;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using Jint;
-using Jint.Native;
-using Jint.Native.Function;
-using Jint.Runtime.Interop;
-using MonoMod.Cil;
 using TerraJS.Contents.Attributes;
-using TerraJS.Contents.Extensions;
 using TerraJS.Contents.Utils;
-using TerraJS.JSEngine;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Reflections
+namespace TerraJS.JSEngine.API.Hooks
 {
     public class HookAPI : BaseAPI
     {
@@ -102,8 +92,6 @@ namespace TerraJS.API.Reflections
                 il.Emit(OpCodes.Pop);
 
             il.Emit(OpCodes.Ret);
-
-            var a = il.ToString();
 
             MonoModHooks.Add(methodInfo, method.CreateDelegate(hookType));
 

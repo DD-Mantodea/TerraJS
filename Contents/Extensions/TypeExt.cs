@@ -1,18 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using TerraJS.DetectorJS.DetectorObjects;
-using Terraria;
-using Terraria.DataStructures;
 
 namespace TerraJS.Contents.Extensions
 {
     public static class TypeExt
     {
+        public static Regex SourceGeneratedRegex = new(@"<[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}>[A-Za-z_][A-Za-z0-9_]*");
+
         public static bool IsGlobalNamespace(this Type type)
         {
             if (type == null)
@@ -37,24 +34,34 @@ namespace TerraJS.Contents.Extensions
                 (type.FullName?.Contains("<>z__ReadOnly") ?? false);
         }
 
+        public static bool IsSourceGenerated(this Type type)
+        {
+            return SourceGeneratedRegex.IsMatch(type.FullName ?? "");
+        }
+
         public static bool IsPrivateImplementationDetails(this Type type)
         {
-            return (type.FullName?.Contains("<PrivateImplementationDetails>")) ?? false;
+            return type.FullName?.Contains("<PrivateImplementationDetails>") ?? false;
         }
 
         public static bool IsInlineArray(this Type type)
         {
-            return (type.FullName?.Contains("<>y__InlineArray")) ?? false;
+            return type.FullName?.Contains("<>y__InlineArray") ?? false;
         }
 
         public static bool IsExtension(this Type type)
         {
-            return (type.FullName?.Contains("<>E__")) ?? false;
+            return type.FullName?.Contains("<>E__") ?? false;
         }
 
         public static bool IsRegexGenerator(this Type type)
         {
-            return (type.FullName?.Contains("<RegexGenerator_g>")) ?? false;
+            return type.FullName?.Contains("<RegexGenerator_g>") ?? false;
+        }
+
+        public static bool IsSearchValue(this Type type)
+        {
+            return type.FullName?.Contains("__CharSearchValues") ?? false;
         }
 
         public static bool IsIllegal(this Type type)
@@ -68,6 +75,8 @@ namespace TerraJS.Contents.Extensions
                 type.IsInlineArray() ||
                 type.IsExtension() ||
                 type.IsRegexGenerator() ||
+                type.IsSourceGenerated() ||
+                type.IsSearchValue() ||
                 DetectorObject.Type2ClassName(type) == ""
                 )
             {

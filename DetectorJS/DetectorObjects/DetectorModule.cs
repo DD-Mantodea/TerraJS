@@ -1,14 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Commands.CommandArguments;
-using TerraJS.API.Events;
 using TerraJS.Contents.Extensions;
-using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {

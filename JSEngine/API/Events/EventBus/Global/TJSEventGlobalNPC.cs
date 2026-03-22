@@ -1,9 +1,7 @@
-﻿using TerraJS.Contents.Attributes;
-using TerraJS.JSEngine;
-using Terraria;
+﻿using Terraria;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Events.EventBus.Global
+namespace TerraJS.JSEngine.API.Events.EventBus.Global
 {
     public unsafe class TJSEventGlobalNPC : GlobalNPC
     {

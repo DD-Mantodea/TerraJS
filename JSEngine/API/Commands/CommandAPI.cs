@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using TerraJS.API.Commands.CommandArguments;
-using TerraJS.JSEngine.API.Commands;
+using TerraJS.JSEngine.API.Commands.CommandArguments;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Commands
+namespace TerraJS.JSEngine.API.Commands
 {
     public class CommandAPI : BaseAPI
     {

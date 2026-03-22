@@ -1,12 +1,12 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using TerraJS.API.Events.Ref;
 using TerraJS.Contents.Attributes;
+using TerraJS.JSEngine.API.Events.Ref;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Events.SubEvents
+namespace TerraJS.JSEngine.API.Events.SubEvents
 {
     public class PlayerEventAPI : BaseEventAPI
     {

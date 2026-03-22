@@ -1,7 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.ComponentModel;
-using TerraJS.Contents.UI.Components;
 
 namespace TerraJS.Contents.UI.Components.Containers
 {

@@ -1,13 +1,10 @@
 ﻿using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Chat;
 using TerraJS.Contents.Utils;
-using static System.Net.Mime.MediaTypeNames;
 
 namespace TerraJS.Contents.UI.Components
 {

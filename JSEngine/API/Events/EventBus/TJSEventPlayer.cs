@@ -1,10 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
-using TerraJS.JSEngine;
 using Terraria;
 using Terraria.DataStructures;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Events.EventBus
+namespace TerraJS.JSEngine.API.Events.EventBus
 {
     public unsafe class TJSEventPlayer : ModPlayer
     {

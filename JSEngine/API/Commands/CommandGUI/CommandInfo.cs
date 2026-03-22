@@ -1,14 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace TerraJS.JSEngine.API.Commands.CommandGUI
 {
     public enum InputState
     {
-        Empty,          // 空输入
-        Command,        // 正在输入指令关键字
-        Parameter       // 正在输入参数
+        Empty,
+        Command,
+        Parameter,
+        Selector
     }
 
     public class CommandInfo
@@ -21,8 +23,6 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
         public int ParameterIndex { get; set; } = -1;          // 当前正在编辑的参数索引
         public int CursorPosition { get; set; } = 0;           // 原始光标位置
         public int RelativeCursorPosition { get; set; } = 0;   // 相对于当前参数的光标位置
-        public bool IsAtParameterStart { get; set; } = false;  // 光标是否在参数开头
-        public bool IsAtParameterEnd { get; set; } = false;    // 光标是否在参数结尾
 
         public static CommandInfo Parse(string inputText, int cursorPosition) => CommandParser.Parse(inputText, cursorPosition);
     }
@@ -44,7 +44,7 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
             }
 
             // 检查是否以斜杠开头
-            if (!inputText.StartsWith("/"))
+            if (!inputText.StartsWith('/'))
             {
                 // 如果不是指令格式，可以根据需要处理
                 result.State = InputState.Empty;
@@ -52,7 +52,7 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
             }
 
             // 移除开头的斜杠
-            string content = inputText.Substring(1);
+            string content = inputText[1..];
             int adjustedCursor = cursorPosition - 1; // 调整光标位置（移除斜杠的影响）
 
             // 分割输入内容
@@ -78,12 +78,11 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                     result.State = InputState.Command;
                     result.RelativeCursorPosition = adjustedCursor - keywordPart.StartIndex;
                 }
-                else if (adjustedCursor > keywordPart.EndIndex && content[adjustedCursor - 1] == ' ')
+                else
                 {
                     // 光标在关键字后的空格位置，准备输入参数
                     result.State = InputState.Parameter;
                     result.ParameterIndex = 0;
-                    result.IsAtParameterStart = true;
                 }
             }
             else
@@ -95,7 +94,13 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                 var currentPart = parts.FirstOrDefault(p =>
                     adjustedCursor >= p.StartIndex && adjustedCursor <= p.EndIndex + 1); // +1 允许在结尾后一个位置
 
-                if (currentPart != null)
+                if (adjustedCursor > parts.Last().EndIndex + 1)
+                {
+                    // 光标在所有部分之后，准备输入新参数
+                    result.State = InputState.Parameter;
+                    result.ParameterIndex = parts.Count - 1;
+                }
+                else if (currentPart != null)
                 {
                     if (currentPart.Index == 0)
                     {
@@ -105,23 +110,26 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                     }
                     else
                     {
-                        // 光标在参数部分
-                        result.State = InputState.Parameter;
+                        var regex = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?");
+
+                        if (regex.IsMatch(currentPart.Text))
+                        {
+                            var match = regex.Match(currentPart.Text);
+
+                            var relative = adjustedCursor - currentPart.StartIndex;
+
+                            if (relative >= match.Groups[1].Length + 1 && relative < currentPart.EndIndex)
+                                result.State = InputState.Selector;
+                            else
+                                result.State = InputState.Parameter;
+                        }
+                        else
+                            result.State = InputState.Parameter;
+
                         result.ParameterIndex = currentPart.Index - 1; // 转换为参数索引
                         result.CurrentParameter = currentPart.Text;
                         result.RelativeCursorPosition = adjustedCursor - currentPart.StartIndex;
-
-                        // 检查光标位置特性
-                        result.IsAtParameterStart = adjustedCursor == currentPart.StartIndex;
-                        result.IsAtParameterEnd = adjustedCursor == currentPart.EndIndex + 1;
                     }
-                }
-                else if (adjustedCursor > parts.Last().EndIndex + 1)
-                {
-                    // 光标在所有部分之后，准备输入新参数
-                    result.State = InputState.Parameter;
-                    result.ParameterIndex = parts.Count - 1;
-                    result.IsAtParameterStart = true;
                 }
             }
 

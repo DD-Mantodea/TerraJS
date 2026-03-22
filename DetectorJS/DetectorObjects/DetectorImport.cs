@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace TerraJS.DetectorJS.DetectorObjects
+﻿namespace TerraJS.DetectorJS.DetectorObjects
 {
     public class DetectorImport(string className, string moduleName) : DetectorObject
     {

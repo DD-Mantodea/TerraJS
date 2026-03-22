@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria;
 
-namespace TerraJS.API.Recipes
+namespace TerraJS.JSEngine.API.Recipes
 {
     public class RecipeAPI : BaseAPI
     {

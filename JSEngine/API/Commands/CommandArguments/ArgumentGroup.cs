@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 
-namespace TerraJS.API.Commands.CommandArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments
 {
     public class ArgumentGroup
     {

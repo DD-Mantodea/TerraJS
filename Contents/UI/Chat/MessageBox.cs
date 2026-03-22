@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Linq;
 using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using TerraJS.Assets.Managers;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
-using TerraJS.Contents.UI.Components;
+using TerraJS.Contents.UI.Chat.Components;
 using TerraJS.Contents.UI.Components.Containers;
-using TerraJS.Contents.Utils;
 using TerraJS.Hooks;
 using Terraria;
-using Terraria.GameInput;
 
 namespace TerraJS.Contents.UI.Chat
 {

@@ -1,14 +1,10 @@
-﻿using System.Collections.Generic;
-using Microsoft.Xna.Framework;
-using TerraJS.API.Events.Ref;
-using TerraJS.Contents.Attributes;
-using TerraJS.JSEngine;
+﻿using TerraJS.Contents.Attributes;
+using TerraJS.JSEngine.API.Events.Ref;
 using Terraria;
-using Terraria.Localization;
 using Terraria.ModLoader;
 using Terraria.ModLoader.IO;
 
-namespace TerraJS.API.Events.EventBus.Global
+namespace TerraJS.JSEngine.API.Events.EventBus.Global
 {
     [HideToJS]
     public unsafe class TJSEventGlobalItem : GlobalItem

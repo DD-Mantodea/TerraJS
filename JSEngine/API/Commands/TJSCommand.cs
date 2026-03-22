@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Commands;
-using TerraJS.API.Commands.CommandArguments;
+﻿using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands
@@ -13,6 +7,8 @@ namespace TerraJS.JSEngine.API.Commands
     public abstract class TJSCommand : ModCommand
     {
         public override string Command { get => CommandAPI.CommandContents[GetType().FullName]; }
+
+        public override string Description => TJSEngine.GlobalAPI.Translation.GetTranslation($"Commands.Description.{GetType().Name}", Language.ActiveCulture);
 
         public override CommandType Type => CommandType.Chat;
 

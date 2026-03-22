@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Events;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
-using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
@@ -51,23 +45,15 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public string Default2String(object @default)
         {
-            switch (@default)
+            return @default switch
             {
-                case string:
-                    return $"\"{@default}\"";
-
-                case null:
-                    return "null";
-
-                case false:
-                    return "false";
-
-                case true:
-                    return "true";
-
-                default:
-                    return @default.ToString();
-            }
+                string => $"\"{@default}\"",
+                char => $"'{@default}'",
+                null => "null",
+                false => "false",
+                true => "true",
+                _ => @default.ToString(),
+            };
         }
     }
 }

@@ -1,17 +1,8 @@
-﻿using Jint;
-using Jint.Native;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Items;
 using Terraria.ModLoader;
-using Terraria;
-using TerraJS.JSEngine;
-using TerraJS.API;
 using TerraJS.JSEngine.API;
 
 namespace TerraJS.Contents.Utils

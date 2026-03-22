@@ -1,14 +1,9 @@
-﻿using System;
-using System.Linq;
-using Microsoft.Xna.Framework.Graphics;
+﻿using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework;
 using FontStashSharp;
 using Terraria;
-using TerraJS.Contents.UI;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
-using TerraJS.Contents.DataStructures;
-using TerraJS.Contents.Attributes;
 
 namespace TerraJS.Contents.UI.Components
 {

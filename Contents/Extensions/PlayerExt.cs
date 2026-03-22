@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Reflection;
 using Jint.Runtime.Interop;
 using TerraJS.Contents.Utils;
 using Terraria;

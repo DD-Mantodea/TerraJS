@@ -3,9 +3,7 @@ using System;
 using System.IO;
 using System.Reflection;
 using Terraria;
-using TerraJS.API.Commands.CommandArguments.BasicArguments;
 using TerraJS.DetectorJS;
-using TerraJS.Assets.Managers;
 using TerraJS.Contents.Attributes;
 using TerraJS.JSEngine;
 using Terraria.ID;
@@ -21,6 +19,8 @@ using System.Threading;
 using TerraJS.Contents.Utils;
 using LibRimeDemo;
 using LibRimeDemo.Data;
+using TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments;
+using Microsoft.Xna.Framework;
 
 namespace TerraJS
 {
@@ -204,14 +204,50 @@ namespace TerraJS
                     thread.Start();
                 })
                 .Register();
+            
+            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("exec")
+                .NextArgument(new StringArgument("code"))
+                .Execute((g, _) =>
+                {
+                    var code = g.GetString("code");
+
+                    try
+                    {
+                        TJSEngine.Engine.Execute(code);
+                    }
+                    catch
+                    {
+
+                    }
+                })
+                .Register();
+
+            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("prefix")
+                .NextArgument(new JsArgument("prefixID"))
+                .Execute((g, _) =>
+                {
+                    var prefixID = g.Get<object>("prefixID");
+
+                    if (prefixID is double val)
+                    {
+                        Main.LocalPlayer.HeldItem.ResetPrefix();
+
+                        Main.LocalPlayer.HeldItem.Prefix((int)val);
+                    }
+                })
+                .Register();
 
             TJSEngine.GlobalAPI.Command.CreateCommandRegistry("test")
-                .NextArgument(new StringArgument("str"))
-                .Execute((group, _) =>
+                .NextArgument(new PlayersArgument("player"))
+                .Execute((g, _) =>
                 {
-                    var result = SnippetUtils.ParseMessage(group.GetString("str"));
+                    var players = g.Get<List<Player>>("player");
 
-                    var a = 1;
+                    if (players.Count == 0)
+                        Main.NewText($"玩家选择器返回空数组", Color.Red);
+                    else
+                        foreach (var player in players)
+                            Main.NewText($"玩家 {player.name} 的坐标是 {player.position}");
                 })
                 .Register();
         }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using TerraJS.API;
 using Terraria.Localization;
 
 namespace TerraJS.JSEngine.API.Translations
@@ -31,10 +30,8 @@ namespace TerraJS.JSEngine.API.Translations
         {
             key = key.Replace("TJSContents", "TerraJS");
 
-            if (Translations[gameCultrue].ContainsKey(key))
+            if (!Translations[gameCultrue].TryAdd(key, value))
                 Translations[gameCultrue][key] = value;
-            else
-                Translations[gameCultrue].Add(key, value);
         }
 
         public string GetTranslation(string key, GameCulture gameCulture = null)

@@ -1,9 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Humanizer;
 using Microsoft.Xna.Framework;
 
 namespace TerraJS.Contents.UI.Components

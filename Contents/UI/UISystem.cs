@@ -10,8 +10,6 @@ using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Utils;
 using TerraJS.Hooks;
 using TerraJS.JSEngine;
-using Terraria;
-using Terraria.DataStructures;
 using Terraria.ModLoader;
 using Terraria.ModLoader.Core;
 using Terraria.UI;

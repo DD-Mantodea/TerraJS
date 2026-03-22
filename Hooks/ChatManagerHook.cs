@@ -2,8 +2,6 @@
 using Microsoft.Xna.Framework;
 using ReLogic.Graphics;
 using TerraJS.Contents.UI.Chat;
-using TerraJS.Contents.UI.Chat.TextSnippnts;
-using TerraJS.JSEngine.API.Commands.CommandGUI;
 using Terraria.ModLoader;
 using Terraria.UI.Chat;
 

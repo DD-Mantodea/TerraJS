@@ -1,6 +1,5 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
-using TerraJS.Contents.DataStructures;
 using TerraJS.Contents.UI.Components.Containers;
 
 namespace TerraJS.JSEngine.API.UIs.Components.Containers

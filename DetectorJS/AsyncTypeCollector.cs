@@ -3,20 +3,17 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using Jint.Runtime;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
-using Terraria;
 
 namespace TerraJS.DetectorJS
 {
     public static class AsyncTypeCollector
     {
         private static readonly ConcurrentDictionary<Type, Type[]> _typeCache = new();
-        private static readonly SemaphoreSlim _cacheSemaphore = new SemaphoreSlim(1, 1);
+        private static readonly SemaphoreSlim _cacheSemaphore = new(1, 1);
 
         public static async Task<HashSet<Type>> CollectAllRelatedTypesAsync(IEnumerable<Type> initialTypes)
         {

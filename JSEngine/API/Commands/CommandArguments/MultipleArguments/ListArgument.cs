@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TerraJS.Contents.Extensions;
+using TerraJS.JSEngine.API.Commands.CommandGUI;
 
-namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments.MultipleArguments
 {
     public class ListArgument<T>(string name, int minLength = 0, int maxLength = int.MaxValue, bool isOptional = false) : CommandArgument(name, isOptional) where T : CommandArgument, new()
     {
@@ -102,7 +103,7 @@ namespace TerraJS.API.Commands.CommandArguments.MultipleArguments
             return value is List<object> list && list.Count >= _minLength && list.Count <= _maxLength;
         }
 
-        public override List<string> GetCompletions() => [];
+        public override List<string> GetCompletions(CommandInfo commandInfo) => [];
 
         public override Type InstanceType => typeof(List<>);
 

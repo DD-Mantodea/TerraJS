@@ -1,7 +1,5 @@
-﻿using System.IO;
-using TerraJS.Contents.Utils;
+﻿using TerraJS.Contents.Utils;
 using TerraJS.JSEngine;
-using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
 

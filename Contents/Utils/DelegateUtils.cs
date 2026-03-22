@@ -1,20 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Linq.Expressions;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Jint.Native;
-using Jint;
 using TerraJS.JSEngine;
-using Jint.Runtime.Interop;
-using Jint.Native.Function;
-using System.Collections.ObjectModel;
-using System.Reflection.Emit;
-using Microsoft.Build.Tasks;
-using System.Runtime.CompilerServices;
 
 namespace TerraJS.Contents.Utils
 {

@@ -5,7 +5,7 @@ using System.IO;
 using System.Linq;
 using Terraria.GameContent;
 
-namespace TerraJS.Assets.Managers
+namespace TerraJS.Assets.AssetManagers
 {
     public class FontManager : AssetManager<FontSystem>
     {

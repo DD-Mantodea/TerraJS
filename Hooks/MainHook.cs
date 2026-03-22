@@ -1,14 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Xna.Framework.Input;
-using ReLogic.OS;
 using TerraJS.Contents.UI.Components;
-using TerraJS.Contents.UI.IME;
-using TerraJS.JSEngine.API.Commands.CommandGUI;
 using Terraria;
 using Terraria.ModLoader;
 

@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Linq;
-using System.Reflection.Emit;
-using TerraJS.API;
-using TerraJS.API.Commands;
-using TerraJS.API.Commands.CommandArguments;
-using TerraJS.API.Projectiles;
+using TerraJS.JSEngine.API.Commands.CommandArguments;
+using Terraria;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands
@@ -25,6 +23,15 @@ namespace TerraJS.JSEngine.API.Commands
         private readonly string _content;
 
         private readonly ArgumentGroup _argumentGroup = new();
+
+        public CommandRegistry Description(GameCulture.CultureName gameCulture, string description)
+        {
+            if (IsEmpty) return this;
+
+            TJSEngine.GlobalAPI.Translation.SetTranslation(GameCulture.FromCultureName(gameCulture), $"Commands.Description.{_builder.Name}", description);
+
+            return this;
+        }
 
         public CommandRegistry NextArgument(CommandArgument argument)
         {

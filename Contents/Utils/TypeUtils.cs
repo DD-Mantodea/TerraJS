@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Jint.Native;
+using System;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Terraria.ModLoader;
 
 namespace TerraJS.Contents.Utils
@@ -19,5 +16,9 @@ namespace TerraJS.Contents.Utils
         public static Type BuildProperties = typeof(Mod).Assembly.GetType("Terraria.ModLoader.Core.BuildProperties");
 
         public static Type ModReference = BuildProperties.GetNestedType("ModReference", BindingFlags.NonPublic);
+
+        public static Type DefaultTypeConverter = typeof(JsValue).Assembly.GetType("Jint.Runtime.Interop.DefaultTypeConverter");
+
+        public static Type InteropHelper = typeof(JsValue).Assembly.GetType("Jint.Runtime.Interop.InteropHelper");
     }
 }

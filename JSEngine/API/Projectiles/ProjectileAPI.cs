@@ -1,19 +1,12 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Reflection;
-using System.Reflection.Emit;
-using System.Text;
-using System.Threading.Tasks;
-using TerraJS.API.Items;
-using TerraJS.Contents.Extensions;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Projectiles
+namespace TerraJS.JSEngine.API.Projectiles
 {
     public class ProjectileAPI : BaseAPI
     {
-        public ProjectileRegistry? CreateProjectileRegistry(string name, string @namespace = "") => new(name, @namespace);
+        public ProjectileRegistry CreateProjectileRegistry(string name, string @namespace = "") => new(name, @namespace);
 
         public int GetModProjectile(string modName, string projName)
         {

@@ -1,23 +1,20 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Emit;
+﻿using System.Reflection.Emit;
 using System.Reflection;
-using TerraJS.API.Events;
-using TerraJS.API.Items;
-using TerraJS.API.Recipes;
-using TerraJS.API.Projectiles;
-using TerraJS.API.Commands;
-using TerraJS.API.Tiles;
-using TerraJS.API.Players;
-using TerraJS.API.Reflections;
-using TerraJS.API.NPCs;
 using TerraJS.JSEngine.API.UIs;
 using TerraJS.JSEngine.API.Translations;
 using TerraJS.JSEngine.API.Debuggers;
 using TerraJS.JSEngine.API.DotNets;
+using TerraJS.JSEngine.API.Items;
+using TerraJS.JSEngine.API.Players;
+using TerraJS.JSEngine.API.Events;
+using TerraJS.JSEngine.API.Commands;
+using TerraJS.JSEngine.API.Recipes;
+using TerraJS.JSEngine.API.Hooks;
+using TerraJS.JSEngine.API.Tiles;
+using TerraJS.JSEngine.API.NPCs;
+using TerraJS.JSEngine.API.Projectiles;
 
-namespace TerraJS.API
+namespace TerraJS.JSEngine.API
 {
     public class GlobalAPI : BaseAPI
     {

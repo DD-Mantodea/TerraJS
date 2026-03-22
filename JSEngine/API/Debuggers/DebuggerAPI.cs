@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Jint.Runtime.Interop;
-using TerraJS.API;
+﻿using Jint.Runtime.Interop;
 using Terraria;
 
 namespace TerraJS.JSEngine.API.Debuggers

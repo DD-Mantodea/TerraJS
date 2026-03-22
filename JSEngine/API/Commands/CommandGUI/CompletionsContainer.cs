@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.Contents.Extensions;
@@ -11,7 +9,6 @@ using TerraJS.Contents.UI.Chat;
 using TerraJS.Contents.UI.Components;
 using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Utils;
-using Terraria;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands.CommandGUI

@@ -1,9 +1,9 @@
 ﻿using System;
-using TerraJS.API.Events.Ref;
 using TerraJS.Contents.Attributes;
+using TerraJS.JSEngine.API.Events.Ref;
 using Terraria;
 
-namespace TerraJS.API.Events.SubEvents
+namespace TerraJS.JSEngine.API.Events.SubEvents
 {
     public class TileEventAPI : BaseEventAPI
     {

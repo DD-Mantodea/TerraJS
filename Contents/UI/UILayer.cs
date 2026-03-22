@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Xna.Framework;
-using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
 using Terraria;

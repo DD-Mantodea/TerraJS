@@ -2,16 +2,11 @@
 using System.Collections.Generic;
 using System.Reflection;
 using System.Reflection.Emit;
-using Microsoft.Win32;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using TerraJS.API;
-using TerraJS.API.Items;
-using TerraJS.Assets.Managers;
+using TerraJS.Assets.AssetManagers;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
-using TerraJS.Contents.Utils;
-using TerraJS.JSEngine;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API

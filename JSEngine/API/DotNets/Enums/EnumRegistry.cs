@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection.Emit;
-using TerraJS.API;
 
 namespace TerraJS.JSEngine.API.DotNets.Enums
 {

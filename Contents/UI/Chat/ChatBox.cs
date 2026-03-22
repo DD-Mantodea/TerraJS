@@ -1,20 +1,16 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
-using TerraJS.API.Commands.CommandGUI;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
-using TerraJS.Contents.UI;
 using TerraJS.Contents.UI.Components;
 using TerraJS.Contents.UI.Components.Containers;
-using TerraJS.Contents.UI.IME;
-using TerraJS.Contents.Utils;
 using TerraJS.Hooks;
+using TerraJS.JSEngine.API.Commands.CommandGUI;
 using Terraria;
 using Terraria.Audio;
 using Terraria.Chat;
 using Terraria.ID;
-using Terraria.ModLoader;
 using Terraria.UI.Chat;
 
 namespace TerraJS.Contents.UI.Chat

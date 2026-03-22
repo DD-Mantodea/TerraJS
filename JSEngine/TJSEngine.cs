@@ -1,19 +1,18 @@
-﻿using System;
-using System.Reflection;
-using Jint;
-using Terraria.ModLoader.Core;
-using Terraria.ModLoader;
-using Microsoft.Xna.Framework;
-using TerraJS.API;
-using TerraJS.Contents.Utils;
-using Terraria.Localization;
-using TerraJS.Contents.Attributes;
-using System.IO;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Jint;
 using Jint.Runtime.Interop;
-using System.Collections;
+using Microsoft.Xna.Framework;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Reflection;
+using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Utils;
+using TerraJS.JSEngine.API;
 using TerraJS.JSEngine.Plugins;
+using Terraria.Localization;
+using Terraria.ModLoader;
+using Terraria.ModLoader.Core;
 
 namespace TerraJS.JSEngine
 {

@@ -2,7 +2,7 @@
 using TerraJS.Contents.Attributes;
 using Terraria;
 
-namespace TerraJS.API.Events.SubEvents
+namespace TerraJS.JSEngine.API.Events.SubEvents
 {
     public class RecipeEventAPI : BaseEventAPI
     {

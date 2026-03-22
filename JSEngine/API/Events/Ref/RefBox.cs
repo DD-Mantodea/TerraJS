@@ -1,4 +1,4 @@
-﻿namespace TerraJS.API.Events.Ref
+﻿namespace TerraJS.JSEngine.API.Events.Ref
 {
     public unsafe class RefBox<T>(T* ptr)
     {

@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.Xna.Framework;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Chat.TextSnippnts;
 using TerraJS.Contents.UI.Components;
 using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Utils;
-using Terraria;
-using static System.Net.Mime.MediaTypeNames;
 
-namespace TerraJS.Contents.UI.Chat
+namespace TerraJS.Contents.UI.Chat.Components
 {
     public class ChatMessage : ColumnContainer
     {

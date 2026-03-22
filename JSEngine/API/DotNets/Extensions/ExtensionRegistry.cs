@@ -1,13 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Reflection.Emit;
 using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Win32;
-using TerraJS.API;
 using TerraJS.Contents.Extensions;
 
 namespace TerraJS.JSEngine.API.DotNets.Extensions

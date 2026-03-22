@@ -4,16 +4,14 @@ using System.Reflection;
 using System.Reflection.Emit;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
-using TerraJS.Assets.Managers;
+using TerraJS.Assets.AssetManagers;
 using TerraJS.Contents.Extensions;
-using TerraJS.JSEngine;
-using TerraJS.JSEngine.API;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
 using Terraria.ModLoader;
 
-namespace TerraJS.API.Items
+namespace TerraJS.JSEngine.API.Items
 {
     public class ItemRegistry : ModTypeRegistry<TJSItem>
     {
