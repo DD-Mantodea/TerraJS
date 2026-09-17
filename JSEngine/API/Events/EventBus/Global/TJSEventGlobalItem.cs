@@ -48,7 +48,7 @@ namespace TerraJS.JSEngine.API.Events.EventBus.Global
         {
             bool useVanilla = true;
 
-            var refBox = new RefBox<bool>(&useVanilla);
+            var refBox = new RefBox<bool>(useVanilla);
 
             var ret = TJSEngine.GlobalAPI.Event.Item.UseItemEvent?.Invoke(item, player, refBox);
 

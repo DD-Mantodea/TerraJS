@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Events.EventBus.Global
 {
-    public unsafe class TJSEventGlobalTile : GlobalTile
+    public class TJSEventGlobalTile : GlobalTile
     {
         public override void PlaceInWorld(int x, int y, int type, Item item)
         {
@@ -17,18 +17,12 @@ namespace TerraJS.JSEngine.API.Events.EventBus.Global
 
         public override void KillTile(int x, int y, int type, ref bool fail, ref bool effectOnly, ref bool noItem)
         {
-            fixed (bool* pFail = &fail, pEffectOnly = &effectOnly, pNoItem = &noItem)
-            {
-                TJSEngine.GlobalAPI.Event.Tile.BreakTileEvent?.Invoke(x, y, type, new(pFail), new(pEffectOnly), new(pNoItem));
-            }
+            TJSEngine.GlobalAPI.Event.Tile.BreakTileEvent?.Invoke(x, y, type, new(fail), new(effectOnly), new(noItem));
         }
 
         public override bool CanKillTile(int x, int y, int type, ref bool blockDamaged)
         {
-            fixed (bool* pBlockDamaged = &blockDamaged)
-            {
-                return TJSEngine.GlobalAPI.Event.Tile.CanBreakTileEvent?.Invoke(x, y, type, new(pBlockDamaged)) ?? true;
-            }
+            return TJSEngine.GlobalAPI.Event.Tile.CanBreakTileEvent?.Invoke(x, y, type, new(blockDamaged)) ?? true;
         }
     }
 }

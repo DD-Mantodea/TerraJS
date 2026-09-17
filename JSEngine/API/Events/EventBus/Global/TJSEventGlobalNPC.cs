@@ -3,7 +3,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Events.EventBus.Global
 {
-    public unsafe class TJSEventGlobalNPC : GlobalNPC
+    public class TJSEventGlobalNPC : GlobalNPC
     {
         public override void ModifyNPCLoot(NPC npc, NPCLoot npcLoot)
         {
@@ -22,10 +22,7 @@ namespace TerraJS.JSEngine.API.Events.EventBus.Global
 
         public override void ModifyActiveShop(NPC npc, string shopName, Item[] items)
         {
-            fixed (Item* pItems = items)
-            {
-                TJSEngine.GlobalAPI.Event.NPC.ModifyActiveShopEvent?.Invoke(npc, shopName, new(pItems, items.Length));
-            }
+            TJSEngine.GlobalAPI.Event.NPC.ModifyActiveShopEvent?.Invoke(npc, shopName, new(items));
         }
 
         public override bool PreAI(NPC npc)

@@ -1,5 +1,5 @@
 ﻿using System;
-using LibRimeDemo.Data;
+using LibRimeSharp.Data;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using TerraJS.Contents.Attributes;
@@ -38,19 +38,19 @@ namespace TerraJS.Contents.UI.IME
 
         public override void Draw(SpriteBatch spriteBatch, GameTime gameTime)
         {
-            if (IMEUtils.GetInput(_session) != "")
+            if ((_session?.GetInput() ?? "") != "")
             {
                 base.Draw(spriteBatch, gameTime);
 
-                spriteBatch.DrawBorderedString(Font, IMEUtils.GetInput(_session), Position.Add(4, 4), Color.White * 0.8f, Color.Black * 0.8f, 2);
+                spriteBatch.DrawBorderedString(Font, _session.GetInput(), Position.Add(4, 4), Color.White * 0.8f, Color.Black * 0.8f, 2);
 
                 spriteBatch.Draw(SpriteBatchExt.Pixel, new Rectangle((int)Position.X + 4, (int)Position.Y + 25, Width - 8, 1), Color.White * 0.6f);
 
-                var candidates = IMEUtils.GetCurrentPageCandidates(_session);
+                var candidates = _session.GetCurrentPageCandidates();
 
                 var offset = 0;
 
-                var index = IMEUtils.GetSelectCandidateIndex(_session);
+                var index = _session.GetSelectCandidateIndex();
 
                 for (var i = 0; i < candidates.Count; i++)
                 {
@@ -76,7 +76,10 @@ namespace TerraJS.Contents.UI.IME
         {
             base.Update(gameTime);
 
-            var candidates = IMEUtils.GetCurrentPageCandidates(_session);
+            if (_session == null)
+                return;
+
+            var candidates = _session?.GetCurrentPageCandidates() ?? [];
 
             var offset = 0;
 
@@ -94,10 +97,10 @@ namespace TerraJS.Contents.UI.IME
                 var deltaWheel = UserInput.GetDeltaWheelValue();
 
                 if (deltaWheel < 0)
-                    IMEUtils.SelectNext(_session);
+                    _session.SelectNext();
 
                 if (deltaWheel > 0)
-                    IMEUtils.SelectPrev(_session);
+                    _session.SelectPrev();
 
                 PlayerHook.ShouldDisableScrollHotbar = true;
             }

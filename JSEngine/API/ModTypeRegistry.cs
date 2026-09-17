@@ -1,24 +1,28 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Reflection;
-using System.Reflection.Emit;
+﻿using Jint.Native;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
+using System;
+using System.Collections.Generic;
+using System.Dynamic;
+using System.Reflection;
+using System.Reflection.Emit;
 using TerraJS.Assets.AssetManagers;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
+using TerraJS.JSEngine.API.Items;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API
 {
-    public abstract class ModTypeRegistry<T> : IRegistry<T> where T : ModType
+    public abstract class ModTypeRegistry<T, K> : IRegistry<T> where T : ModType where K : ModTypeRegistry<T, K>
     {
         internal TypeBuilder _builder;
 
         internal TextureGetter _texture = new();
 
         internal static Type _contentType = typeof(T);
-
+     
         internal static List<T> _tjsInstances = [];
 
         public bool IsEmpty = false;
@@ -45,6 +49,27 @@ namespace TerraJS.JSEngine.API
 
         [HideToJS]
         public abstract void Register(Mod mod);
+
+        public K FromJS(ExpandoObject obj)
+        {
+            if (this is not K)
+                return default;
+
+            foreach (var item in obj)
+            {
+                if (item.Value is not Func<JsValue, JsValue[], JsValue> @delegate)
+                    continue;
+
+                var method = typeof(TJSItem).GetMethod(item.Key);
+
+                if (method == null)
+                    continue;
+
+                RegistryUtils.OverrideJS(this, item.Key, @delegate);
+            }
+
+            return this as K;
+        }
     }
 
     public class TextureGetter

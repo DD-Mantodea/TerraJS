@@ -1,19 +1,23 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+using Jint.Runtime;
 using Microsoft.Xna.Framework;
-using Terraria;
 using Microsoft.Xna.Framework.Input;
-using TerraJS.Contents.UI;
-using TerraJS.Contents.Extensions;
-using TerraJS.Contents.UI.Components.Containers;
-using TerraJS.Contents.Attributes;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
 using System.Text.RegularExpressions;
+using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Extensions;
+using TerraJS.Contents.UI;
 using TerraJS.Contents.UI.Chat;
+using TerraJS.Contents.UI.Components;
+using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Utils;
+using Terraria;
 
 namespace TerraJS.JSEngine.API.Commands.CommandGUI
 {
-    [RegisterUI("CommandPanel")]
+    [RegisterUI("CommandPanel", priority: -1)]
     public class CommandPanel : SizeContainer
     {
         public CommandPanel()
@@ -21,6 +25,11 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
             RelativePosition = new(78, 0);
 
             CompletionsContainer = new CompletionsContainer().Join(this);
+
+            UserInput.KeyJustPress += KeyJustPress;
+            UserInput.KeyKeepPress += KeyKeepPress;
+
+            Timer = new(2);
         }
 
         public static CommandPanel Instance => UISystem.GetUIInstance<CommandPanel>("CommandPanel");
@@ -34,6 +43,8 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
         public int CurrentIndex = 0;
 
         public string ChatText => ChatBox.Instance.TextBox.Text;
+
+        public Timer Timer;
 
         public CompletionsContainer CompletionsContainer;
 
@@ -59,9 +70,7 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                     {
                         var matchingCommands = container.GetMatchingCommands();
 
-                        container.RemoveAllChild();
-
-                        container.RebuildCompletions([.. matchingCommands.Select(command =>
+                        container.SetCompletions([.. matchingCommands.Select(command =>
                         {
                             var text = "";
 
@@ -87,8 +96,6 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
 
                         var match = commandInfo.CurrentParameter;
 
-                        container.RemoveAllChild();
-
                         foreach (var command in commands)
                         {
                             var argsGroup = CommandAPI.CommandArgumentGroups[command.GetType().FullName];
@@ -106,25 +113,37 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                                 values.Add(arg.ToString());
                         }
 
-                        container.RebuildCompletions(values);
+                        container.SetCompletions(values);
                     }
-
-                    LastChatText = CurrentChatText;
-
-                    LastIndex = CurrentIndex;
                 }
                 else
-                    container.RemoveAllChild();
+                    container.SetCompletions([]);
+
+                LastChatText = CurrentChatText;
+
+                LastIndex = CurrentIndex;
             }
 
-            if (isCommandInputActive)
-            {
-                if (completions.Count > 0)
-                {
-                    var index = container.SelectedCompletionIndex;
+            RelativePosition.Y = Main.screenHeight - (50 + CompletionsContainer.Height);
 
-                    if (UserInput.IsJustPress(Keys.Tab))
-                    {
+            base.Update(gameTime);
+        }
+
+        public void KeyJustPress(object sender, KeyEventArgs e)
+        {
+            if (isCommandInputActive && CompletionsContainer.Completions.Count > 0)
+            {
+                var container = CompletionsContainer;
+
+                var completions = container.Completions;
+
+                var commandInfo = CommandInfo.Parse(ChatText, ChatBox.Instance.TextBox.Cursor.CursorIndex);
+
+                var index = container.SelectedCompletionIndex;
+
+                switch (e.KeyCode)
+                {
+                    case Keys.Tab:
                         var selected = SnippetUtils.GetPlainText(completions[index]);
 
                         if (selected.Contains(' '))
@@ -136,48 +155,109 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
 
                             var currentInput = state == InputState.Command ? commandInfo.Command : commandInfo.CurrentParameter;
 
-                            if (state == InputState.Selector)
+                            switch (state)
                             {
-                                var match = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?").Match(currentInput);
+                                case InputState.Selector:
+                                case InputState.Entity:
 
-                                var parts = match.Groups[2].Value.Split(',');
+                                    Match match = null;
 
-                                var cursorPos = commandInfo.RelativeCursorPosition;
-
-                                var length = match.Groups[1].Length + 1;
-
-                                foreach (var part in parts)
-                                {
-                                    if (cursorPos > length)
-                                        length += part.Length;
-
-                                    if (cursorPos <= length)
+                                    switch (state)
                                     {
-                                        currentInput = part;
+                                        case InputState.Selector:
+                                            match = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?").Match(currentInput);
 
-                                        break;
+                                            break;
+                                        case InputState.Entity:
+                                            match = new Regex(@"([a-zA-Z0-9_]+:[a-zA-Z0-9_]+)\[(.*)\]?").Match(currentInput);
+
+                                            break;
                                     }
 
-                                    length++;
-                                }
+                                    var parts = match.Groups[2].Value.Split(',');
 
-                                ChatBox.Instance.TextBox.AppendAt(selected[currentInput.Length..], length + commandInfo.CursorPosition - commandInfo.RelativeCursorPosition - 1);
+                                    var cursorPos = commandInfo.RelativeCursorPosition;
+
+                                    var length = match.Groups[1].Length + 1;
+
+                                    foreach (var part in parts)
+                                    {
+                                        if (cursorPos > length)
+                                            length += part.Length;
+
+                                        if (cursorPos <= length)
+                                        {
+                                            currentInput = part;
+
+                                            break;
+                                        }
+
+                                        length++;
+                                    }
+
+                                    ChatBox.Instance.TextBox.AppendAt(selected[currentInput.Length..], length + commandInfo.CursorPosition - commandInfo.RelativeCursorPosition);
+
+                                    ChatBox.Instance.TextBox.CursorTo(length + commandInfo.CursorPosition);
+
+                                    break;
+                                default:
+                                    if (currentInput != selected)
+                                        ChatBox.Instance.TextBox.AppendString(selected[currentInput.Length..]);
+
+                                    break;
                             }
-                            else if (currentInput != selected)
-                                ChatBox.Instance.TextBox.AppendString(selected[currentInput.Length..]);
                         }
-                    }
 
-                    if (UserInput.IsJustPress(Keys.Down))
+                        break;
+                    case Keys.Down:
                         container.SelectedCompletionIndex = (index + 1) % completions.Count;
-                    else if (UserInput.IsJustPress(Keys.Up))
+
+                        break;
+                    case Keys.Up:
                         container.SelectedCompletionIndex = (index - 1 + completions.Count) % completions.Count;
+
+                        break;
                 }
             }
+        }
 
-            RelativePosition.Y = Main.screenHeight - (50 + CompletionsContainer.Height);
+        public void KeyKeepPress(object sender, KeyEventArgs e)
+        {
+            if (isCommandInputActive && CompletionsContainer.Completions.Count > 0)
+            {
+                var container = CompletionsContainer;
 
-            base.Update(gameTime);
+                var completions = container.Completions;
+
+                var index = container.SelectedCompletionIndex;
+
+                switch (e.KeyCode)
+                {
+                    case Keys.Down:
+                        Timer[0]++;
+
+                        if (Timer[0] < 6)
+                            return;
+
+                        Timer[0] = 0;
+
+                        container.SelectedCompletionIndex = (index + 1) % completions.Count;
+
+                        break;
+
+                    case Keys.Up:
+                        Timer[1]++;
+
+                        if (Timer[1] < 6)
+                            return;
+
+                        Timer[1] = 0;
+
+                        container.SelectedCompletionIndex = (index - 1 + completions.Count) % completions.Count;
+
+                        break;
+                }
+            }
         }
 
         public override bool Visible => ChatText.StartsWith('/') && Main.drawingPlayerChat;

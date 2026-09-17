@@ -7,7 +7,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands
 {
-    public class CommandRegistry : ModTypeRegistry<TJSCommand>
+    public class CommandRegistry : ModTypeRegistry<TJSCommand, CommandRegistry>
     {
         public override string Namespace => "Commands";
 

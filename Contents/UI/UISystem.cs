@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using LibRimeSharp;
 using Microsoft.Xna.Framework;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.UI.Chat;
@@ -80,7 +81,6 @@ namespace TerraJS.Contents.UI
             }
 
             TJSEngine.GlobalAPI.Event.UI.RegisterUIEvent?.Invoke();
-
         }
 
         public override void ModifyInterfaceLayers(List<GameInterfaceLayer> layers)
@@ -120,7 +120,7 @@ namespace TerraJS.Contents.UI
             PlayerHook.ShouldDisableOpenInventory = false;
 
             if (TextBox.HasActiveInstance)
-                IMEUtils.DisableIME();
+                RimeUtils.DisableIME();
 
             TextBox.HasActiveInstance = false;
 

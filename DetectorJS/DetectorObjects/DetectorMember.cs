@@ -1,13 +1,17 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using System.Text;
 using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
+using Terraria;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
-    public class DetectorMember(MemberInfo info) : DetectorObject
+    public class DetectorMember(MemberInfo info, Type thisType) : DetectorObject
     {
         public MemberInfo MemberInfo = info;
+
+        public Type ThisType = thisType;
 
         public override string Serialize()
         {
@@ -42,7 +46,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
                     if (TryGetMethodComment(method, out var comment))
                         sb.AppendLine(comment);
 
-                    sb.AppendLine(new DetectorMethod(method).Serialize());
+                    sb.AppendLine(new DetectorMethod(method, ThisType).Serialize());
 
                     return sb.ToString();
 

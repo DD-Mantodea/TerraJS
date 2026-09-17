@@ -1,19 +1,39 @@
-﻿namespace TerraJS.JSEngine.API.Events.Ref
+﻿using System;
+using System.Runtime.InteropServices;
+
+namespace TerraJS.JSEngine.API.Events.Ref
 {
-    public unsafe class RefBox<T>(T* ptr)
+    public unsafe class RefBox<T>(T value) : IDisposable
     {
-        private readonly T* _ptr = ptr;
+        private GCHandle _handle = GCHandle.Alloc(value, GCHandleType.Normal);
+        
+        private bool _disposed;
 
         public T Value
         {
-            get => *_ptr;
+            get => _disposed || !_handle.IsAllocated ? throw new ObjectDisposedException(GetType().FullName) : (T)_handle.Target;
 
-            set => *_ptr = value;
+            set
+            {
+                ObjectDisposedException.ThrowIf(_disposed || !_handle.IsAllocated, this);
+
+                _handle.Target = value;
+            }
         }
 
-        public override bool Equals(object obj)
+        public void Dispose()
         {
-            return obj is RefBox<T> box && box._ptr == _ptr;
+            if (!_disposed)
+            {
+                if (_handle.IsAllocated)
+                    _handle.Free();
+
+                GC.SuppressFinalize(this);
+
+                _disposed = true;
+            }
         }
+
+        ~RefBox() => Dispose();
     }
 }

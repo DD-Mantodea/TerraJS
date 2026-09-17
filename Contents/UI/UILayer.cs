@@ -8,10 +8,8 @@ using Terraria.UI;
 
 namespace TerraJS.Contents.UI
 {
-    public class UILayer : GameInterfaceLayer
+    public class UILayer(string name, InterfaceScaleType scaleType) : GameInterfaceLayer(name, scaleType)
     {
-        public UILayer(string name, InterfaceScaleType scaleType) : base(name, scaleType) { }
-
         public SizeContainer ScreenContainer = new(Main.screenWidth, Main.screenHeight);
 
         public void Register(Container c)

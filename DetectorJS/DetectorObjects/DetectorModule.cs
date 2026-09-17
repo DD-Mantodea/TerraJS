@@ -13,7 +13,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
         public List<DetectorImport> Imports = [];
 
-        public List<DetectorClass> Classes = [];
+        public List<DetectorType> Classes = [];
 
         public void AddType(Type type)
         {

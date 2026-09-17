@@ -142,8 +142,25 @@ namespace TerraJS.Contents.UI.Components.Containers
             return Children.FirstOrDefault(c => c.ID == id, null);
         }
 
+        public void RemoveChild(Component component)
+        {
+            if (component is null && !Children.Remove(component))
+                return;
+
+            component.Parent = null;
+
+            component.Unload();
+        }
+
         public void RemoveAllChild()
         {
+            foreach (var child in Children)
+            {
+                child.Parent = null;
+
+                child.Unload();
+            }
+
             Children.Clear();
         }
 

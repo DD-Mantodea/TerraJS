@@ -71,10 +71,10 @@ namespace TerraJS.JSEngine.API.Items
 
         public DamageClass GetModDamageClass(TypeReference type) => GetModDamageClass(type.ReferenceType);
 
-        public DamageClass GetTJSDamageClass(string fullName)
+        public TJSDamageClass GetTJSDamageClass(string fullName)
         {
             if (DamageClassRegistry._damageClasses.TryGetValue($"TJSContents.DamageClasses.{fullName}", out var dmgClzType))
-                return ModContentUtils.GetInstance<DamageClass>(dmgClzType);
+                return ModContentUtils.GetInstance<TJSDamageClass>(dmgClzType);
 
             return null;
         }

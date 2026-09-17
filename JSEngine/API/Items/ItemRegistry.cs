@@ -1,11 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Dynamic;
 using System.Reflection;
 using System.Reflection.Emit;
+using Jint.Native;
 using Microsoft.Xna.Framework.Graphics;
 using ReLogic.Content;
 using TerraJS.Assets.AssetManagers;
+using TerraJS.Contents.Attributes;
 using TerraJS.Contents.Extensions;
+using TerraJS.Contents.Utils;
 using Terraria;
 using Terraria.GameContent;
 using Terraria.Localization;
@@ -13,7 +17,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Items
 {
-    public class ItemRegistry : ModTypeRegistry<TJSItem>
+    public class ItemRegistry : ModTypeRegistry<TJSItem, ItemRegistry>
     {
         internal static Dictionary<string, int> _contentTypes = [];
 
@@ -54,6 +58,7 @@ namespace TerraJS.JSEngine.API.Items
             return this;
         }
 
+        [Comment("Set the item's shown name, for example: Name(Cultures.English, \"Basic Item\")")]
         public ItemRegistry Name(GameCulture.CultureName gameCulture, string str)
         {
             if (IsEmpty) return this;
@@ -108,6 +113,8 @@ namespace TerraJS.JSEngine.API.Items
             var entity = _contentType.GetProperty("Entity", BindingFlags.Public | BindingFlags.Instance);
 
             entity.GetSetMethod(true).Invoke(JSItem, [new Item()]);
+
+            AfterRegister?.Invoke(itemType);
 
             mod.AddContent(JSItem);
 

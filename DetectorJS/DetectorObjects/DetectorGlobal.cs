@@ -98,7 +98,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
                 var m = t.GetMethod("Invoke");
 
-                return new DetectorMethod(m).Serialize().Replace("\"Invoke\"", $"function {Object.Item1}");
+                return new DetectorMethod(m, null).Serialize().Replace("\"Invoke\"", $"function {Object.Item1}");
             }
             else if (Object.Item2 is not ExpandoObject)
                 return $"const {Object.Item1}: {Type2ClassName(Object.Item2.GetType())}";

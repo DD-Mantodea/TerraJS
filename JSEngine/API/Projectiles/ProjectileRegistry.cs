@@ -9,7 +9,7 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Projectiles
 {
-    public class ProjectileRegistry : ModTypeRegistry<TJSProjectile>
+    public class ProjectileRegistry : ModTypeRegistry<TJSProjectile, ProjectileRegistry>
     {
         internal static Dictionary<string, int> _contentTypes = [];
 

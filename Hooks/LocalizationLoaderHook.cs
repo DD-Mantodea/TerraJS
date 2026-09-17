@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using TerraJS.Contents.Attributes;
 using Terraria.Localization;
@@ -9,13 +10,17 @@ namespace TerraJS.Hooks
     [HideToJS]
     public class LocalizationLoaderHook : ModSystem
     {
+        public static List<Type> Types = [];
+
         public override void Load()
         {
             MonoModHooks.Add(typeof(LocalizationLoader).GetMethod("UpdateLocalizationFilesForMod", BindingFlags.Static | BindingFlags.NonPublic), (Action<Mod, string, GameCulture> orig, Mod mod, string str, GameCulture cul) =>
             {
-                if (mod is not TerraJS)
+                if (mod is not TerraJS || Types.Contains(mod.GetType()))
                     orig.Invoke(mod, str, cul);
             });
         }
+
+        public static void NoLocalization<T>() where T : Mod => Types.Add(typeof(T));
     }
 }

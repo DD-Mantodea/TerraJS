@@ -21,6 +21,11 @@ namespace TerraJS.Contents.Extensions
             return string.IsNullOrEmpty(type.Namespace);
         }
 
+        public static bool IsStatic(this Type type)
+        {
+            return type.IsAbstract && type.IsSealed && !type.IsEnum;
+        }
+
         public static bool IsDynamicType(this Type type)
         {
             return (typeof(System.Reflection.Emit.TypeBuilder).IsAssignableFrom(type.GetType()) ||

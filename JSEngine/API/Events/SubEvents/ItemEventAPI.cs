@@ -54,7 +54,6 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
         public void SetDefaults(Action<Item> @delegate) => SetDefaultsEvent += @delegate;
 
         [EventInfo("item")]
-        [Comment("仅用于原版物品 即ItemID.XXX")]
         public void SetDefaults(int itemType, Action<Item> @delegate) => SetDefaultsEvent += item =>
         {
             if (item.type == itemType)

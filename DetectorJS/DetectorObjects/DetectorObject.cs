@@ -155,6 +155,7 @@ namespace TerraJS.DetectorJS.DetectorObjects
             "import",
             "switch",
             "break",
+            "class",
             "super",
             "enum",
             "with",
@@ -181,6 +182,18 @@ namespace TerraJS.DetectorJS.DetectorObjects
             }
 
             return false;
+        }
+
+        public static string Default2String(object @default)
+        {
+            return @default switch
+            {
+                string => $"\"{@default}\"",
+                null => "null",
+                false => "false",
+                true => "true",
+                _ => @default.ToString(),
+            };
         }
     }
 }

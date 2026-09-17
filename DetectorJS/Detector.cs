@@ -25,6 +25,8 @@ namespace TerraJS.DetectorJS
 
         internal static ConcurrentDictionary<string, DetectorModule> Modules = [];
 
+        internal static ConcurrentDictionary<Type, List<MethodInfo>> GenericExtensionMethods = [];
+
         internal static ConcurrentDictionary<Type, List<MethodInfo>> ExtensionMethods = [];
 
         public static void Detect()

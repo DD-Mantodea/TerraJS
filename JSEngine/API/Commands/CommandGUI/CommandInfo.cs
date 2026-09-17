@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using TerraJS.Contents.Extensions;
 
 namespace TerraJS.JSEngine.API.Commands.CommandGUI
 {
@@ -10,7 +11,8 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
         Empty,
         Command,
         Parameter,
-        Selector
+        Selector,
+        Entity
     }
 
     public class CommandInfo
@@ -110,16 +112,25 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
                     }
                     else
                     {
-                        var regex = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?");
+                        var selRegex = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?");
 
-                        if (regex.IsMatch(currentPart.Text))
+                        var entRegex = new Regex(@"([a-zA-Z0-9_]+:[a-zA-Z0-9_]+)\[(.*)\]?");
+
+                        if (selRegex.TryMatch(currentPart.Text, out var selMatch))
                         {
-                            var match = regex.Match(currentPart.Text);
-
                             var relative = adjustedCursor - currentPart.StartIndex;
 
-                            if (relative >= match.Groups[1].Length + 1 && relative < currentPart.EndIndex)
+                            if (relative >= selMatch.Groups[1].Length + 1 && relative < currentPart.EndIndex)
                                 result.State = InputState.Selector;
+                            else
+                                result.State = InputState.Parameter;
+                        }
+                        else if (entRegex.TryMatch(currentPart.Text, out var entMatch))
+                        {
+                            var relative = adjustedCursor - currentPart.StartIndex;
+
+                            if (relative >= entMatch.Groups[1].Length + 1 && relative < currentPart.EndIndex)
+                                result.State = InputState.Entity;
                             else
                                 result.State = InputState.Parameter;
                         }

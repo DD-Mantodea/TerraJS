@@ -33,13 +33,11 @@ namespace TerraJS.Contents.UI.Chat
         {
             RelativePosition = new(78, Main.screenHeight - 456);
 
-            Visible = true;
-
             base.Update(gameTime);
 
             int totalHeight = Children.Sum(c => c.Height + 4);
 
-            if (IsHovering)
+            if (IsHovering && Visible)
             {
                 var deltaWheel = UserInput.GetDeltaWheelValue();
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using TerraJS.Contents.Utils;
 using Terraria;
 using Terraria.Localization;
@@ -7,9 +8,8 @@ using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Items.DamageClasses
 {
-    public class DamageClassRegistry : ModTypeRegistry<TJSDamageClass>
+    public class DamageClassRegistry : ModTypeRegistry<TJSDamageClass, DamageClassRegistry>
     {
-
         internal static Dictionary<string, Type> _damageClasses = [];
 
         public override string Namespace => "DamageClasses";
@@ -28,7 +28,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry SetDefaultStats(Action<Player> @delegate)
+        public DamageClassRegistry SetDefaultStats(Action<TJSDamageClass, Player> @delegate)
         {
             if (IsEmpty)
                 return this;
@@ -38,7 +38,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry GetEffectInheritance(Func<DamageClass, bool> @delegate)
+        public DamageClassRegistry GetEffectInheritance(Func<TJSDamageClass, DamageClass, bool> @delegate)
         {
             if (IsEmpty)
                 return this;
@@ -48,7 +48,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry GetPrefixInheritance(Func<DamageClass, bool> @delegate)
+        public DamageClassRegistry GetPrefixInheritance(Func<TJSDamageClass, DamageClass, bool> @delegate)
         {
             if (IsEmpty)
                 return this;
@@ -58,7 +58,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry GetModifierInheritance(Func<DamageClass, StatInheritanceData> @delegate)
+        public DamageClassRegistry GetModifierInheritance(Func<TJSDamageClass, DamageClass, StatInheritanceData> @delegate)
         {
             if (IsEmpty)
                 return this;
@@ -68,7 +68,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry ShowStatTooltipLine(Func<Player, string, bool> @delegate)
+        public DamageClassRegistry ShowStatTooltipLine(Func<TJSDamageClass, Player, string, bool> @delegate)
         {
             if (IsEmpty)
                 return this;
@@ -78,7 +78,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry DisplayName(Func<LocalizedText> @delegate)
+        public DamageClassRegistry DisplayName(Func<TJSDamageClass, LocalizedText> @delegate)
         {
             if (IsEmpty)
                 return this;
@@ -88,7 +88,7 @@ namespace TerraJS.JSEngine.API.Items.DamageClasses
             return this;
         }
 
-        public DamageClassRegistry UseStandardCritCalcs(Func<bool> @delegate)
+        public DamageClassRegistry UseStandardCritCalcs(Func<TJSDamageClass, bool> @delegate)
         {
             if (IsEmpty)
                 return this;

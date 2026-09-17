@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
-using TerraJS.JSEngine.API.Commands.CommandArguments.Selectors;
+using TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments.Selectors;
 using Terraria;
 
-namespace TerraJS.JSEngine.API.Commands.CommandArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments
 {
-    public class Selector(Entity sender)
+    public abstract class Selector(Entity sender)
     {
         public Entity Sender = sender;
 
@@ -49,5 +50,10 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments
                 };
             });
         }
+    }
+
+    public interface ISelector<TSelector, Target> where TSelector : Selector where Target : Entity
+    {
+        public abstract static Dictionary<string, Func<TSelector, List<Target>>> Selectors { get; }
     }
 }

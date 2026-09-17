@@ -1,4 +1,5 @@
 ﻿using Jint;
+using Jint.Runtime;
 using Jint.Runtime.Interop;
 using Microsoft.Xna.Framework;
 using System;
@@ -46,6 +47,7 @@ namespace TerraJS.JSEngine
                 option.CatchClrExceptions(exception =>
                 {
                     Console.WriteLine($"[Jint] CLR Exception: {exception.Message}");
+
                     return true;
                 });
             });

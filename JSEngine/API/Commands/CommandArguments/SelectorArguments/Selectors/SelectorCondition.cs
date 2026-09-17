@@ -3,7 +3,7 @@ using System.Linq;
 using System.Reflection;
 using Terraria;
 
-namespace TerraJS.JSEngine.API.Commands.CommandArguments.Selectors
+namespace TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments.Selectors
 {
     public class SelectorCondition(string variable, string value, string check)
     {

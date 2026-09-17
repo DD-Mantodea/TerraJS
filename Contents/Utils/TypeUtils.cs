@@ -17,8 +17,6 @@ namespace TerraJS.Contents.Utils
 
         public static Type ModReference = BuildProperties.GetNestedType("ModReference", BindingFlags.NonPublic);
 
-        public static Type DefaultTypeConverter = typeof(JsValue).Assembly.GetType("Jint.Runtime.Interop.DefaultTypeConverter");
-
         public static Type InteropHelper = typeof(JsValue).Assembly.GetType("Jint.Runtime.Interop.InteropHelper");
     }
 }

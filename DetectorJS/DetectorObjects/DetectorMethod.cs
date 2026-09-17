@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using TerraJS.Contents.Attributes;
@@ -6,9 +7,11 @@ using TerraJS.Contents.Extensions;
 
 namespace TerraJS.DetectorJS.DetectorObjects
 {
-    public class DetectorMethod(MethodInfo method) : DetectorObject
+    public class DetectorMethod(MethodInfo method, Type thisType) : DetectorObject
     {
         public MethodInfo Method = method;
+
+        public Type ThisType = thisType;
 
         public override string Serialize()
         {
@@ -28,8 +31,13 @@ namespace TerraJS.DetectorJS.DetectorObjects
                 return $"{SpecialNameCheck(pName)}: {Type2ClassName(p.ParameterType, eventInfo?.ParameterNames, true)}{@default}";
             }));
 
+            var returnType = Method.ReturnType;
+
+            if (returnType.IsGenericParameter && parameters.Length > 0 && returnType == Method.GetParameters()[0].ParameterType)
+                returnType = ThisType;
+
             if (Method.GetCustomAttribute<ExtensionAttribute>() != null)
-                return $"\"{Method.Name}\"({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";
+                return $"\"{Method.Name}\"({paramTexts}): {Type2ClassName(returnType, asParameter: true)}";
 
             if (Method.IsGenericMethod)
             {
@@ -37,10 +45,10 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
                 var genericTexts = string.Join(", ", genericParams.Select(t => t.Name));
 
-                return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"<{genericTexts}>({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";
+                return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"<{genericTexts}>({paramTexts}): {Type2ClassName(returnType, asParameter: true)}";
             }
 
-            return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"({paramTexts}): {Type2ClassName(Method.ReturnType, asParameter: true)}";
+            return $"{(Method.IsStatic ? "static " : "")}\"{Method.Name}\"({paramTexts}): {Type2ClassName(returnType, asParameter: true)}";
         }
 
         public string Default2String(object @default)

@@ -9,7 +9,7 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.MultipleArguments
 {
     public class ListArgument<T>(string name, int minLength = 0, int maxLength = int.MaxValue, bool isOptional = false) : CommandArgument(name, isOptional) where T : CommandArgument, new()
     {
-        private T _argumentInstance = new T();
+        private T _argumentInstance = new();
 
         private int _minLength = minLength >= 0 ? minLength : 0;
 

@@ -17,10 +17,13 @@ using log4net;
 using TerraJS.JSEngine.Plugins;
 using System.Threading;
 using TerraJS.Contents.Utils;
-using LibRimeDemo;
-using LibRimeDemo.Data;
+using LibRimeSharp;
+using LibRimeSharp.Data;
 using TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments;
 using Microsoft.Xna.Framework;
+using TerraJS.JSEngine.API.Commands;
+using Lokad.ILPack;
+using TerraJS.JSEngine.API;
 
 namespace TerraJS
 {
@@ -34,7 +37,7 @@ namespace TerraJS
 
         public static SHAManager SHAManager = new();
 
-        public static RimeApi IME;
+        public static RimeAPI Rime => RimeAPI.Instance;
 
         public static bool IsLoading = false;
 
@@ -66,6 +69,8 @@ namespace TerraJS
             TJSEngine.GlobalAPI.Event.ModLoadEvent?.Invoke();
 
             RegisterCommands();
+
+            CommandManager.RegisterCommands();
 
             /*
             MonoModHooks.Add(typeof(UserInterface).GetMethod("Update"), ModifyUpdate);
@@ -133,25 +138,13 @@ namespace TerraJS
 
         public void SetupIME()
         {
-            IME = RimeApi.Instance;
-
-            var IMEPath = Path.Combine(Pathes.TerraJSPath, "IME");
+            var IMEPath = Path.Combine(Pathes.TerraJSPath, "Rime");
 
             var userPath = Path.Combine(IMEPath, "User");
 
             var sharePath = Path.Combine(IMEPath, "Share");
 
-            var traits = new RimeTraits()
-            {
-                SharedDataDir = sharePath,
-                UserDataDir = userPath
-            };
-
-            IME.Setup(traits);
-
-            IME.Initialize(traits);
-
-            FileUtils.CreateDirectoryIfNotExist(IMEPath);
+			FileUtils.CreateDirectoryIfNotExist(IMEPath);
 
             FileUtils.CreateDirectoryIfNotExist(userPath);
 
@@ -166,8 +159,10 @@ namespace TerraJS
             FileUtils.CreateDirectoryIfNotExist(Path.Combine(sharePath, "opencc"));
 
             foreach (var file in GetFileNames())
-                if (file.Contains("Assets/IME"))
+                if (file.Contains("Assets/Rime"))
                     FileUtils.CopyModFile(file, Path.Combine(Pathes.TerraJSPath, file.Replace("Assets/", "")));
+
+            RimeUtils.InitializeRime(Rime, userPath, sharePath);
         }
 
         [HideToJS]
@@ -189,67 +184,6 @@ namespace TerraJS
                 })
                 .Register();
             */
-
-            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("terrajs")
-                .NextArgument(new ConstantArgument("feature", "reload"))
-                .Execute((_, _) => Reload())
-                .Register();
-
-            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("terrajs")
-                .NextArgument(new ConstantArgument("feature", "detect"))
-                .Execute((_, _) =>
-                {
-                    var thread = new Thread(Detector.Detect);
-
-                    thread.Start();
-                })
-                .Register();
-            
-            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("exec")
-                .NextArgument(new StringArgument("code"))
-                .Execute((g, _) =>
-                {
-                    var code = g.GetString("code");
-
-                    try
-                    {
-                        TJSEngine.Engine.Execute(code);
-                    }
-                    catch
-                    {
-
-                    }
-                })
-                .Register();
-
-            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("prefix")
-                .NextArgument(new JsArgument("prefixID"))
-                .Execute((g, _) =>
-                {
-                    var prefixID = g.Get<object>("prefixID");
-
-                    if (prefixID is double val)
-                    {
-                        Main.LocalPlayer.HeldItem.ResetPrefix();
-
-                        Main.LocalPlayer.HeldItem.Prefix((int)val);
-                    }
-                })
-                .Register();
-
-            TJSEngine.GlobalAPI.Command.CreateCommandRegistry("test")
-                .NextArgument(new PlayersArgument("player"))
-                .Execute((g, _) =>
-                {
-                    var players = g.Get<List<Player>>("player");
-
-                    if (players.Count == 0)
-                        Main.NewText($"玩家选择器返回空数组", Color.Red);
-                    else
-                        foreach (var player in players)
-                            Main.NewText($"玩家 {player.name} 的坐标是 {player.position}");
-                })
-                .Register();
         }
 
         [HideToJS]
@@ -261,7 +195,11 @@ namespace TerraJS
 
             SHAManager.Load();
 
-            TJSEngine.GlobalAPI.Event.PostSetupContentEvent?.Invoke(); 
+            TJSEngine.GlobalAPI.Event.PostSetupContentEvent?.Invoke();
+
+            var generator = new AssemblyGenerator();
+
+            generator.GenerateAssembly(GlobalAPI._ab, Path.Combine(Pathes.TerraJSPath, "a.dll"));
             
             IsLoading = false;
         }

@@ -1,4 +1,4 @@
-﻿using FontStashSharp;
+using FontStashSharp;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using System.Collections.Generic;
@@ -118,6 +118,17 @@ namespace TerraJS.Contents.UI.Components
         public void SetText(string text)
         {
             Snippets = SnippetUtils.ParseMessage(text);
+        }
+
+        public void SetSnippets(List<TextSnippet> snippets)
+        {
+            Snippets = snippets;
+
+            var size = SnippetUtils.GetSize(Snippets, Font).Add(4, 4);
+
+            _width = (int)size.X;
+
+            _height = (int)size.Y;
         }
     }
 }

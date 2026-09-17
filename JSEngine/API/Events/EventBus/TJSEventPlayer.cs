@@ -14,24 +14,12 @@ namespace TerraJS.JSEngine.API.Events.EventBus
 
         public override void ModifyFishingAttempt(ref FishingAttempt attempt)
         {
-            fixed (FishingAttempt* pFishingAttempt = &attempt)
-            {
-                TJSEngine.GlobalAPI.Event.Player.ModifyFishingAttempt?.Invoke(this, new(pFishingAttempt));
-            }
+            TJSEngine.GlobalAPI.Event.Player.ModifyFishingAttempt?.Invoke(this, new(attempt));
         }
 
         public override void CatchFish(FishingAttempt attempt, ref int itemDrop, ref int npcSpawn, ref AdvancedPopupRequest sonar, ref Vector2 sonarPosition)
         {
-            fixed (int* pItemDrop = &itemDrop, pNpcSpawn = &npcSpawn)
-            {
-                fixed (AdvancedPopupRequest* pSonar = &sonar)
-                {
-                    fixed (Vector2* pSonarPosition = &sonarPosition)
-                    {
-                        TJSEngine.GlobalAPI.Event.Player.CatchFishEvent.Invoke(this, attempt, new(pItemDrop), new(pNpcSpawn), new(pSonar), new(pSonarPosition));
-                    }
-                }
-            }
+            TJSEngine.GlobalAPI.Event.Player.CatchFishEvent.Invoke(this, attempt, new(itemDrop), new(npcSpawn), new(sonar), new(sonarPosition));
         }
     }
 }

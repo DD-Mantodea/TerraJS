@@ -24,26 +24,5 @@ namespace TerraJS.DetectorJS.DetectorObjects
 
             return $"constructor({paramTexts})";
         }
-
-        public string Default2String(object @default)
-        {
-            switch (@default)
-            {
-                case string:
-                    return $"\"{@default}\"";
-
-                case null:
-                    return "null";
-
-                case false:
-                    return "false";
-
-                case true:
-                    return "true";
-
-                default:
-                    return @default.ToString();
-            }
-        }
     }
 }

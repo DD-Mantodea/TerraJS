@@ -16,7 +16,7 @@ namespace TerraJS.Hooks
 
             MonoModHooks.Add(canChangeType, CanChangeType);
 
-            var convert = TypeUtils.DefaultTypeConverter.GetMethod("TryConvert", BindingFlags.NonPublic | BindingFlags.Instance);
+            var convert = typeof(DefaultTypeConverter).GetMethod(nameof(DefaultTypeConverter.TryConvert), BindingFlags.Public | BindingFlags.Instance);
 
             MonoModHooks.Add(convert, TryConvert);
         }
@@ -27,12 +27,12 @@ namespace TerraJS.Hooks
                 return orig(obj, type);
         }
 
-        private delegate bool TryConvertOrig(DefaultTypeConverter self, object? value, Type type, IFormatProvider provider, bool propagateException, out object? converted, out string? problemMessage);
+        private delegate bool TryConvertOrig(DefaultTypeConverter self, object? value, Type type, IFormatProvider provider, out object? converted);
 
-        private bool TryConvert(TryConvertOrig orig, DefaultTypeConverter self, object? value, Type type, IFormatProvider provider, bool propagateException, out object? converted, out string? problemMessage)
+        private bool TryConvert(TryConvertOrig orig, DefaultTypeConverter self, object? value, Type type, IFormatProvider provider, out object? converted)
         {
             using (new Logging.QuietExceptionHandle())
-                return orig(self, value, type, provider, propagateException, out converted, out problemMessage);
+                return orig(self, value, type, provider, out converted);
         }
     }
 }

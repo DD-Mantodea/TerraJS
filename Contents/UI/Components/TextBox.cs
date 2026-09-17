@@ -5,8 +5,8 @@ using Microsoft.Xna.Framework.Input;
 using TerraJS.Contents.Extensions;
 using TerraJS.Contents.UI.Components.Containers;
 using TerraJS.Contents.Utils;
-using LibRimeDemo;
-using LibRimeDemo.Data;
+using LibRimeSharp;
+using LibRimeSharp.Data;
 using TerraJS.Contents.UI.IME;
 using Terraria;
 namespace TerraJS.Contents.UI.Components
@@ -44,7 +44,7 @@ namespace TerraJS.Contents.UI.Components
 
         public delegate void TextChangedHandler(TextBox sender, string text);
 
-        public RimeApi IME => TerraJS.IME;
+        public RimeAPI IME => TerraJS.Rime;
 
         private RimeSession _session;
 
@@ -68,7 +68,7 @@ namespace TerraJS.Contents.UI.Components
         {
            if (Active)
             {
-                if (IMEUtils.GetInput(_session) == "")
+                if ((_session?.GetInput() ?? "") == "")
                 {
                     switch (e.KeyCode)
                     {
@@ -157,14 +157,14 @@ namespace TerraJS.Contents.UI.Components
                     switch (e.KeyCode)
                     {
                         case Keys.Back:
-                            IMEUtils.BackSpace(_session);
+                            _session.BackSpace();
 
                             break;
 
                         case Keys.Enter:
-                            AppendString(IMEUtils.GetInput(_session).Replace("\'", ""));
+                            AppendString((_session?.GetInput() ?? "").Replace("\'", ""));
 
-                            IMEUtils.Escape(_session);
+                            _session.Escape();
 
                             e.Cancel = true;
 
@@ -172,23 +172,23 @@ namespace TerraJS.Contents.UI.Components
 
                         case Keys.OemPlus:
                         case Keys.Add:
-                            IMEUtils.NextPage(_session);
+                            _session.NextPage();
 
                             break;
 
                         case Keys.OemMinus:
                         case Keys.Subtract:
-                            IMEUtils.PrevPage(_session);
+                            _session.PrevPage();
 
                             break;
 
                         case Keys.Up:
-                            IMEUtils.SelectPrev(_session);
+                            _session.SelectPrev();
 
                             break;
 
                         case Keys.Down:
-                            IMEUtils.SelectNext(_session);
+                            _session.SelectNext();
 
                             break;
                     }
@@ -223,7 +223,7 @@ namespace TerraJS.Contents.UI.Components
         {
             if (Active)
             {
-                if (IMEUtils.GetInput(_session) == "")
+                if ((_session?.GetInput() ?? "") == "")
                 {
                     switch (e.KeyCode)
                     {
@@ -311,7 +311,7 @@ namespace TerraJS.Contents.UI.Components
 
                             Cursor.Timer[4] = 0;
 
-                            IMEUtils.BackSpace(_session);
+                            _session.BackSpace();
 
                             break;
 
@@ -324,7 +324,7 @@ namespace TerraJS.Contents.UI.Components
 
                             Cursor.Timer[5] = 0;
 
-                            IMEUtils.NextPage(_session);
+                            _session.NextPage();
 
                             break;
 
@@ -337,7 +337,7 @@ namespace TerraJS.Contents.UI.Components
 
                             Cursor.Timer[6] = 0;
 
-                            IMEUtils.PrevPage(_session);
+                            _session.PrevPage();
 
                             break;
 
@@ -349,7 +349,7 @@ namespace TerraJS.Contents.UI.Components
 
                             Cursor.Timer[7] = 0;
 
-                            IMEUtils.SelectPrev(_session);
+                            _session.SelectPrev();
 
                             break;
 
@@ -361,7 +361,7 @@ namespace TerraJS.Contents.UI.Components
 
                             Cursor.Timer[8] = 0;
 
-                            IMEUtils.SelectNext(_session);
+                            _session.SelectNext();
 
                             break;
                     }
@@ -373,7 +373,7 @@ namespace TerraJS.Contents.UI.Components
         {
             if (Active && !UserInput.Ctrl)
             {
-                if (_session == null || (e.Character == ' ' && IMEUtils.GetInput(_session) == ""))
+                if (_session == null || (e.Character == ' ' && _session.GetInput() == ""))
                 {
                     if (!e.Character.Equals('\r') && !e.Character.Equals('\n'))
                     {
@@ -394,11 +394,11 @@ namespace TerraJS.Contents.UI.Components
                             _session.ProcessKey(e.Character);
                         else
                         {
-                            var input = IMEUtils.GetInput(_session);
+                            var input = _session?.GetInput() ?? "";
 
                             if (input != "")
                             {
-                                var count = IMEUtils.GetCurrentPageCandidates(_session).Count;
+                                var count = _session.GetCurrentPageCandidates().Count;
 
                                 if (count == 0)
                                 {
@@ -406,7 +406,7 @@ namespace TerraJS.Contents.UI.Components
                                     {
                                         _session.ProcessKey(e.Character);
 
-                                        var commit = IMEUtils.GetCommit(_session);
+                                        var commit = _session.CommitText;
 
                                         AppendString(commit);
                                     }
@@ -418,7 +418,7 @@ namespace TerraJS.Contents.UI.Components
                                     {
                                         _session.ProcessKey(e.Character);
 
-                                        var commit = IMEUtils.GetCommit(_session);
+                                        var commit = _session.CommitText;
 
                                         AppendString(commit);
                                     }

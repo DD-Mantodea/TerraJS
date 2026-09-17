@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TerraJS.JSEngine.API.Commands.CommandArguments.Selectors;
+using TerraJS.Contents.Extensions;
+using TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments.Selectors;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
 using Terraria;
 
-namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
+namespace TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments
 {
     public class PlayersArgument(string name, bool isOptional = false) : CommandArgument(name, isOptional)
     {
@@ -27,10 +28,8 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
                 }
             }
 
-            if (Selector.RegExp.IsMatch(content))
+            if (Selector.RegExp.TryMatch(content, out var match))
             {
-                var match = Selector.RegExp.Match(content);
-
                 var identifier = match.Groups[1].Value;
 
                 if (!PlayerSelector.Selectors.TryGetValue(identifier, out var selector))
@@ -62,13 +61,11 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
         {
             var regex = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?");
 
-            if (regex.IsMatch(commandInfo.CurrentParameter) && commandInfo.State == InputState.Selector)
+            if (regex.TryMatch(commandInfo.CurrentParameter, out var match) && commandInfo.State == InputState.Selector)
             {
-                var match = regex.Match(commandInfo.CurrentParameter);
-
                 var parts = match.Groups[2].Value.Split(',');
 
-                var currentInput = match.Groups[2].Value.Split(',').Select(s => s.Trim()).Last();
+                var currentInput = parts.Select(s => s.Trim()).Last();
 
                 var cursorPos = commandInfo.RelativeCursorPosition;
 
