@@ -1,7 +1,8 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using TerraJS.Contents.Utils;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 {
@@ -15,13 +16,20 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
         public static BoolArgument New(string name, dynamic options = default)
             => new(name, OptionUtils.GetOption<bool>(options, "isOptional", false));
 
-        public override bool FromString(string content, object last, out object value)
+        public override bool FromString(string content, object last, out object value) => TryParse(content, last, out value, out _);
+
+        public override bool TryParse(string content, object last, out object value, out string expected)
         {
+            expected = ToString();
+
             value = null;
 
-            if (bool.TryParse(content, out bool val))
+            foreach (var text in Values)
             {
-                value = val;
+                if (!string.Equals(text, content, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                value = bool.Parse(text);
 
                 return true;
             }
@@ -35,6 +43,40 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 
         public override List<string> GetCompletions(CommandInfo commandInfo) => DealStartWith(["true", "false"], commandInfo.CurrentParameter);
 
-        public override bool InScope(object value, object last) => value is string;
+        public override IEnumerable<Suggestion> Complete(CompletionContext context)
+        {
+            foreach (var value in Values)
+            {
+                if (!value.StartsWith(context.Prefix, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                yield return context.Value(value, value, null, context.Prefix.Length);
+            }
+        }
+
+        private static readonly string[] Values = ["true", "false"];
+
+        public override ArgumentState Validate(CompletionContext context, out string expected)
+        {
+            expected = ToString();
+
+            var token = context.Prefix;
+
+            if (token.Length == 0)
+                return ArgumentState.Incomplete;
+
+            if (TryParse(token, null, out _, out _))
+                return ArgumentState.Valid;
+
+            foreach (var value in Values)
+            {
+                if (value.StartsWith(token, StringComparison.OrdinalIgnoreCase))
+                    return ArgumentState.Incomplete;
+            }
+
+            return ArgumentState.Invalid;
+        }
+
+        public override bool InScope(object value, object last) => value is bool;
     }
 }

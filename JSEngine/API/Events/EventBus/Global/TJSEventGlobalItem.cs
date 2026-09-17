@@ -1,4 +1,4 @@
-﻿using TerraJS.Contents.Attributes;
+using TerraJS.Contents.Attributes;
 using TerraJS.JSEngine.API.Events.Ref;
 using Terraria;
 using Terraria.ModLoader;
@@ -46,11 +46,12 @@ namespace TerraJS.JSEngine.API.Events.EventBus.Global
 
         public override bool? UseItem(Item item, Player player)
         {
-            bool useVanilla = true;
+            if (TJSEngine.GlobalAPI.Event.Item.UseItemEvent is not { } handler)
+                return null;
 
-            var refBox = new RefBox<bool>(useVanilla);
+            using var useVanilla = new RefValue<bool>(true);
 
-            var ret = TJSEngine.GlobalAPI.Event.Item.UseItemEvent?.Invoke(item, player, refBox);
+            var ret = handler(item, player, useVanilla);
 
             return useVanilla ? null : ret;
         }

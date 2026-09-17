@@ -159,7 +159,7 @@ namespace TerraJS
             FileUtils.CreateDirectoryIfNotExist(Path.Combine(sharePath, "opencc"));
 
             foreach (var file in GetFileNames())
-                if (file.Contains("Assets/Rime"))
+                if (file.Contains("Assets/Rime") && File.Exists(Path.Combine(Pathes.TerraJSPath, file.Replace("Assets/", ""))))
                     FileUtils.CopyModFile(file, Path.Combine(Pathes.TerraJSPath, file.Replace("Assets/", "")));
 
             RimeUtils.InitializeRime(Rime, userPath, sharePath);
@@ -199,7 +199,7 @@ namespace TerraJS
 
             var generator = new AssemblyGenerator();
 
-            generator.GenerateAssembly(GlobalAPI._ab, Path.Combine(Pathes.TerraJSPath, "a.dll"));
+            //generator.GenerateAssembly(GlobalAPI._ab, Path.Combine(Pathes.TerraJSPath, "a.dll"));
             
             IsLoading = false;
         }
@@ -212,7 +212,8 @@ namespace TerraJS
 
         public override object Call(params object[] args)
         {
-            if (args.Length == 0) return null;
+            if (args.Length == 0) 
+                return null;
 
             return null;
         }

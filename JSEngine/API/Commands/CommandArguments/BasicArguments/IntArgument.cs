@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using TerraJS.Contents.Utils;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 {
@@ -25,32 +27,23 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 
         private readonly int _maxVal = maxValue >= minValue ? maxValue : minValue;
 
-        public override bool FromString(string content, object last, out object value)
+        public override bool FromString(string content, object last, out object value) => TryParse(content, last, out value, out _);
+
+        public override bool TryParse(string content, object last, out object value, out string expected)
         {
-            if (int.TryParse(content, out var res))
-            {
-                value = Math.Clamp(res, _minVal, _maxVal);
+            expected = ToString();
 
-                return true;
-            }
+            value = null;
 
-            value = "";
+            if (!long.TryParse(content, out var result))
+                return false;
 
-            return false;
-        }
+            if (result < _minVal || result > _maxVal)
+                return false;
 
-        public override bool FromStringWithoutClamp(string content, object last, out object value)
-        {
-            if (int.TryParse(content, out var res))
-            {
-                value = res;
+            value = (int)result;
 
-                return true;
-            }
-
-            value = "";
-
-            return false;
+            return true;
         }
 
         public override string ToString()
@@ -72,6 +65,43 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
         }
 
         public override List<string> GetCompletions(CommandInfo commandInfo) => [];
+
+        public override IEnumerable<Suggestion> Complete(CompletionContext context)
+        {
+            var prefix = context.Prefix;
+
+            if (_maxVal - (long)_minVal <= 20 && _minVal != int.MinValue)
+            {
+                for (long value = _minVal; value <= _maxVal; value++)
+                {
+                    var text = value.ToString();
+
+                    if (!text.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    yield return context.Value(text, text, null, prefix.Length);
+                }
+
+                yield break;
+            }
+
+            yield return context.Hint(ToString());
+        }
+
+        public override ArgumentState Validate(CompletionContext context, out string expected)
+        {
+            expected = ToString();
+
+            var token = context.Prefix;
+
+            if (token.Length == 0)
+                return ArgumentState.Incomplete;
+
+            if (TryParse(token, null, out _, out _))
+                return ArgumentState.Valid;
+
+            return token is "-" or "+" ? ArgumentState.Incomplete : ArgumentState.Invalid;
+        }
 
         public override Type InstanceType => typeof(int);
 

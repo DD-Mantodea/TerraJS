@@ -1,8 +1,7 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Text.RegularExpressions;
-using TerraJS.Contents.Extensions;
+using TerraJS.JSEngine.API.Commands.Completion;
 
 namespace TerraJS.JSEngine.API.Commands.CommandGUI
 {
@@ -18,194 +17,369 @@ namespace TerraJS.JSEngine.API.Commands.CommandGUI
     public class CommandInfo
     {
         public InputState State { get; set; } = InputState.Empty;
+
         public string FullInput { get; set; } = string.Empty;
+
         public string Command { get; set; } = string.Empty;
+
         public List<string> Parameters { get; set; } = new();
+
         public string CurrentParameter { get; set; } = string.Empty;
-        public int ParameterIndex { get; set; } = -1;          // 当前正在编辑的参数索引
-        public int CursorPosition { get; set; } = 0;           // 原始光标位置
-        public int RelativeCursorPosition { get; set; } = 0;   // 相对于当前参数的光标位置
+
+        public int ParameterIndex { get; set; } = -1;
+
+        public int CursorPosition { get; set; } = 0;
+
+        public int RelativeCursorPosition { get; set; } = 0;
+
+        public List<CommandToken> Tokens { get; set; } = new();
+
+        public int CommandTokenIndex { get; set; } = -1;
+
+        public int CurrentTokenIndex { get; set; } = -1;
+
+        public CommandToken CurrentToken { get; set; }
+
+        public string Prefix { get; set; } = string.Empty;
+
+        public string Suffix { get; set; } = string.Empty;
+
+        public string MatchPrefix { get; set; } = string.Empty;
+
+        public bool Quoted { get; set; }
+
+        public bool HasTrailingSpace { get; set; }
+
+        public bool InBracket { get; set; }
+
+        public string BracketHead { get; set; } = string.Empty;
+
+        public int BracketStart { get; set; } = -1;
+
+        public int BracketEnd { get; set; } = -1;
+
+        public int SegmentStart { get; set; } = -1;
+
+        public int SegmentEnd { get; set; } = -1;
+
+        public bool CursorInValue { get; set; }
+
+        public string AttributeName { get; set; } = string.Empty;
+
+        public string AttributeOperator { get; set; } = string.Empty;
+
+        public int ReplaceStart { get; set; } = 0;
+
+        public int ReplaceLength { get; set; } = 0;
 
         public static CommandInfo Parse(string inputText, int cursorPosition) => CommandParser.Parse(inputText, cursorPosition);
     }
 
-    public class CommandParser
+    public static class CommandParser
     {
+        private static readonly Regex SelectorHead = new(@"^@[A-Za-z][A-Za-z0-9_]*$");
+
+        private static readonly Regex EntityHead = new(@"^[A-Za-z0-9_]+:[A-Za-z0-9_]+$");
+
+        private static readonly string[] Operators = [">=", "<=", "!=", "=", ">", "<"];
+
+        private static string _cachedInput;
+
+        private static int _cachedCursor = -1;
+
+        private static CommandInfo _cached;
+
         public static CommandInfo Parse(string inputText, int cursorPosition)
         {
-            var result = new CommandInfo
+            if (_cached is not null && _cachedInput == inputText && _cachedCursor == cursorPosition)
+                return _cached;
+
+            var info = Build(inputText, cursorPosition);
+
+            _cachedInput = inputText;
+
+            _cachedCursor = cursorPosition;
+
+            _cached = info;
+
+            return info;
+        }
+
+        private static CommandInfo Build(string inputText, int cursorPosition)
+        {
+            var info = new CommandInfo
             {
                 FullInput = inputText ?? string.Empty,
-                CursorPosition = cursorPosition
+                CursorPosition = Math.Clamp(cursorPosition, 0, (inputText ?? string.Empty).Length),
             };
 
-            if (string.IsNullOrEmpty(inputText))
+            if (string.IsNullOrEmpty(info.FullInput) || !info.FullInput.StartsWith('/'))
             {
-                result.State = InputState.Empty;
-                return result;
+                info.State = InputState.Empty;
+
+                return info;
             }
 
-            // 检查是否以斜杠开头
-            if (!inputText.StartsWith('/'))
+            var tokens = CommandTokenizer.Tokenize(info.FullInput);
+
+            if (tokens.Count > 0 && tokens[0].Start == 0 && tokens[0].Raw.StartsWith('/'))
+                tokens[0] = new CommandToken(tokens[0].Raw[1..], tokens[0].Text.StartsWith('/') ? tokens[0].Text[1..] : tokens[0].Text, 1, tokens[0].End, tokens[0].Quoted, tokens[0].Closed);
+
+            tokens.RemoveAll(token => token.Length == 0);
+
+            info.Tokens = tokens;
+
+            var (index, token) = Locate(tokens, info.CursorPosition);
+
+            info.CurrentTokenIndex = index;
+
+            info.CurrentToken = token;
+
+            info.Prefix = token.RawPrefix(info.CursorPosition);
+
+            info.Suffix = token.RawSuffix(info.CursorPosition);
+
+            info.MatchPrefix = StripQuote(info.Prefix);
+
+            info.Quoted = token.Quoted;
+
+            info.HasTrailingSpace = info.FullInput.Length > 0 && char.IsWhiteSpace(info.FullInput[^1]);
+
+            info.RelativeCursorPosition = token.LocalCursor(info.CursorPosition);
+
+            info.ReplaceStart = token.Length == 0 ? info.CursorPosition : token.Start;
+
+            info.ReplaceLength = token.Length;
+
+            info.CommandTokenIndex = tokens.Count > 0 ? 0 : -1;
+
+            info.Command = tokens.Count > 0 ? tokens[0].Text : string.Empty;
+
+            for (var i = 1; i < tokens.Count; i++)
+                info.Parameters.Add(tokens[i].Text);
+
+            if (index == 0)
             {
-                // 如果不是指令格式，可以根据需要处理
-                result.State = InputState.Empty;
-                return result;
+                info.State = InputState.Command;
+
+                info.ParameterIndex = -1;
+
+                if (info.ReplaceStart < 1)
+                {
+                    info.ReplaceStart = 1;
+
+                    info.ReplaceLength = 0;
+                }
+
+                return info;
             }
 
-            // 移除开头的斜杠
-            string content = inputText[1..];
-            int adjustedCursor = cursorPosition - 1; // 调整光标位置（移除斜杠的影响）
+            info.State = InputState.Parameter;
 
-            // 分割输入内容
-            var parts = SplitWithCursorTracking(content, adjustedCursor);
+            info.ParameterIndex = index - 1;
 
-            if (parts.Count == 0)
+            info.CurrentParameter = token.Text;
+
+            AnalyzeBracket(info, token);
+
+            return info;
+        }
+
+        private static (int Index, CommandToken Token) Locate(List<CommandToken> tokens, int cursor)
+        {
+            for (var i = 0; i < tokens.Count; i++)
             {
-                result.State = InputState.Command;
-                return result;
+                if (tokens[i].Contains(cursor))
+                    return (i, tokens[i]);
             }
 
-            // 第一个部分总是关键字
-            result.Command = parts[0].Text;
+            var index = 0;
 
-            if (parts.Count == 1)
+            while (index < tokens.Count && tokens[index].End <= cursor)
+                index++;
+
+            return (index, new CommandToken(string.Empty, string.Empty, cursor, cursor, false, true));
+        }
+
+        private static void AnalyzeBracket(CommandInfo info, CommandToken token)
+        {
+            var raw = token.Raw;
+
+            var local = token.LocalCursor(info.CursorPosition);
+
+            var open = -1;
+
+            var depth = 0;
+
+            for (var i = 0; i < raw.Length; i++)
             {
-                // 只有关键字部分
-                var keywordPart = parts[0];
+                if (raw[i] == '[')
+                {
+                    depth++;
 
-                if (adjustedCursor <= keywordPart.EndIndex)
-                {
-                    // 光标在关键字范围内
-                    result.State = InputState.Command;
-                    result.RelativeCursorPosition = adjustedCursor - keywordPart.StartIndex;
+                    if (i < local)
+                        open = i;
                 }
-                else
+                else if (raw[i] == ']' && depth > 0)
+                    depth--;
+            }
+
+            if (open < 0)
+                return;
+
+            info.InBracket = true;
+
+            info.BracketHead = raw[..open];
+
+            info.BracketStart = token.Start + open + 1;
+
+            var close = raw.Length;
+
+            for (var i = open + 1; i < raw.Length; i++)
+            {
+                if (raw[i] == ']' && i >= local)
                 {
-                    // 光标在关键字后的空格位置，准备输入参数
-                    result.State = InputState.Parameter;
-                    result.ParameterIndex = 0;
+                    close = i;
+
+                    break;
                 }
             }
-            else
+
+            info.BracketEnd = token.Start + close;
+
+            var content = raw[(open + 1)..close];
+
+            var offset = Math.Clamp(local - open - 1, 0, content.Length);
+
+            var segStart = 0;
+
+            var segEnd = content.Length;
+
+            var segDepth = 0;
+
+            for (var i = 0; i < content.Length; i++)
             {
-                // 有关键字和参数
-                result.Parameters = parts.Skip(1).Select(p => p.Text).ToList();
+                var c = content[i];
 
-                // 查找光标所在的part
-                var currentPart = parts.FirstOrDefault(p =>
-                    adjustedCursor >= p.StartIndex && adjustedCursor <= p.EndIndex + 1); // +1 允许在结尾后一个位置
-
-                if (adjustedCursor > parts.Last().EndIndex + 1)
+                if (c == '[')
                 {
-                    // 光标在所有部分之后，准备输入新参数
-                    result.State = InputState.Parameter;
-                    result.ParameterIndex = parts.Count - 1;
+                    segDepth++;
+
+                    continue;
                 }
-                else if (currentPart != null)
+
+                if (c == ']')
                 {
-                    if (currentPart.Index == 0)
-                    {
-                        // 光标在关键字部分
-                        result.State = InputState.Command;
-                        result.RelativeCursorPosition = adjustedCursor - currentPart.StartIndex;
-                    }
-                    else
-                    {
-                        var selRegex = new Regex(@"(@[a-zA-Z0-9]+)\[(.*)\]?");
+                    if (segDepth > 0)
+                        segDepth--;
 
-                        var entRegex = new Regex(@"([a-zA-Z0-9_]+:[a-zA-Z0-9_]+)\[(.*)\]?");
-
-                        if (selRegex.TryMatch(currentPart.Text, out var selMatch))
-                        {
-                            var relative = adjustedCursor - currentPart.StartIndex;
-
-                            if (relative >= selMatch.Groups[1].Length + 1 && relative < currentPart.EndIndex)
-                                result.State = InputState.Selector;
-                            else
-                                result.State = InputState.Parameter;
-                        }
-                        else if (entRegex.TryMatch(currentPart.Text, out var entMatch))
-                        {
-                            var relative = adjustedCursor - currentPart.StartIndex;
-
-                            if (relative >= entMatch.Groups[1].Length + 1 && relative < currentPart.EndIndex)
-                                result.State = InputState.Entity;
-                            else
-                                result.State = InputState.Parameter;
-                        }
-                        else
-                            result.State = InputState.Parameter;
-
-                        result.ParameterIndex = currentPart.Index - 1; // 转换为参数索引
-                        result.CurrentParameter = currentPart.Text;
-                        result.RelativeCursorPosition = adjustedCursor - currentPart.StartIndex;
-                    }
+                    continue;
                 }
+
+                if (c != ',' || segDepth > 0)
+                    continue;
+
+                if (offset <= i)
+                {
+                    segEnd = i;
+
+                    break;
+                }
+
+                segStart = i + 1;
+            }
+
+            var segment = content[segStart..segEnd];
+
+            var segmentOffset = Math.Clamp(offset - segStart, 0, segment.Length);
+
+            info.SegmentStart = token.Start + open + 1 + segStart;
+
+            info.SegmentEnd = token.Start + open + 1 + segEnd;
+
+            info.ReplaceStart = info.SegmentStart;
+
+            info.ReplaceLength = info.SegmentEnd - info.SegmentStart;
+
+            ApplyState(info);
+
+            var operatorIndex = FindOperator(segment);
+
+            if (operatorIndex < 0)
+            {
+                info.MatchPrefix = StripQuote(segment[..segmentOffset]);
+
+                return;
+            }
+
+            var operatorLength = OperatorLength(segment, operatorIndex);
+
+            var valueStart = operatorIndex + operatorLength;
+
+            info.AttributeName = segment[..operatorIndex].Trim();
+
+            info.AttributeOperator = segment.Substring(operatorIndex, operatorLength);
+
+            if (segmentOffset <= operatorIndex)
+            {
+                info.ReplaceLength = operatorIndex;
+
+                info.MatchPrefix = StripQuote(segment[..segmentOffset]);
+
+                return;
+            }
+
+            info.CursorInValue = true;
+
+            info.ReplaceStart = token.Start + open + 1 + segStart + valueStart;
+
+            info.ReplaceLength = Math.Max(0, segEnd - segStart - valueStart);
+
+            info.MatchPrefix = StripQuote(segment[valueStart..Math.Clamp(segmentOffset, valueStart, segment.Length)]);
+        }
+
+        private static void ApplyState(CommandInfo info)
+        {
+            if (SelectorHead.IsMatch(info.BracketHead))
+                info.State = InputState.Selector;
+            else if (EntityHead.IsMatch(info.BracketHead))
+                info.State = InputState.Entity;
+        }
+
+        private static int FindOperator(string segment)
+        {
+            var result = -1;
+
+            foreach (var op in Operators)
+            {
+                var index = segment.IndexOf(op, StringComparison.Ordinal);
+
+                if (index < 0)
+                    continue;
+
+                if (result < 0 || index < result)
+                    result = index;
             }
 
             return result;
         }
 
-        private static List<TextPart> SplitWithCursorTracking(string text, int cursorPosition)
+        private static int OperatorLength(string segment, int index)
         {
-            var parts = new List<TextPart>();
-            int startIndex = 0;
-            int currentIndex = 0;
-            int partIndex = 0;
-            bool inWord = false;
+            if (index + 1 >= segment.Length)
+                return 1;
 
-            while (currentIndex < text.Length)
-            {
-                if (char.IsWhiteSpace(text[currentIndex]))
-                {
-                    if (inWord)
-                    {
-                        // 结束当前单词
-                        parts.Add(new TextPart
-                        {
-                            Index = partIndex++,
-                            Text = text.Substring(startIndex, currentIndex - startIndex),
-                            StartIndex = startIndex,
-                            EndIndex = currentIndex - 1
-                        });
-                        inWord = false;
-                    }
-                    currentIndex++;
-                }
-                else
-                {
-                    if (!inWord)
-                    {
-                        // 开始新单词
-                        startIndex = currentIndex;
-                        inWord = true;
-                    }
-                    currentIndex++;
-                }
-            }
+            var pair = segment.Substring(index, 2);
 
-            // 处理最后一个单词
-            if (inWord)
-            {
-                parts.Add(new TextPart
-                {
-                    Index = partIndex,
-                    Text = text.Substring(startIndex, currentIndex - startIndex),
-                    StartIndex = startIndex,
-                    EndIndex = currentIndex
-                });
-            }
-
-            return parts;
+            return pair is ">=" or "<=" or "!=" ? 2 : 1;
         }
 
-        private class TextPart
+        private static string StripQuote(string text)
         {
-            public int Index { get; set; }
-            public string Text { get; set; } = string.Empty;
-            public int StartIndex { get; set; }
-            public int EndIndex { get; set; }
+            if (string.IsNullOrEmpty(text))
+                return string.Empty;
+
+            return text[0] is '"' or '\'' ? text[1..] : text;
         }
     }
 }

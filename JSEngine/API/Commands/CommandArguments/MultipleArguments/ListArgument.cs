@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using TerraJS.Contents.Extensions;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.MultipleArguments
 {
@@ -15,8 +16,12 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.MultipleArguments
 
         private int _maxLength = maxLength >= minLength ? maxLength : minLength;
 
-        public override bool FromString(string content, object last, out object value)
+        public override bool FromString(string content, object last, out object value) => TryParse(content, last, out value, out _);
+
+        public override bool TryParse(string content, object last, out object value, out string expected)
         {
+            expected = ToString();
+
             value = null;
 
             if (!Pattern.IsMatch(content))
@@ -30,55 +35,16 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.MultipleArguments
 
             foreach (var arg in args)
             {
-                if (_argumentInstance.FromString(arg, lastArg, out var val))
-                {
-                    list.Add(val);
+                if (!_argumentInstance.TryParse(arg, lastArg, out var val, out _))
+                    return false;
 
-                    lastArg = val;
+                list.Add(val);
 
-                    continue;
-                }
-                
-                return false;
+                lastArg = val;
             }
 
-            while (list.Count < _minLength) 
-                list.Add(null);
-
-            while (list.Count > _maxLength) 
-                list.RemoveAt(list.Count - 1);
-
-            value = list;
-
-            return true;
-        }
-
-        public override bool FromStringWithoutClamp(string content, object last, out object value)
-        {
-            value = null;
-
-            if (!Pattern.IsMatch(content))
+            if (list.Count < _minLength || list.Count > _maxLength)
                 return false;
-
-            var list = new List<object>();
-
-            var args = Pattern.Match(content).Groups[1].Value.Replace(" ", "").SplitListElements().ToList();
-
-            object lastArg = null;
-
-            foreach (var arg in args)
-            {
-                if (_argumentInstance.FromString(arg, lastArg, out var val))
-                {
-                    list.Add(val);
-
-                    lastArg = val;
-
-                    continue;
-                }
-
-                return false;
-            }
 
             value = list;
 
@@ -104,6 +70,55 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.MultipleArguments
         }
 
         public override List<string> GetCompletions(CommandInfo commandInfo) => [];
+
+        public override IEnumerable<Suggestion> Complete(CompletionContext context)
+        {
+            var info = context.Info;
+
+            if (info is null || !info.InBracket)
+            {
+                yield return context.Hint(ToString());
+
+                yield break;
+            }
+
+            var sub = new CompletionContext
+            {
+                Info = info,
+                Argument = _argumentInstance,
+                Prefix = context.Prefix,
+                RawPrefix = context.RawPrefix,
+                Suffix = context.Suffix,
+                ArgumentIndex = 0,
+                InBracket = false,
+                InValue = false,
+                AttributeName = string.Empty,
+                AttributeOperator = string.Empty,
+                ReplaceStart = info.SegmentStart,
+                ReplaceLength = Math.Max(0, info.SegmentEnd - info.SegmentStart),
+            };
+
+            foreach (var suggestion in _argumentInstance.Complete(sub))
+                yield return suggestion;
+        }
+
+        public override ArgumentState Validate(CompletionContext context, out string expected)
+        {
+            expected = ToString();
+
+            var token = context.Prefix;
+
+            if (token.Length == 0)
+                return ArgumentState.Incomplete;
+
+            if (TryParse(token, null, out _, out _))
+                return ArgumentState.Valid;
+
+            if (token.IndexOf('[') < 0)
+                return ArgumentState.Invalid;
+
+            return token.EndsWith("]", StringComparison.Ordinal) ? ArgumentState.Invalid : ArgumentState.Incomplete;
+        }
 
         public override Type InstanceType => typeof(List<>);
 

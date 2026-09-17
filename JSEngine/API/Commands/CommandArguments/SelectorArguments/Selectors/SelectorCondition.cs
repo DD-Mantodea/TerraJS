@@ -28,10 +28,10 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments.Selec
                 return false;
             }
 
-            var field = f == null ? p.GetValue(obj) : f.GetValue(obj);
+            var type = f?.FieldType ?? p.PropertyType;
 
             if (Selector.ConditionCheckers.TryGetValue(f.FieldType.FullName, out var checker))
-                return checker(field, _value, _check);
+                return checker(type, _value, _check);
 
             Main.NewText($"Field or Property type not supported: {_variable}");
 

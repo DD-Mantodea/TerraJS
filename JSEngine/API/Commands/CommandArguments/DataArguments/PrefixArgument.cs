@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 using Terraria.ID;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.DataArguments
@@ -20,6 +21,40 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.DataArguments
         }
 
         public override List<string> GetCompletions(CommandInfo commandInfo) => DealStartWith([.. PrefixID.Search.Names], commandInfo.CurrentParameter);
+
+        public override IEnumerable<Suggestion> Complete(CompletionContext context)
+        {
+            foreach (var name in PrefixID.Search.Names)
+            {
+                if (!name.StartsWith(context.Prefix, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                yield return context.Value(name, name, null, context.Prefix.Length);
+            }
+        }
+
+        public override ArgumentState Validate(CompletionContext context, out string expected)
+        {
+            expected = ToString();
+
+            var token = context.Prefix;
+
+            if (token.Length == 0)
+                return ArgumentState.Incomplete;
+
+            if (TryParse(token, null, out _, out _))
+                return ArgumentState.Valid;
+
+            var prefixMatched = false;
+
+            foreach (var name in PrefixID.Search.Names)
+            {
+                if (name.StartsWith(token, StringComparison.OrdinalIgnoreCase))
+                    prefixMatched = true;
+            }
+
+            return prefixMatched ? ArgumentState.Incomplete : ArgumentState.Invalid;
+        }
 
         public override string ToString() => IsOptional ? $"[<{Name} : Prefix>]" : $"<{Name} : Prefix>";
     }

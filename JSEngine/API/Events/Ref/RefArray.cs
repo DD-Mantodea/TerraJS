@@ -4,18 +4,29 @@ using System.Collections.Generic;
 
 namespace TerraJS.JSEngine.API.Events.Ref
 {
-    public unsafe class RefBoxArray<T>(T[] array) : IEnumerable<RefBox<T>>
+    public unsafe class RefArray<T>(T[] array) : IEnumerable<RefArray<T>.Element>
     {
+        public sealed class Element(RefArray<T> array, int index)
+        {
+            public T Value
+            {
+                get => array.Get(index);
+
+                set => array.Set(index, value);
+            }
+
+            public int Index => index;
+
+            public static implicit operator T(Element element) => element.Value;
+        }
+
         private readonly T[] _array = array;
 
         public int Length => _array.Length;
 
         public bool IsReadOnly { get; set; }
 
-        public T this[int index] 
-        {
-            get => Get(index);
-        }
+        public T this[int index] => Get(index);
 
         public T Get(int index)
         {
@@ -42,10 +53,10 @@ namespace TerraJS.JSEngine.API.Events.Ref
             return -1;
         }
 
-        public IEnumerator<RefBox<T>> GetEnumerator()
+        public IEnumerator<Element> GetEnumerator()
         {
             for (int i = 0; i < Length; i++)
-                yield return new(_array[i]);
+                yield return new(this, i);
         }
 
         IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();

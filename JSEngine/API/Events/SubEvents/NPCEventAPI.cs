@@ -18,7 +18,7 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
         public Action<NPCShop> ModifyShopEvent;
 
         [HideToJS]
-        public Action<NPC, string, RefBoxArray<Item>> ModifyActiveShopEvent;
+        public Action<NPC, string, RefArray<Item>> ModifyActiveShopEvent;
 
         [HideToJS]
         public Func<NPC, bool> PreAIEvent;
@@ -39,7 +39,7 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
         public void ModifyShop(Action<NPCShop> @delegate) => ModifyShopEvent += @delegate;
 
         [EventInfo("npc", "shopName", "items")]
-        public void ModifyActiveShop(Action<NPC, string, RefBoxArray<Item>> @delegate) => ModifyActiveShopEvent += @delegate;
+        public void ModifyActiveShop(Action<NPC, string, RefArray<Item>> @delegate) => ModifyActiveShopEvent += @delegate;
 
         [EventInfo("npc")]
         public void PreAI(Func<NPC, bool> @delegate) => PreAIEvent += @delegate;

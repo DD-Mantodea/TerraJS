@@ -1,4 +1,4 @@
-﻿using Jint.Runtime;
+using Jint.Runtime;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using TerraJS.Contents.Extensions;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 using Terraria;
 using Terraria.ID;
 using Terraria.ModLoader;
@@ -23,6 +24,8 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.EntityArguments
         })];
 
         public override List<string> GetAllIdentifiers() => Completions;
+
+        public override List<CompletionEntry> GetEntries() => CompletionSources.Npcs;
 
         public override bool FromString(string content, object last, out object value)
         {

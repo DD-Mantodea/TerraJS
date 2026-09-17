@@ -28,6 +28,8 @@ namespace TerraJS.JSEngine
 
         public static void Load()
         {
+            GlobalAPI ??= new();
+
             Assembly[] assemblies = [
                 ..AssemblyManager.GetModAssemblies("TerraJS"),
                 typeof(ModLoader).Assembly,
@@ -111,6 +113,8 @@ namespace TerraJS.JSEngine
             Engine?.Dispose();
 
             BindingUtils.Values?.Clear();
+
+            Plugins?.Clear();
 
             Engine = null;
 

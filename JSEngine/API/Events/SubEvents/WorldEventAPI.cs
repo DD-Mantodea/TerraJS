@@ -10,13 +10,13 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
     public class WorldEventAPI : BaseEventAPI
     {
         [HideToJS]
-        public Action<List<GenPass>, RefBox<double>> ModifyWorldGenTasksEvent;
+        public Action<List<GenPass>, RefValue<double>> ModifyWorldGenTasksEvent;
 
         [HideToJS]
         public Func<Mod, bool> ShouldModWorldGenEvent;
 
         [EventInfo("passes", "totalWeight")]
-        public void ModifyWorldGenTasks(Action<List<GenPass>, RefBox<double>> @delegate) => ModifyWorldGenTasksEvent += @delegate;
+        public void ModifyWorldGenTasks(Action<List<GenPass>, RefValue<double>> @delegate) => ModifyWorldGenTasksEvent += @delegate;
 
         [EventInfo("mod")]
         public void ShouldModWorldGen(Func<Mod, bool> @delegate) => ShouldModWorldGenEvent += @delegate;

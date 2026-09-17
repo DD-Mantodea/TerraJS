@@ -90,7 +90,7 @@ namespace TerraJS.Contents.UI.Chat
             new ChatMessage(text, player, color, local).Join(this);
 
             if (Children.Count > 100)
-                Children.RemoveAt(0);
+                RemoveChildAt(0);
         }
 
         public void ClearMessage()

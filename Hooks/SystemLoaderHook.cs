@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using TerraJS.Contents.Extensions;
 using TerraJS.JSEngine;
+using TerraJS.JSEngine.API.Events.Ref;
 using Terraria;
 using Terraria.Localization;
 using Terraria.ModLoader;
@@ -55,7 +56,14 @@ namespace TerraJS.Hooks
                 }
             }
             
-            TJSEngine.GlobalAPI.Event.World.ModifyWorldGenTasksEvent?.Invoke(passes, new(totalWeight));
+            if (TJSEngine.GlobalAPI.Event.World.ModifyWorldGenTasksEvent is { } modifyWorldGenTasks)
+            {
+                using var totalWeightRef = new RefValue<double>(totalWeight);
+
+                modifyWorldGenTasks(passes, totalWeightRef);
+
+                totalWeight = totalWeightRef.Value;
+            }
         }
     }
 }

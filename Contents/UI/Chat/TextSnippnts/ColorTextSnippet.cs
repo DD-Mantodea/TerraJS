@@ -12,13 +12,13 @@ namespace TerraJS.Contents.UI.Chat.TextSnippnts
     {
         public ColorTextSnippet() : this("", "", default) { }
 
+        public static Regex Regex = new("(c|color)/([0-9A-F]{6}):(.*)");
+
         public string Text = text;
 
         public Color Color = color;
 
         public override string[] Identifiers => ["c", "color"];
-
-        public Regex Regex = new("(c|color)/([0-9A-F]{6}):(.*)");
 
         public override Vector2 GetSize(SpriteFontBase font)
         {

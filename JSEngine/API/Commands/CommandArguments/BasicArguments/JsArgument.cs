@@ -1,5 +1,6 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
@@ -26,6 +27,8 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
         }
 
         public override List<string> GetCompletions(CommandInfo commandInfo) => [];
+
+        public override IEnumerable<Suggestion> Complete(CompletionContext context) => [context.Hint("<js expression>")];
 
         public override string ToString() => IsOptional ? $"[<{Name} : jsExpression>]" : $"<{Name} : jsExpression>";
     }

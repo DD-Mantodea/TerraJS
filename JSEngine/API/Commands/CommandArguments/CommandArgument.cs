@@ -1,7 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments
 {
@@ -15,11 +17,36 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments
 
         public abstract bool FromString(string content, object last, out object value);
 
-        public virtual bool FromStringWithoutClamp(string content, object last, out object value) => FromString(content, last, out value);
+        public virtual bool TryParse(string content, object last, out object value, out string expected)
+        {
+            expected = ToString();
+
+            return FromString(content, last, out value);
+        }
 
         public abstract override string ToString();
 
         public abstract List<string> GetCompletions(CommandInfo commandInfo);
+
+        public virtual IEnumerable<Suggestion> Complete(CompletionContext context)
+        {
+            foreach (var value in GetCompletions(context.Info))
+            {
+                var insert = StripMarkup(value);
+
+                if (!insert.StartsWith(context.Prefix, StringComparison.OrdinalIgnoreCase))
+                    continue;
+
+                yield return context.Value(insert, insert, null, context.Prefix.Length);
+            }
+        }
+
+        public virtual ArgumentState Validate(CompletionContext context, out string expected)
+        {
+            expected = ToString();
+
+            return ArgumentState.Valid;
+        }
 
         public override int GetHashCode() => Name.GetHashCode();
 
@@ -37,6 +64,10 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments
         {
             return [.. values.Where(t => t.StartsWith(match)).Select(t => (match.Length == 0 ? "" : $"[c/F4F32B:{match}]") + t[match.Length..])];
         }
+
+        private static readonly Regex MarkupPattern = new(@"\[c/[0-9A-Fa-f]{6}:((?:[^\[\]]|\[[^\[\]]*\])*)\]");
+
+        public static string StripMarkup(string text) => string.IsNullOrEmpty(text) ? string.Empty : MarkupPattern.Replace(text, "$1");
 
         public virtual Type InstanceType => typeof(object);
 

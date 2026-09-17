@@ -14,18 +14,18 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
         public Action<ModPlayer> PostUpdateEvent;
 
         [HideToJS]
-        public Action<ModPlayer, RefBox<FishingAttempt>> ModifyFishingAttempt;
+        public Action<ModPlayer, RefValue<FishingAttempt>> ModifyFishingAttemptEvent;
 
         [HideToJS]
-        public Action<ModPlayer, FishingAttempt, RefBox<int>, RefBox<int>, RefBox<AdvancedPopupRequest>, RefBox<Vector2>> CatchFishEvent;
+        public Action<ModPlayer, FishingAttempt, RefValue<int>, RefValue<int>, RefValue<AdvancedPopupRequest>, RefValue<Vector2>> CatchFishEvent;
 
         [EventInfo("modPlayer")]
         public void PostUpdate(Action<ModPlayer> @delegate) => PostUpdateEvent += @delegate;
 
         [EventInfo("modPlayer", "fishingAttempt")]
-        public void PostUpdate(Action<ModPlayer, RefBox<FishingAttempt>> @delegate) => ModifyFishingAttempt += @delegate;
+        public void ModifyFishingAttempt(Action<ModPlayer, RefValue<FishingAttempt>> @delegate) => ModifyFishingAttemptEvent += @delegate;
 
         [EventInfo("modPlayer", "fishingAttempt", "itemDrop", "npcSpawn", "sonar", "sonarPosition")]
-        public void CatchFish(Action<ModPlayer, FishingAttempt, RefBox<int>, RefBox<int>, RefBox<AdvancedPopupRequest>, RefBox<Vector2>> @delegate) => CatchFishEvent += @delegate;
+        public void CatchFish(Action<ModPlayer, FishingAttempt, RefValue<int>, RefValue<int>, RefValue<AdvancedPopupRequest>, RefValue<Vector2>> @delegate) => CatchFishEvent += @delegate;
     }
 }

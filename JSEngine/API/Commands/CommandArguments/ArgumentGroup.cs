@@ -1,53 +1,61 @@
-﻿using System.Collections.Generic;
-using System.Collections.ObjectModel;
+using System;
+using System.Collections.Generic;
 using System.Linq;
+using TerraJS.JSEngine.API.Commands.Completion;
+using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments
 {
     public class ArgumentGroup
     {
-        private readonly List<CommandArgument> _arguments = [];
-
-        public ReadOnlyCollection<CommandArgument> Arguments => _arguments.AsReadOnly();
-
-        public ArgumentGroup Append(CommandArgument argument)
+        public ArgumentGroup()
         {
-            if (_arguments.Exists(arg => arg.Name == argument.Name))
-                return this;
-
-            _arguments.Add(argument);
-
-            return this;
+            Root = new GroupNode();
         }
+
+        public CommandNode Root { get; }
+
+        private sealed class GroupNode : CommandNode
+        {
+        }
+
+        public bool HasAction => Root.HasAction;
+
+        public void Attach(CommandNode node) => Root.Next(node);
+
+        public List<string> MissingActions() => MissingActions(Root, string.Empty);
+
+        private static List<string> MissingActions(CommandNode node, string path)
+        {
+            var result = new List<string>();
+
+            if (node.AcceptsToken)
+                path = path.Length == 0 ? node.UsageText : path + " " + node.UsageText;
+
+            if (node.Action is null && node.Children.All(child => child.IsOptional))
+                result.Add(path);
+
+            foreach (var child in node.Children)
+                result.AddRange(MissingActions(child, path));
+
+            return result;
+        }
+
+        public bool TryParse(string[] args, bool allowIncomplete, out CommandExecution execution, out string expected) => CommandTree.TryParse(Root, args, allowIncomplete, out execution, out expected);
+
+        public string RenderUsage() => Root.RenderUsage();
+
+        public string RenderUsage(CommandExecution execution) => Root.RenderUsage(execution);
 
         public bool Deserialize(string[] args, out ArgumentInstanceGroup group)
         {
             group = new();
 
-            int argIndex = 0;
+            if (!TryParse(args, false, out var execution, out _))
+                return false;
 
-            object last = null;
-
-            foreach (var arg in _arguments)
-            {
-                if (argIndex >= args.Length)
-                {
-                    if (!arg.IsOptional) return false;
-
-                    continue;
-                }
-
-                if (arg.FromString(args[argIndex], last, out var value))
-                {
-                    group.Add(arg.Name, value);
-
-                    last = value;
-
-                    argIndex++;
-                }
-                else if (!arg.IsOptional)
-                    return false;
-            }
+            foreach (var pair in execution.Values)
+                group.TryAdd(pair.Key, pair.Value);
 
             return true;
         }
@@ -62,38 +70,19 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments
         {
             arguments = new();
 
-            int argIndex = 0;
+            if (!TryParse(args, true, out var execution, out _))
+                return false;
 
-            object last = null;
-
-            foreach (var arg in _arguments)
+            foreach (var pair in execution.NodeValues)
             {
-                if (argIndex >= args.Length)
-                    return true;
-
-                if (arg.FromStringWithoutClamp(args[argIndex], last, out var value))
-                {
-                    arguments.Add(arg, value);
-
-                    last = value;
-
-                    argIndex++;
-                }
-                else if (!arg.IsOptional)
-                    return false;
+                if (pair.Key is ArgumentNode node)
+                    arguments[node.Argument] = pair.Value;
             }
 
             return true;
         }
 
-        public static bool operator ==(ArgumentGroup g1, ArgumentGroup g2)
-        {
-            var args1 = g1._arguments;
-
-            var args2 = g2._arguments;
-
-            return args1.Count == args2.Count && args1.All(a1 => args2.Any(a2 => a2.SameType(a1) && a2.SameValue(a1)));
-        }
+        public static bool operator ==(ArgumentGroup g1, ArgumentGroup g2) => g1.RenderUsage() == g2.RenderUsage();
 
         public static bool operator !=(ArgumentGroup g1, ArgumentGroup g2) => !(g1 == g2);
 

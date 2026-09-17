@@ -89,32 +89,43 @@ Type `/` in the game's chatbox then you can see the command.
 
 You can get arguments' value by the `group` parameter of the function you send in `Execute`.
 
+`Execute` runs exactly where you attach it: attached to the whole command (right after `CreateCommandRegistry`) it runs for the **command itself with no arguments**; attached to a node it runs when the parse **reaches that node**.
+An end point without any `Execute` is not executable and reports an error.
+
 The code below is an example to use `StringArgument`.
 
 ```javascript
 TJS.Event.ModLoad(() => {
     TJS.Command.CreateCommandRegistry("testcmd")
-        .NextArgument(new StringArgument("text"))
-        .Execute((group, caller) => {
-            let text = group.GetString("text") //use the name to get arguments' value
+        .Next(CommandNode.Argument(new StringArgument("text"))
+            .Execute((group, caller) => {
+                let text = group.GetString("text") //use the name to get arguments' value
 
-            Main.NewText(text)
-        })
+                Main.NewText(text)
+            }))
         .Register()
 })
 ```
 
-The code below is an example to use `ComboArgument`.
+Arguments are described with **nodes**: `CommandNode.Argument(...)` is an argument node, `CommandNode.Literal("set")` is a literal node.
+Sequences are written by **nesting** (a child node follows its parent), branches by **calling `Next` several times on the same node**, and actions are attached to the node itself.
+
+The code below is a branch example (`/testcmd set <value>` and `/testcmd list`, two different shapes):
 
 ```javascript
 TJS.Event.ModLoad(() => {
     TJS.Command.CreateCommandRegistry("testcmd")
-        .NextArgument(new ComboArgument("combo", ["enable1", "enable2"]))
-        .Execute((group, caller) => {
-            var combo = group.GetString("combo") //combo is actually a string
-
-            Main.NewText(combo)
-        })
+        .Next(CommandNode.Literal("set")
+            .Next(CommandNode.Argument(new IntArgument("value"))
+                .Execute((group, caller) => {
+                    Main.NewText("set " + group.GetInt("value"))
+                }))
+            .Next(CommandNode.Literal("list")
+                .Execute((group, caller) => {
+                    Main.NewText("list")
+                })))
         .Register()
 })
 ```
+
+Optional arguments use `CommandNode.Optional(new IntArgument("stack"))` (or `new IntArgument("stack", isOptional: true)`).

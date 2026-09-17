@@ -38,7 +38,7 @@ namespace TerraJS.Contents.UI.Chat.Components
 
         public void SetMessage(string message, string player, Color color, bool local)
         {
-            Children.Clear();
+            RemoveAllChild();
 
             var text = $"[{(string.IsNullOrEmpty(player) ? "System" : player)}]: {message}";
 

@@ -89,32 +89,43 @@ TJS.Event.ModLoad(() => {
 
 参数可以通过 `Execute` 中传入函数的 `group` 参数来获取。
 
+`Execute` 挂在哪里就在哪里执行：挂在整个指令上（跟在 `CreateCommandRegistry` 后面）表示**命令本身、不带任何参数**时执行什么；挂在节点上表示**走到该节点**时执行什么。
+没有挂 `Execute` 的终点不可执行，走到那里会报错。
+
 如下为一个使用 `StringArgument` 的示例。
 
 ```javascript
 TJS.Event.ModLoad(() => {
     TJS.Command.CreateCommandRegistry("testcmd")
-        .NextArgument(new StringArgument("str"))
-        .Execute((group, caller) => {
-            let str = group.GetString("str") //通过名字即可获取对应参数
+        .Next(CommandNode.Argument(new StringArgument("str"))
+            .Execute((group, caller) => {
+                let str = group.GetString("str") //通过名字即可获取对应参数
 
-            Main.NewText(str)
-        })
+                Main.NewText(str)
+            }))
         .Register()
 })
 ```
 
-如下为一个使用 `ComboArgument` 的示例。
+指令的参数用**节点**描述：`CommandNode.Argument(...)` 是参数节点，`CommandNode.Literal("set")` 是字面量节点。
+顺序靠**嵌套**（子节点接在父节点后面），分支靠**在同一个节点上连续 `Next`**，动作挂在节点自身上。
+
+如下为一个带分支的示例（`/testcmd set <value>` 与 `/testcmd list` 两种不同形状）：
 
 ```javascript
 TJS.Event.ModLoad(() => {
     TJS.Command.CreateCommandRegistry("testcmd")
-        .NextArgument(new ComboArgument("combo", ["enable1", "enable2"]))
-        .Execute((group, caller) => {
-            var combo = group.GetString("combo") //combo实际上也是字符串
-
-            Main.NewText(combo)
-        })
+        .Next(CommandNode.Literal("set")
+            .Next(CommandNode.Argument(new IntArgument("value"))
+                .Execute((group, caller) => {
+                    Main.NewText("set " + group.GetInt("value"))
+                }))
+            .Next(CommandNode.Literal("list")
+                .Execute((group, caller) => {
+                    Main.NewText("list")
+                })))
         .Register()
 })
 ```
+
+可选参数用 `CommandNode.Optional(new IntArgument("stack"))`（或者 `new IntArgument("stack", isOptional: true)`）。

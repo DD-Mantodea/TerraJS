@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,83 +12,122 @@ namespace TerraJS.DetectorJS
 {
     public static class AsyncTypeCollector
     {
-        private static readonly ConcurrentDictionary<Type, Type[]> _typeCache = new();
-        private static readonly SemaphoreSlim _cacheSemaphore = new(1, 1);
+        private const int BatchSize = 4096;
 
-        public static async Task<HashSet<Type>> CollectAllRelatedTypesAsync(IEnumerable<Type> initialTypes)
+        private static readonly ConcurrentDictionary<Type, Type[]> _typeCache = new();
+
+        private static int _skipped;
+
+        public static int SkippedCount => Volatile.Read(ref _skipped);
+
+        public static async Task<HashSet<Type>> CollectAllRelatedTypesAsync(IEnumerable<Type> initialTypes, CancellationToken token = default)
         {
-            var collectedTypes = new ConcurrentBag<Type>();
-            var processedTypes = new ConcurrentDictionary<Type, bool>();
-            var tasks = new List<Task>();
+            Interlocked.Exchange(ref _skipped, 0);
+
+            var queue = new ConcurrentQueue<Type>();
+
+            var seen = new ConcurrentDictionary<Type, byte>();
+
+            var collected = new ConcurrentDictionary<Type, byte>();
 
             foreach (var type in initialTypes)
             {
-                tasks.Add(ProcessTypeAsync(type, collectedTypes, processedTypes));
-            }
-            await Task.WhenAll(tasks);
-
-            var resultTypes = collectedTypes.Where(t =>
-            {
-                return !t.IsIllegal() && 
-                t.GetCustomAttribute<HideToJSAttribute>() == null &&
-                !(t.FullName?.Contains("ObjectiveCMarshal") ?? false);
-            });
-
-            return [..resultTypes];
-        }
-
-        private static async Task ProcessTypeAsync(Type type,
-            ConcurrentBag<Type> collectedTypes,
-            ConcurrentDictionary<Type, bool> processedTypes)
-        {
-            // 跳过已处理和不需处理的类型
-            if (!ShouldProcessType(type) || processedTypes.ContainsKey(type))
-                return;
-
-            // 标记为已处理
-            processedTypes.TryAdd(type, true);
-            collectedTypes.Add(type);
-
-            // 获取相关类型(异步缓存)
-            var relatedTypes = await GetRelatedTypesAsync(type);
-
-            // 并行处理相关类型
-            var processingTasks = new List<Task>();
-            foreach (var relatedType in relatedTypes)
-            {
-                processingTasks.Add(ProcessTypeAsync(relatedType, collectedTypes, processedTypes));
+                if (type is not null)
+                    queue.Enqueue(type);
             }
 
-            await Task.WhenAll(processingTasks);
+            var options = new ParallelOptions
+            {
+                MaxDegreeOfParallelism = Environment.ProcessorCount,
+                CancellationToken = token
+            };
+
+            while (!queue.IsEmpty)
+            {
+                token.ThrowIfCancellationRequested();
+
+                var batch = new List<Type>();
+
+                while (batch.Count < BatchSize && queue.TryDequeue(out var type))
+                    batch.Add(type);
+
+                await Parallel.ForEachAsync(batch, options, (type, _) =>
+                {
+                    if (type is null || !seen.TryAdd(type, 0))
+                        return ValueTask.CompletedTask;
+
+                    try
+                    {
+                        if (!ShouldProcessType(type))
+                            return ValueTask.CompletedTask;
+
+                        collected.TryAdd(type, 0);
+
+                        foreach (var related in GetRelatedTypes(type))
+                            queue.Enqueue(related);
+                    }
+                    catch
+                    {
+                        Interlocked.Increment(ref _skipped);
+                    }
+
+                    return ValueTask.CompletedTask;
+                });
+            }
+
+            token.ThrowIfCancellationRequested();
+
+            var result = new HashSet<Type>();
+
+            foreach (var type in collected.Keys)
+            {
+                try
+                {
+                    if (IsWanted(type))
+                        result.Add(type);
+                }
+                catch
+                {
+                    Interlocked.Increment(ref _skipped);
+                }
+            }
+
+            return result;
         }
 
-        private static async Task<Type[]> GetRelatedTypesAsync(Type type)
+        private static bool IsWanted(Type type)
         {
-            // 先从缓存读取
+            return !type.IsIllegal() &&
+                type.GetCustomAttribute<HideToJSAttribute>() == null &&
+                !(type.FullName?.Contains("ObjectiveCMarshal") ?? false);
+        }
+
+        private static Type[] GetRelatedTypes(Type type)
+        {
             if (_typeCache.TryGetValue(type, out var cachedTypes))
                 return cachedTypes;
 
-            // 异步获取类型信息
-            var types = await Task.Run(() => UncachedGetRelatedTypes(type).Where(t =>
-            {
-                return !t.IsGenericParameter;
-            }).ToArray());
+            var types = UncachedGetRelatedTypes(type)
+                .Where(t => t is not null && !t.IsGenericParameter)
+                .Distinct()
+                .ToArray();
 
-            // 安全地更新缓存
-            await _cacheSemaphore.WaitAsync();
-            try
-            {
-                return _typeCache.GetOrAdd(type, types);
-            }
-            finally
-            {
-                _cacheSemaphore.Release();
-            }
+            return _typeCache.GetOrAdd(type, types);
+        }
+
+        private static bool ShouldProcessType(Type type)
+        {
+            if (type is null || type == typeof(void))
+                return false;
+
+            if (type.IsGenericParameter || type.IsByRef || type.IsPointer)
+                return false;
+
+            return true;
         }
 
         private static IEnumerable<Type> UncachedGetRelatedTypes(Type type)
         {
-            // 基类和接口
             if (type.BaseType != null)
                 yield return type.BaseType;
 
@@ -98,61 +137,70 @@ namespace TerraJS.DetectorJS
             foreach (var interfaceType in type.GetInterfaces())
                 yield return interfaceType;
 
-            // 泛型参数
             foreach (var genericArg in type.GetGenericArguments())
                 yield return genericArg;
 
-            // 字段类型
-            foreach (var field in type.GetFields())
-                yield return field.FieldType;
+            if (type.IsArray || type.IsByRef || type.IsPointer)
+                yield return type.GetElementType();
 
-            // 属性类型
+            foreach (var field in type.GetFields())
+                yield return Unwrap(field.FieldType);
+
             foreach (var property in type.GetProperties())
             {
-                yield return property.PropertyType;
+                yield return Unwrap(property.PropertyType);
 
                 var getMethod = property.GetMethod;
+
                 if (getMethod != null)
                 {
                     foreach (var param in getMethod.GetParameters())
-                        yield return param.ParameterType;
+                        yield return Unwrap(param.ParameterType);
                 }
 
                 var setMethod = property.SetMethod;
+
                 if (setMethod != null)
                 {
                     foreach (var param in setMethod.GetParameters())
-                        yield return param.ParameterType;
+                        yield return Unwrap(param.ParameterType);
                 }
             }
 
-            // 方法返回类型和参数
+            foreach (var constructor in type.GetConstructors())
+            {
+                foreach (var param in constructor.GetParameters())
+                    yield return Unwrap(param.ParameterType);
+            }
+
             foreach (var method in type.GetMethods())
             {
                 if (method.ReturnType != typeof(void))
-                    yield return method.ReturnType;
+                    yield return Unwrap(method.ReturnType);
 
                 foreach (var param in method.GetParameters())
-                    yield return param.ParameterType;
+                    yield return Unwrap(param.ParameterType);
 
                 foreach (var genericParam in method.GetGenericArguments())
                     yield return genericParam;
             }
 
-            // 事件类型
             foreach (var eventInfo in type.GetEvents())
-                yield return eventInfo.EventHandlerType;
+            {
+                if (eventInfo.EventHandlerType != null)
+                    yield return Unwrap(eventInfo.EventHandlerType);
+            }
         }
 
-        private static bool ShouldProcessType(Type type)
+        private static Type Unwrap(Type type)
         {
-            if (type == null || type.IsPointer || type == typeof(void) || type == typeof(void*))
-                return false;
+            if (type is null)
+                return null;
 
-            if (type.Name.Contains('&') || type.Name.Contains('*'))
-                return false;
+            if (type.IsByRef || type.IsPointer)
+                return type.GetElementType();
 
-            return true;
+            return type;
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 using TerraJS.Contents.Utils;
 using TerraJS.JSEngine.API.Commands.CommandGUI;
+using TerraJS.JSEngine.API.Commands.Completion;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
 {
@@ -37,6 +38,8 @@ namespace TerraJS.JSEngine.API.Commands.CommandArguments.BasicArguments
         public override string ToString() => IsOptional ? $"[<{Name} : string>]" : $"<{Name} : string>";
 
         public override List<string> GetCompletions(CommandInfo commandInfo) => [];
+
+        public override IEnumerable<Suggestion> Complete(CompletionContext context) => [context.Hint("\"<text>\"")];
 
         public override bool InScope(object value, object last) => value is string;
 

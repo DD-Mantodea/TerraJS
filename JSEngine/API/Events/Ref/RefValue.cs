@@ -3,11 +3,13 @@ using System.Runtime.InteropServices;
 
 namespace TerraJS.JSEngine.API.Events.Ref
 {
-    public unsafe class RefBox<T>(T value) : IDisposable
+    public unsafe class RefValue<T>(T value) : IDisposable
     {
         private GCHandle _handle = GCHandle.Alloc(value, GCHandleType.Normal);
         
         private bool _disposed;
+
+        public static implicit operator T(RefValue<T> @ref) => @ref.Value;
 
         public T Value
         {
@@ -34,6 +36,6 @@ namespace TerraJS.JSEngine.API.Events.Ref
             }
         }
 
-        ~RefBox() => Dispose();
+        ~RefValue() => Dispose();
     }
 }

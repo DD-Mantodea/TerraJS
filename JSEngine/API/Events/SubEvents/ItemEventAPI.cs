@@ -33,7 +33,7 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
         public Func<Item, bool> CanRightClickEvent;
 
         [HideToJS]
-        public Func<Item, Player, RefBox<bool>, bool> UseItemEvent;
+        public Func<Item, Player, RefValue<bool>, bool> UseItemEvent;
 
         [HideToJS]
         public Func<Item, Player, bool> CanUseItemEvent;
@@ -76,7 +76,7 @@ namespace TerraJS.JSEngine.API.Events.SubEvents
         public void CanRightClick(Func<Item, bool> @delegate) => CanRightClickEvent += @delegate;
 
         [EventInfo("item", "player", "useVanilla")]
-        public void UseItem(Func<Item, Player, RefBox<bool>, bool> @delegate) => UseItemEvent += @delegate;
+        public void UseItem(Func<Item, Player, RefValue<bool>, bool> @delegate) => UseItemEvent += @delegate;
 
         [EventInfo("item", "player")]
         public void CanUseItem(Func<Item, Player, bool> @delegate) => CanUseItemEvent += @delegate;

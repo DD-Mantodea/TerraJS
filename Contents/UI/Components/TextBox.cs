@@ -1,4 +1,4 @@
-﻿using System.Text.RegularExpressions;
+using System.Text.RegularExpressions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -567,6 +567,19 @@ namespace TerraJS.Contents.UI.Components
                 return;
 
             Text = Text.Insert(index, str);
+
+            OnTextChanged?.Invoke(null, Text);
+        }
+
+        public void ReplaceRange(int start, int length, string str)
+        {
+            start = start.Clamp(0, Text.Length);
+
+            length = length.Clamp(0, Text.Length - start);
+
+            Text = Text.Remove(start, length).Insert(start, str ?? "");
+
+            CursorTo(start + (str?.Length ?? 0));
 
             OnTextChanged?.Invoke(null, Text);
         }

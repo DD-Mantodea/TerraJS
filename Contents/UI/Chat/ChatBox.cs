@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+using System.Collections.Generic;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using TerraJS.Contents.Attributes;
@@ -78,6 +78,15 @@ namespace TerraJS.Contents.UI.Chat
                 switch (e.KeyCode)
                 {
                     case Keys.Escape:
+                        var panel = CommandPanel.Instance;
+
+                        if (panel is not null && panel.CompletionsContainer.HasSuggestions)
+                        {
+                            panel.CompletionsContainer.Clear();
+
+                            break;
+                        }
+
                         Close();
 
                         break;

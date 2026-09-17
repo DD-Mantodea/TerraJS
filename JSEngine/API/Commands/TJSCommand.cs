@@ -1,4 +1,6 @@
-﻿using Terraria.Localization;
+using TerraJS.JSEngine.API.Commands.CommandArguments;
+using TerraJS.JSEngine.API.Commands.Completion;
+using Terraria.Localization;
 using Terraria.ModLoader;
 
 namespace TerraJS.JSEngine.API.Commands
@@ -8,7 +10,22 @@ namespace TerraJS.JSEngine.API.Commands
     {
         public override string Command { get => CommandAPI.CommandContents[GetType().FullName]; }
 
-        public override string Description => TJSEngine.GlobalAPI.Translation.GetTranslation($"Commands.Description.{GetType().Name}", Language.ActiveCulture);
+        public override string Description
+        {
+            get
+            {
+                var key = $"Commands.Description.{GetType().Name}";
+
+                var translation = TJSEngine.GlobalAPI.Translation;
+
+                var text = translation.GetTranslation(key, Language.ActiveCulture);
+
+                if (text == key)
+                    translation.DefaultLocalizedTexts.TryGetValue(key, out text);
+
+                return string.IsNullOrEmpty(text) || text == key ? string.Empty : text;
+            }
+        }
 
         public override CommandType Type => CommandType.Chat;
 
@@ -16,10 +33,18 @@ namespace TerraJS.JSEngine.API.Commands
         {
             var argsGroup = CommandAPI.CommandArgumentGroups[GetType().FullName];
 
-            var action = CommandAPI.CommandActions[GetType().FullName];
+            if (!argsGroup.TryParse(args, false, out var execution, out _))
+                return;
 
-            if (argsGroup.Deserialize(args, out var arguments))
-                action(arguments, caller);
+            if (execution.Action is null)
+                return;
+
+            var arguments = new ArgumentInstanceGroup();
+
+            foreach (var pair in execution.Values)
+                arguments.TryAdd(pair.Key, pair.Value);
+
+            execution.Action(arguments, caller);
         }
 
         public bool TryGetArgumentsText(string[] args, out string text)
@@ -28,26 +53,14 @@ namespace TerraJS.JSEngine.API.Commands
 
             text = "";
 
-            if (argsGroup.GetUseArguments(args, out var arguments))
-            {
-                object last = null;
+            if (!argsGroup.TryParse(args, true, out var execution, out _))
+                return false;
 
-                foreach (var arg in argsGroup.Arguments)
-                {
-                    if (arguments.TryGetValue(arg, out object value))
-                    {
-                        text += arg.InScope(arguments[arg], last) ? $" [c/F4F32B:{arg}]" : $" [c/E74032:{arg}]";
+            var usage = argsGroup.RenderUsage(execution);
 
-                        last = value;
-                    }
-                    else
-                        text += $" [c/A0A0A0:{arg}]";
-                }
+            text = usage.Length == 0 ? "" : " " + usage;
 
-                return true;
-            }
-
-            return false;
+            return true;
         }
 
         public override string Usage => TryGetArgumentsText([], out var text) ? text : text;
