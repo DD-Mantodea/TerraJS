@@ -155,7 +155,7 @@ namespace TerraJS.Contents.UI
 
         public const string Wire_Selection = "TerraJS: Wire Selection";
 
-        public const string Capture_Manager_Check = "TerraJS: Capture Manager Check";
+        public const string Capture_Manager_Check = "TerraJS: Capture Manager CheckTarget";
 
         public const string Ingame_Options = "TerraJS: Ingame Options";
 
@@ -233,7 +233,7 @@ namespace TerraJS.Contents.UI
                 "TerraJS: Town NPC House Banners" => InterfaceScaleType.Game,
                 "TerraJS: Hide UI Toggle" => InterfaceScaleType.UI,
                 "TerraJS: Wire Selection" => InterfaceScaleType.UI,
-                "TerraJS: Capture Manager Check" => InterfaceScaleType.Game,
+                "TerraJS: Capture Manager CheckTarget" => InterfaceScaleType.Game,
                 "TerraJS: Ingame Options" => InterfaceScaleType.UI,
                 "TerraJS: Fancy UI" => InterfaceScaleType.UI,
                 "TerraJS: Achievement Complete Popups" => InterfaceScaleType.UI,

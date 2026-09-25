@@ -38,6 +38,20 @@ namespace TerraJS.JSEngine.API.Commands
             Cmd.CreateCommandRegistry("terrajs")
                 .Next(CommandNode.Literal("reload").Execute((_, _) => TerraJS.Reload()))
                 .Next(CommandNode.Literal("detect").Execute((_, _) => Detector.Detect()))
+                .Next(CommandNode.Literal("plugins").Execute((_, _) =>
+                {
+                    if (TJSEngine.Plugins.Count == 0)
+                    {
+                        Main.NewText(Language.ActiveCulture.LegacyId == 7 ? "没有已加载的插件" : "No plugins loaded", 255, 200, 120);
+
+                        return;
+                    }
+
+                    Main.NewText(Language.ActiveCulture.LegacyId == 7 ? "已加载的插件:" : "Loaded plugins:", 255, 200, 120);
+
+                    foreach (var plugin in TJSEngine.Plugins)
+                        Main.NewText($"{plugin.GetType().FullName} ({plugin.Mod?.Name ?? "?"})", 200, 220, 255);
+                }))
                 .Register();
 
             Cmd.CreateCommandRegistry("exec")

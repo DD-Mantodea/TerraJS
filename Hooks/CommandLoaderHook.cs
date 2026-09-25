@@ -1,4 +1,4 @@
-﻿using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -163,9 +163,22 @@ namespace TerraJS.Hooks
             {
                 if (cmdList.TrueForAll(cmd => cmd is TJSCommand))
                 {
-                    var cmds = cmdList.Where(cmd => CommandAPI.CommandArgumentGroups[cmd.GetType().FullName].Deserialize(args, out _));
+                    List<ModCommand> cmds;
 
-                    if (cmds.Count() > 1)
+                    var context = CommandContext.Caller;
+
+                    CommandContext.Caller = caller;
+
+                    try
+                    {
+                        cmds = [.. cmdList.Where(cmd => CommandAPI.CommandArgumentGroups[cmd.GetType().FullName].Deserialize(args, out _))];
+                    }
+                    finally
+                    {
+                        CommandContext.Caller = context;
+                    }
+
+                    if (cmds.Count > 1)
                     {
                         if (Language.ActiveCulture.LegacyId == 7)
                             caller.Reply("有多个命令 /" + name + "同时满足输入的参数", Color.Red);
@@ -176,7 +189,7 @@ namespace TerraJS.Hooks
 
                         return false;
                     }
-                    else if (cmds.Count() == 0)
+                    else if (cmds.Count == 0)
                     {
                         if (Language.ActiveCulture.LegacyId == 7)
                             caller.Reply("有多个命令 /" + name + "且都不满足输入的参数", Color.Red);
@@ -186,7 +199,7 @@ namespace TerraJS.Hooks
                         return false;
                     }
                     else
-                        mc = cmds.First();
+                        mc = cmds[0];
                 }
                 else
                 {

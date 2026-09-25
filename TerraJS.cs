@@ -14,7 +14,6 @@ using System.Reflection.Emit;
 using System.Collections.Generic;
 using MonoMod.Utils;
 using log4net;
-using TerraJS.JSEngine.Plugins;
 using System.Threading;
 using TerraJS.Contents.Utils;
 using LibRimeSharp;
@@ -61,8 +60,6 @@ namespace TerraJS
             FileUtils.CopyModFile("lib/rime.dll", "Libraries/Native/Windows/rime.dll");
 
             TJSEngine.LoadPlugins();
-
-            PluginRegistryInfos.RegisterAll();
 
             TJSEngine.Load();
 

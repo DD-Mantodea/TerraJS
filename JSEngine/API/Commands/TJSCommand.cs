@@ -1,3 +1,4 @@
+using Microsoft.Xna.Framework;
 using TerraJS.JSEngine.API.Commands.CommandArguments;
 using TerraJS.JSEngine.API.Commands.Completion;
 using Terraria.Localization;
@@ -33,19 +34,47 @@ namespace TerraJS.JSEngine.API.Commands
         {
             var argsGroup = CommandAPI.CommandArgumentGroups[GetType().FullName];
 
-            if (!argsGroup.TryParse(args, false, out var execution, out _))
-                return;
+            var previous = CommandContext.Caller;
 
-            if (execution.Action is null)
-                return;
+            CommandContext.Caller = caller;
 
-            var arguments = new ArgumentInstanceGroup();
+            try
+            {
+                if (!argsGroup.TryParse(args, false, out var execution, out var expected) || execution.Action is null)
+                {
+                    caller.Reply(ErrorText(argsGroup, expected), Color.Red);
 
-            foreach (var pair in execution.Values)
-                arguments.TryAdd(pair.Key, pair.Value);
+                    return;
+                }
 
-            execution.Action(arguments, caller);
+                var arguments = new ArgumentInstanceGroup();
+
+                foreach (var pair in execution.Values)
+                    arguments.TryAdd(pair.Key, pair.Value);
+
+                execution.Action(arguments, caller);
+            }
+            finally
+            {
+                CommandContext.Caller = previous;
+            }
         }
+
+        private string ErrorText(ArgumentGroup argsGroup, string expected)
+        {
+            var usage = argsGroup.RenderUsage();
+
+            var text = usage.Length == 0 ? $"{Localized("用法", "Usage")}: /{Command}" : $"{Localized("用法", "Usage")}: /{Command} {usage}";
+
+            if (string.IsNullOrEmpty(expected))
+                return text;
+
+            var reason = Localized($"参数无效, 期望 {expected}", $"Invalid argument, expected {expected}");
+
+            return $"{text} ({reason})";
+        }
+
+        private static string Localized(string chinese, string english) => Language.ActiveCulture.LegacyId == 7 ? chinese : english;
 
         public bool TryGetArgumentsText(string[] args, out string text)
         {

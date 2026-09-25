@@ -129,3 +129,97 @@ TJS.Event.ModLoad(() => {
 ```
 
 Optional arguments use `CommandNode.Optional(new IntArgument("stack"))` (or `new IntArgument("stack", isOptional: true)`).
+
+#### Example: Target selectors
+
+`PlayersArgument` accepts Minecraft-like target selectors: `@p` (nearest player), `@r` (random player), `@a` (all players), `@s` (the executor), and plain player names.
+
+Inside `[]` you can add conditions separated by commas, written as `member operator value`, with `=`, `!=`, `>`, `>=`, `<`, `<=`, and ranges for numbers:
+
+```
+/give @a[statLife>100] TerraJS:dirt
+/give @p[distance<30,name=Steve] TerraJS:dirt
+/give @a[team=1,sort=nearest,limit=3] TerraJS:dirt
+```
+
+`distance`, `r` and `rm` limit the distance from the executor, measured in tiles, so `distance<30` means within 30 tiles, `r=30` is the maximum distance and `rm=5` is the minimum one.
+
+`x` and `y` together with `dx` and `dy` limit a rectangular area, and `dx` and `dy` must be given together. Without `dx` and `dy` you can still use `x` and `y` alone to move the origin used for distance.
+
+`limit` caps how many targets are taken, `sort` picks the order and accepts `nearest`, `furthest`, `random` and `arbitrary`.
+
+Every other condition name is a public field or property of `Player` (`int`, `long`, `float`, `bool`, `string` and enums), such as `statLife`, `dead`, `team`, `name` and `difficulty`.
+
+`@p` takes the nearest one by default, `@r` a random one and `@a` all of them; an explicit `sort` or `limit` wins.
+
+When a condition is written wrong, or nothing matches, the command reports an error together with its usage.
+
+#### Example: Plugin
+
+You can use the plugin system.
+
+```csharp
+using TerraJS.JSEngine.Plugins;
+
+namespace MyMod.Plugins
+{
+    public class MyPlugin : TJSPlugin
+    {
+        public override void Load()
+        {
+            Mod.Logger.Info("my plugin is loaded");
+        }
+
+        public override void AddBindings()
+        {
+            BindInstance("MyAPI", new MyAPI());
+
+            BindMethod("MyFunc", (int value) => value * 2);
+        }
+    }
+}
+```
+
+`BindInstance` and `BindMethod` put objects and functions into JS, so JS can use `MyAPI` and `MyFunc(2)` directly.
+
+Type `/terrajs plugins` in game to see which plugins are loaded.
+
+#### Example: Write a selector for your own type
+
+Terramon is used as an example here.
+
+```csharp
+public class TerramonArgument(string name, bool isOptional = false) : SelectorArgument<TerramonData>(name, isOptional)
+{
+    public override SelectorRegistry<TerramonData> Registry => SelectorRegistry<TerramonData>.Instance;
+
+    public override string NameHint => "pokemon";
+
+    public override bool TryResolveName(string text, out List<TerramonData> targets)
+    {
+        //the form without @, for example a dex number or a nickname
+    }
+
+    public override Vector2? PositionOf(TerramonData target)
+    {
+        //give a position if you need distance and sort=nearest, otherwise return null
+    }
+
+    protected override IEnumerable<CompletionEntry> NameCompletions()
+    {
+        //name candidates
+    }
+}
+```
+
+`Registry` decides which selectors this argument can use. Returning a new `SelectorRegistry<T>` of your own means only your own mod can add selectors to it.
+
+`TryResolveName` handles the form without `@`, `NameCompletions` provides name candidates, `PositionOf` decides whether this target type can measure distance, and `NameHint` is the hint shown while typing a name.
+
+Then register the selector together with its target type in the plugin.
+
+```csharp
+TJSPlugin.RegisterSelector<TerramonData>("p", new SelectorEntry<TerramonData>(candidates, SelectorSort.Nearest, 1));
+```
+
+`distance`, `x`, `y`, `dx`, `dy` and `sort=nearest` need a position, so they cannot be used on a type whose `PositionOf` returns `null`.

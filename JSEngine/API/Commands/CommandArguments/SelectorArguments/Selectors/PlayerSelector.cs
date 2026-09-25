@@ -1,75 +1,42 @@
-using Microsoft.Xna.Framework;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TerraJS.Contents.Extensions;
+using TerraJS.JSEngine.API.CommandArguments.SelectorArguments;
 using Terraria;
-using Terraria.ID;
 using Terraria.Localization;
 
 namespace TerraJS.JSEngine.API.Commands.CommandArguments.SelectorArguments.Selectors
 {
-    public class PlayerSelector(Player player) : Selector(player), ISelector<PlayerSelector, Player>
+    public static class PlayerSelector
     {
-        public static Dictionary<string, Func<PlayerSelector, List<Player>>> Selectors { get; } = [];
+        public static SelectorRegistry<Player> Registry => SelectorRegistry<Player>.Instance;
+
+        public static Dictionary<string, SelectorEntry<Player>> Selectors => Registry.Selectors;
 
         static PlayerSelector()
         {
             RegisterTranslations();
 
-            Selectors.Add("p", (selector) =>
-            {
-                if (Main.netMode == NetmodeID.SinglePlayer)
-                {
-                    if (SelectorCondition.CheckAll(Main.LocalPlayer, selector.Conditions))
-                        return [Main.LocalPlayer];
-                    else
-                        return [];
-                }
+            Registry.Register("p", new SelectorEntry<Player>(Candidates, SelectorSort.Nearest, 1));
 
-                var players = Main.player.Where(p => p.active && SelectorCondition.CheckAll(p, selector.Conditions)).ToList();
+            Registry.Register("r", new SelectorEntry<Player>(Candidates, SelectorSort.Random, 1));
 
-                if (players.Count == 0)
-                    return [];
+            Registry.Register("a", new SelectorEntry<Player>(Candidates, SelectorSort.None, -1));
 
-                return [players.OrderBy(p => Vector2.DistanceSquared(p.position, selector.Sender.position)).First()];
-            });
+            Registry.Register("s", new SelectorEntry<Player>(Self, SelectorSort.None, -1));
+        }
 
-            Selectors.Add("r", (selector) =>
-            {
-                if (Main.netMode == NetmodeID.SinglePlayer)
-                {
-                    if (SelectorCondition.CheckAll(Main.LocalPlayer, selector.Conditions))
-                        return [Main.LocalPlayer];
-                    else
-                        return [];
-                }
+        public static List<Player> Candidates(Selector selector)
+        {
+            return [.. Main.player.Where(player => player.active && SelectorCondition.CheckAllTarget(player, selector))];
+        }
 
-                var players = Main.player.Where(p => p.active && SelectorCondition.CheckAll(p, selector.Conditions)).ToList();
+        public static List<Player> Self(Selector selector)
+        {
+            if (selector.Sender is not Player player || !player.active || !SelectorCondition.CheckAllTarget(player, selector))
+                return [];
 
-                if (players.Count == 0)
-                    return [];
-
-                return [ players.Random() ];
-            });
-
-            Selectors.Add("a", (selector) =>
-            {
-                if (Main.netMode == NetmodeID.SinglePlayer)
-                {
-                    if (SelectorCondition.CheckAll(Main.LocalPlayer, selector.Conditions))
-                        return [Main.LocalPlayer];
-                    else
-                        return [];
-                }
-
-                return [.. Main.player.Where(p => p.active && SelectorCondition.CheckAll(p, selector.Conditions))];
-            }); 
-            
-            Selectors.Add("s", (selector) =>
-            {
-                return [ selector.Sender as Player ];
-            });
+            return [player];
         }
 
         private static void RegisterTranslations()

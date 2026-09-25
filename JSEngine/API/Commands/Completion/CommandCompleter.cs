@@ -199,7 +199,7 @@ namespace TerraJS.JSEngine.API.Commands.Completion
                 return;
             }
 
-            if (info.InBracket && !token.Raw.EndsWith("]", StringComparison.Ordinal))
+            if (info.InBracket && !token.Raw.EndsWith("]", StringComparison.Ordinal) && token.Raw.IndexOf(']') >= 0)
             {
                 result.Error = Language.ActiveCulture.LegacyId == 7 ? "方括号未闭合" : "Unclosed bracket";
 

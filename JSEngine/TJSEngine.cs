@@ -1,4 +1,4 @@
-﻿using Jint;
+using Jint;
 using Jint.Runtime;
 using Jint.Runtime.Interop;
 using Microsoft.Xna.Framework;
@@ -54,7 +54,7 @@ namespace TerraJS.JSEngine
                 });
             });
 
-            BindingUtils.Clear();
+            BindingUtils.Flush();
 
             BindingUtils.BindInstance("TJS", GlobalAPI);
 
@@ -62,7 +62,17 @@ namespace TerraJS.JSEngine
 
             BindInnerMethods();
 
-            Plugins.ForEach(p => p.AddBindings());
+            foreach (var plugin in Plugins)
+            {
+                try
+                {
+                    plugin.AddBindings();
+                }
+                catch (Exception e)
+                {
+                    TerraJS.Instance?.Logger.Error($"[Plugin] {plugin.GetType().FullName} failed to bind: {e}");
+                }
+            }
 
             LoadScripts();
         }
@@ -98,11 +108,37 @@ namespace TerraJS.JSEngine
 
             foreach (var plugin in plugins)
             {
-                var instance = Activator.CreateInstance(plugin) as TJSPlugin;
+                try
+                {
+                    if (Activator.CreateInstance(plugin) is not TJSPlugin instance)
+                    {
+                        TerraJS.Instance?.Logger.Warn($"[Plugin] {plugin.FullName} could not be instantiated, skipped.");
 
-                Plugins.Add(instance);
+                        continue;
+                    }
 
-                instance.Load();
+                    var owner = ModLoader.Mods.FirstOrDefault(mod => mod.Code == plugin.Assembly);
+
+                    if (owner is null)
+                    {
+                        TerraJS.Instance?.Logger.Warn($"[Plugin] {plugin.FullName} has no owning mod, skipped.");
+
+                        continue;
+                    }
+
+                    owner.AddContent(instance);
+
+                    Plugins.Add(instance);
+
+                    if (instance.Mod is null)
+                        TerraJS.Instance?.Logger.Warn($"[Plugin] {plugin.FullName}: AddContent did not assign a Mod, its tML lifecycle will not run.");
+                    else
+                        TerraJS.Instance?.Logger.Info($"[Plugin] {plugin.FullName} loaded by mod {owner.Name}.");
+                }
+                catch (Exception e)
+                {
+                    TerraJS.Instance?.Logger.Error($"[Plugin] {plugin.FullName} failed to load: {e}");
+                }
             }
         }
 
