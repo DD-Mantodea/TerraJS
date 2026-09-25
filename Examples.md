@@ -130,6 +130,51 @@ TJS.Event.ModLoad(() => {
 
 可选参数用 `CommandNode.Optional(new IntArgument("stack"))`（或者 `new IntArgument("stack", isOptional: true)`）。
 
+#### 示例：自定义参数
+
+参数继承 `CommandArgument` 即可。`FromString` 负责执行时的解析，`Validate` 负责补全时的检查，`GetCompletions` 提供补全候选。
+
+如下为一个解析六位十六进制颜色的示例。
+
+```csharp
+public class ColorArgument(string name, bool isOptional = false) : CommandArgument(name, isOptional)
+{
+    public override string ToString() => IsOptional ? $"[<{Name} : color>]" : $"<{Name} : color>";
+
+    public override bool FromString(string content, object last, out object value)
+    {
+        value = null;
+
+        if (content.Length != 6 || !int.TryParse(content, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var hex))
+            return false;
+
+        value = new Color((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+
+        return true;
+    }
+
+    public override ArgumentState Validate(CompletionContext context, out string expected)
+    {
+        expected = ToString();
+
+        if (context.Prefix.Length == 0)
+            return ArgumentState.Incomplete;
+
+        return context.Prefix.Length <= 6 && context.Prefix.All(Uri.IsHexDigit) ? ArgumentState.Valid : ArgumentState.Invalid;
+    }
+
+    public override List<string> GetCompletions(CommandInfo commandInfo) => ["FF0000", "00FF00", "0000FF"];
+}
+```
+
+`Validate` 只做检查：`ArgumentState.Incomplete` 表示还没输完，`ArgumentState.Invalid` 表示这个输入不合法。
+
+`ToString` 是用法文本里显示的形状，`IsOptional` 为 `true` 时会自动套上方括号。
+
+```csharp
+CommandNode.Argument(new ColorArgument("color"))
+```
+
 #### 示例：选择器
 
 `PlayersArgument` 支持类似 Minecraft 的目标选择器：`@p`（最近的玩家）、`@r`（随机玩家）、`@a`（所有玩家）、`@s`（执行者自己），也可以直接写玩家名。

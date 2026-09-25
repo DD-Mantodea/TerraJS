@@ -130,6 +130,51 @@ TJS.Event.ModLoad(() => {
 
 Optional arguments use `CommandNode.Optional(new IntArgument("stack"))` (or `new IntArgument("stack", isOptional: true)`).
 
+#### Example: Custom argument
+
+An argument just has to inherit from `CommandArgument`. `FromString` parses the value when the command runs, `Validate` checks the input while completing, and `GetCompletions` provides the candidates.
+
+The code below is an example to parse a six digit hex color.
+
+```csharp
+public class ColorArgument(string name, bool isOptional = false) : CommandArgument(name, isOptional)
+{
+    public override string ToString() => IsOptional ? $"[<{Name} : color>]" : $"<{Name} : color>";
+
+    public override bool FromString(string content, object last, out object value)
+    {
+        value = null;
+
+        if (content.Length != 6 || !int.TryParse(content, NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var hex))
+            return false;
+
+        value = new Color((hex >> 16) & 0xFF, (hex >> 8) & 0xFF, hex & 0xFF);
+
+        return true;
+    }
+
+    public override ArgumentState Validate(CompletionContext context, out string expected)
+    {
+        expected = ToString();
+
+        if (context.Prefix.Length == 0)
+            return ArgumentState.Incomplete;
+
+        return context.Prefix.Length <= 6 && context.Prefix.All(Uri.IsHexDigit) ? ArgumentState.Valid : ArgumentState.Invalid;
+    }
+
+    public override List<string> GetCompletions(CommandInfo commandInfo) => ["FF0000", "00FF00", "0000FF"];
+}
+```
+
+`Validate` only checks: `ArgumentState.Incomplete` means the input is not finished yet, `ArgumentState.Invalid` means the input is not valid.
+
+`ToString` is the shape shown in the usage text, and `IsOptional` adds the square brackets for you.
+
+```csharp
+CommandNode.Argument(new ColorArgument("color"))
+```
+
 #### Example: Target selectors
 
 `PlayersArgument` accepts Minecraft-like target selectors: `@p` (nearest player), `@r` (random player), `@a` (all players), `@s` (the executor), and plain player names.
@@ -156,7 +201,7 @@ When a condition is written wrong, or nothing matches, the command reports an er
 
 #### Example: Plugin
 
-You can use the plugin system.
+You can use the plugin system to add some new APIs.
 
 ```csharp
 using TerraJS.JSEngine.Plugins;
